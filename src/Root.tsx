@@ -1,4 +1,5 @@
 import { Composition, Folder } from "remotion";
+import { BuenaVida } from "./BuenaVida";
 import { HelloWorld } from "./HelloWorld";
 import { Logo } from "./HelloWorld/Logo";
 import { Title } from "./HelloWorld/Title";
@@ -8,6 +9,15 @@ import { Title } from "./HelloWorld/Title";
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/* Reel vertical para Instagram (9:16) */}
+      <Composition
+        id="BuenaVida"
+        component={BuenaVida}
+        durationInFrames={208}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
       <Folder name="Elements">
         <Composition
           id="Logo"
