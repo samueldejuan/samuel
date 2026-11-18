@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merco Guatemala · Ofertas de apertura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F2D5C;
+    --blue: #2B6CB0;
+    --sky: #9EC5F0;
+    --light: #EEF3FA;
+    --white: #FFFFFF;
+    --orange: #F28C28;
+    --red: #D93B3B;
+    --green: #1F8A5B;
+    --text: #13223D;
+    --muted: #5B6B85;
+    --head: 'Oswald', 'Arial Narrow', Impact, sans-serif;
+    --body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; overflow-x: hidden; font-family: var(--body); color: var(--text); background: var(--light); }
+  a { color: inherit; }
+
+  /* Aviso de concepto */
+  .concept {
+    background: var(--navy); color: var(--sky);
+    font-size: 13px; text-align: center; padding: 6px 16px; letter-spacing: .02em;
+  }
+
+  /* Cabecera */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--white); box-shadow: 0 2px 16px rgba(15,45,92,.08);
+  }
+  .bar {
+    max-width: 1280px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .logo { font-family: var(--head); font-size: 34px; color: var(--navy); letter-spacing: .02em; line-height: 1; }
+  .logo span { color: var(--blue); }
+  .logo small { display: block; font-family: var(--body); font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
+  nav { display: flex; gap: 4px; margin-left: auto; white-space: nowrap; }
+  nav a {
+    text-decoration: none; font-weight: 600; font-size: 15px; color: var(--navy);
+    padding: 9px 14px; border-radius: 999px;
+  }
+  nav a:hover, nav a.on { background: var(--light); color: var(--blue); }
+  .cart {
+    position: relative; display: flex; align-items: center; gap: 10px;
+    background: var(--navy); color: var(--white); border-radius: 999px; padding: 10px 18px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .cart b { font-family: var(--head); font-size: 20px; }
+  .cart .save { color: #FFD08A; font-size: 13px; }
+  .cart.bump { animation: bump .35s ease; }
+  @keyframes bump { 50% { transform: scale(1.08); } }
+
+  /* Portada */
+  .hero {
+    background: linear-gradient(120deg, var(--navy) 0%, #164581 60%, var(--blue) 100%);
+    color: var(--white); position: relative; overflow: hidden;
+  }
+  .hero-in > * { min-width: 0; }
+  .hero-in { max-width: 1280px; margin: 0 auto; padding: 64px 24px 72px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: center; }
+  .kicker { font-family: var(--head); letter-spacing: .14em; text-transform: uppercase; color: var(--sky); font-size: 18px; }
+  .hero h1 { font-family: var(--head); font-size: clamp(44px, 6vw, 84px); line-height: 1; margin: 12px 0 18px; text-transform: uppercase; }
+  .hero h1 em { font-style: normal; display: inline-block; line-height: 1; background: var(--white); color: var(--navy); padding: 6px 16px 10px; margin-top: 12px; border-radius: 8px; }
+  .hero p { font-size: 20px; color: #D6E4F5; max-width: 560px; margin: 0 0 28px; }
+  .cta { display: inline-block; background: var(--orange); color: var(--white); font-weight: 800; font-size: 18px; text-decoration: none; padding: 16px 28px; border-radius: 14px; box-shadow: 0 10px 30px rgba(242,140,40,.35); }
+  .stamp {
+    justify-self: center; transform: rotate(-6deg);
+    border: 6px solid var(--white); border-radius: 20px; padding: 26px 34px; text-align: center;
+    font-family: var(--head); text-transform: uppercase; line-height: 1.05;
+  }
+  .stamp .big { font-size: 96px; color: #FFD08A; }
+  .stamp .sm { font-size: 30px; }
+  .stamp .xs { font-family: var(--body); font-weight: 600; font-size: 15px; text-transform: none; color: var(--sky); margin-top: 10px; }
+
+  /* Promesas */
+  .promises { max-width: 1280px; margin: -34px auto 0; padding: 0 24px; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .promise { background: var(--white); border-radius: 18px; padding: 20px 22px; display: flex; gap: 16px; align-items: center; box-shadow: 0 10px 30px rgba(15,45,92,.12); }
+  .promise .ic { font-size: 34px; }
+  .promise b { display: block; font-size: 18px; color: var(--navy); }
+  .promise span { color: var(--muted); font-size: 15px; }
+
+  /* Secciones */
+  section.cat { max-width: 1280px; margin: 0 auto; padding: 64px 24px 8px; scroll-margin-top: 90px; }
+  .cat-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 22px; }
+  .cat-head h2 { font-family: var(--head); text-transform: uppercase; color: var(--navy); font-size: clamp(32px, 4vw, 48px); margin: 6px 0 0; line-height: 1; }
+  .cat-head .kicker { color: var(--blue); font-size: 16px; }
+  .why {
+    background: var(--white); border-left: 5px solid var(--blue); border-radius: 12px;
+    padding: 12px 18px; font-size: 15px; color: var(--muted); max-width: 520px;
+  }
+  .why b { color: var(--navy); }
+  body.clean .why { display: none; }
+
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .card {
+    background: var(--white); border-radius: 20px; padding: 18px; position: relative;
+    box-shadow: 0 6px 20px rgba(15,45,92,.07); display: flex; flex-direction: column;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 14px 34px rgba(15,45,92,.14); }
+  .pic { height: 140px; border-radius: 14px; display: grid; place-items: center; font-size: 76px; margin-bottom: 14px; }
+  .badge { position: absolute; top: 14px; left: 14px; background: var(--red); color: var(--white); font-family: var(--head); font-size: 22px; padding: 4px 12px; border-radius: 10px; }
+  .origin { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,.9); font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; color: var(--navy); }
+  .card h3 { margin: 0; font-size: 18px; color: var(--navy); }
+  .card .unit { color: var(--muted); font-size: 14px; margin: 2px 0 12px; }
+  .prices { display: flex; align-items: baseline; gap: 10px; margin-top: auto; }
+  .now { font-family: var(--head); font-size: 34px; color: var(--red); }
+  .was { color: var(--muted); text-decoration: line-through; font-size: 16px; }
+  .add {
+    margin-top: 12px; border: 0; cursor: pointer; width: 100%;
+    background: var(--blue); color: var(--white); font: 700 16px var(--body);
+    padding: 12px; border-radius: 12px;
+  }
+  .add:hover { background: var(--navy); }
+  .add.done { background: var(--green); }
+
+  /* Combo remesas */
+  .combo {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 24px; overflow: hidden;
+    background: var(--white); box-shadow: 0 10px 30px rgba(15,45,92,.12);
+  }
+  .combo .l { background: linear-gradient(135deg, var(--orange), #F5B547); color: var(--white); padding: 40px; }
+  .combo .l h3 { font-family: var(--head); text-transform: uppercase; font-size: 46px; line-height: 1; margin: 8px 0 14px; }
+  .combo .l p { font-size: 18px; margin: 0 0 20px; }
+  .combo .price { font-family: var(--head); font-size: 64px; line-height: 1; }
+  .combo .price s { font-size: 26px; opacity: .8; margin-left: 10px; }
+  .combo .r { padding: 34px 40px; }
+  .combo ul { list-style: none; padding: 0; margin: 0 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+  .combo li { font-size: 17px; display: flex; gap: 10px; align-items: center; }
+  .combo li span { font-size: 26px; }
+
+  /* Pie */
+  footer { background: var(--navy); color: var(--sky); margin-top: 72px; }
+  .foot { max-width: 1280px; margin: 0 auto; padding: 36px 24px; display: flex; gap: 24px; justify-content: space-between; flex-wrap: wrap; font-size: 14px; }
+  .foot b { color: var(--white); }
+
+  .hint { position: fixed; bottom: 16px; right: 16px; background: rgba(15,45,92,.9); color: var(--white); font-size: 13px; padding: 10px 14px; border-radius: 12px; z-index: 20; }
+  .hint kbd { background: rgba(255,255,255,.15); border-radius: 5px; padding: 1px 6px; font-family: inherit; }
+  body.clean .hint { display: none; }
+
+  @media (max-width: 1000px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-in, .combo { grid-template-columns: 1fr; }
+    .promises { grid-template-columns: 1fr; }
+    nav { display: none; }
+    .stamp { display: none; }
+    .hint { display: none; }
+    .cart { margin-left: auto; }
+  }
+  @media (max-width: 520px) {
+    .bar { padding: 12px 16px; }
+    section.cat, .hero-in, .promises { padding-left: 16px; padding-right: 16px; }
+    .grid { grid-template-columns: 1fr; }
+    .combo ul { grid-template-columns: 1fr; }
+    .cart .save { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="concept">Concepto para una presentación académica · No es una tienda real · Precios ilustrativos en quetzales (Q)</div>
+
+<header>
+  <div class="bar">
+    <div class="logo">MERCO <span>GT</span><small>Tu súper de barrio</small></div>
+    <nav>
+      <a href="#apertura">Apertura</a>
+      <a href="#chapin">Sabor chapín</a>
+      <a href="#mexico">Lo mejor de México</a>
+      <a href="#frescos">Frescos</a>
+      <a href="#familia">Combo familiar</a>
+    </nav>
+    <div class="cart" id="cart">🛒 <b id="count">0</b> <span class="save" id="save">Ahorras Q0.00</span></div>
+  </div>
+</header>
+
+<div class="hero" id="apertura">
+  <div class="hero-in">
+    <div>
+      <div class="kicker">Gran apertura · Tienda piloto</div>
+      <h1>Merco llega a <em>Guatemala</em></h1>
+      <p>El súper de cercanía que lleva 80 años cuidando el dinero de las familias, ahora en tu barrio. Con lo mejor de aquí y lo mejor de México.</p>
+      <a class="cta" href="#chapin">Ver ofertas de apertura →</a>
+    </div>
+    <div class="stamp">
+      <div class="sm">Hasta</div>
+      <div class="big">-30%</div>
+      <div class="sm">Ofertas de apertura</div>
+      <div class="xs">Solo el primer mes</div>
+    </div>
+  </div>
+</div>
+
+<div class="promises">
+  <div class="promise"><div class="ic">🥬</div><div><b>Frescura garantizada</b><span>Si no está fresco, te lo cambiamos</span></div></div>
+  <div class="promise"><div class="ic">↩️</div><div><b>30 días para devolver</b><span>Sin preguntas, con tu ticket</span></div></div>
+  <div class="promise"><div class="ic">🏘️</div><div><b>Tienda de tu barrio</b><span>Cerca, rápido y con trato de vecino</span></div></div>
+</div>
+
+<section class="cat" id="chapin">
+  <div class="cat-head">
+    <div><div class="kicker">Producto local</div><h2>Sabor chapín</h2></div>
+    <div class="why"><b>Estrategia semiglobal:</b> el surtido se adapta al gusto guatemalteco con frijol, maíz y café de proveedores locales.</div>
+  </div>
+  <div class="grid" data-items='[
+    {"e":"🫘","n":"Frijol negro","u":"Bolsa 2 lb","o":"Guatemala","was":18.00,"now":13.50,"bg":"#EFE6DD"},
+    {"e":"🌽","n":"Tortillas de maíz","u":"Paquete 30 uds.","o":"Guatemala","was":12.00,"now":9.00,"bg":"#FBF1D5"},
+    {"e":"☕","n":"Café de Huehuetenango","u":"Molido · 1 lb","o":"Guatemala","was":55.00,"now":42.00,"bg":"#EADFD5"},
+    {"e":"🧀","n":"Queso fresco","u":"1 lb","o":"Guatemala","was":32.00,"now":25.50,"bg":"#FFF6E2"}
+  ]'></div>
+</section>
+
+<section class="cat" id="mexico">
+  <div class="cat-head">
+    <div><div class="kicker">Importado</div><h2>Lo mejor de México</h2></div>
+    <div class="why"><b>Ventaja de origen:</b> México ya es el 3.<sup>er</sup> proveedor de Guatemala. Traemos lo que distingue a Merco.</div>
+  </div>
+  <div class="grid" data-items='[
+    {"e":"🌶️","n":"Salsa picante","u":"Botella 370 ml","o":"México","was":19.00,"now":14.00,"bg":"#FBE3DE"},
+    {"e":"🫙","n":"Chiles jalapeños","u":"Lata 380 g","o":"México","was":16.00,"now":12.00,"bg":"#E2F1E2"},
+    {"e":"🍪","n":"Galletas surtidas","u":"Caja 500 g","o":"México","was":28.00,"now":21.00,"bg":"#F6EBDD"},
+    {"e":"🥫","n":"Frijoles refritos","u":"Lata 580 g","o":"México","was":14.00,"now":10.50,"bg":"#EDE3DB"}
+  ]'></div>
+</section>
+
+<section class="cat" id="frescos">
+  <div class="cat-head">
+    <div><div class="kicker">Frescura garantizada</div><h2>Frescos del día</h2></div>
+    <div class="why"><b>Contra Walmart:</b> Merco no gana por tamaño, gana por frescura y trato, el mismo modelo que rinde $118,000 por m² en México.</div>
+  </div>
+  <div class="grid" data-items='[
+    {"e":"🥑","n":"Aguacate Hass","u":"Unidad","o":"Guatemala","was":6.00,"now":4.00,"bg":"#E3F0DC"},
+    {"e":"🍌","n":"Plátano maduro","u":"Libra","o":"Guatemala","was":4.50,"now":3.25,"bg":"#FBF3D0"},
+    {"e":"🥚","n":"Huevos","u":"Cartón 30 uds.","o":"Guatemala","was":42.00,"now":34.00,"bg":"#F7EEE4"},
+    {"e":"🍅","n":"Tomate","u":"Libra","o":"Guatemala","was":7.00,"now":5.00,"bg":"#FBE0DC"}
+  ]'></div>
+</section>
+
+<section class="cat" id="familia">
+  <div class="cat-head">
+    <div><div class="kicker">Pensado para las remesas</div><h2>Combo familiar</h2></div>
+    <div class="why"><b>Oportunidad O1:</b> las remesas subieron 18.7% en 2025. Muchas familias reciben dinero de fuera: un combo fijo ayuda a estirarlo.</div>
+  </div>
+  <div class="combo">
+    <div class="l">
+      <div class="kicker" style="color:#FFF3DF">Canasta para toda la semana</div>
+      <h3>Rinde más tu remesa</h3>
+      <p>Lo básico para una familia de 4, a un precio fijo todo el mes de apertura.</p>
+      <div class="price">Q199<s>Q265</s></div>
+    </div>
+    <div class="r">
+      <ul>
+        <li><span>🫘</span> Frijol negro 4 lb</li>
+        <li><span>🍚</span> Arroz 4 lb</li>
+        <li><span>🌽</span> Tortillas 60 uds.</li>
+        <li><span>🥚</span> Huevos 30 uds.</li>
+        <li><span>🛢️</span> Aceite 1 L</li>
+        <li><span>☕</span> Café 1 lb</li>
+        <li><span>🍌</span> Plátano 5 lb</li>
+        <li><span>🧀</span> Queso fresco 1 lb</li>
+      </ul>
+      <button class="add" data-was="265" data-now="199" data-name="Combo familiar">Agregar combo · Ahorras Q66</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot">
+    <div><b>Merco GT</b> · Propuesta de internacionalización de Supermercados Merco<br>Samuel de Juan Ortiz · Estrategia y globalización (Gpo 504)</div>
+    <div>Concepto académico: no es una tienda real.<br>Precios y productos ilustrativos.</div>
+  </div>
+</footer>
+
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> secciones · <kbd>N</kbd> ocultar notas</div>
+
+<script>
+  // Pinta las tarjetas a partir de los datos de cada sección
+  const fmt = (n) => 'Q' + n.toFixed(2);
+  document.querySelectorAll('.grid[data-items]').forEach((grid) => {
+    JSON.parse(grid.dataset.items).forEach((p) => {
+      const off = Math.round((1 - p.now / p.was) * 100);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="pic" style="background:${p.bg}">${p.e}</div>
+        <div class="badge">-${off}%</div>
+        <div class="origin">${p.o === 'Guatemala' ? '🇬🇹' : '🇲🇽'} ${p.o}</div>
+        <h3>${p.n}</h3>
+        <div class="unit">${p.u}</div>
+        <div class="prices"><span class="now">${fmt(p.now)}</span><span class="was">${fmt(p.was)}</span></div>
+        <button class="add" data-was="${p.was}" data-now="${p.now}">Agregar</button>`;
+      grid.appendChild(card);
+    });
+  });
+
+  // Carrito de demostración: cuenta productos y ahorro
+  let count = 0, saved = 0;
+  const cart = document.getElementById('cart');
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.add');
+    if (!btn) return;
+    count += 1;
+    saved += Number(btn.dataset.was) - Number(btn.dataset.now);
+    document.getElementById('count').textContent = count;
+    document.getElementById('save').textContent = 'Ahorras ' + fmt(saved);
+    btn.classList.add('done');
+    const label = btn.textContent;
+    btn.textContent = '✓ Agregado';
+    setTimeout(() => { btn.classList.remove('done'); btn.textContent = label; }, 900);
+    cart.classList.remove('bump'); void cart.offsetWidth; cart.classList.add('bump');
+  });
+
+  // Navegación con teclado para presentar: ← → entre secciones, N oculta notas
+  const stops = ['apertura', 'chapin', 'mexico', 'frescos', 'familia'].map((id) => document.getElementById(id));
+  const links = document.querySelectorAll('nav a');
+  const current = () => {
+    let idx = 0;
+    stops.forEach((s, i) => { if (s.getBoundingClientRect().top <= 140) idx = i; });
+    return idx;
+  };
+  const mark = () => {
+    const i = current();
+    links.forEach((a, j) => a.classList.toggle('on', j === i));
+  };
+  document.addEventListener('scroll', mark, { passive: true });
+  mark();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+      e.preventDefault();
+      const i = Math.min(stops.length - 1, current() + 1);
+      stops[i].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      const i = Math.max(0, current() - 1);
+      i === 0 ? window.scrollTo({ top: 0, behavior: 'smooth' }) : stops[i].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'n' || e.key === 'N') {
+      document.body.classList.toggle('clean');
+    }
+  });
+</script>
+</body>
+</html>
