@@ -20,7 +20,7 @@ Recomendación: **B. Sí a Guatemala, paso a paso (aprobar con condiciones).**
 | **D2** | Nunca ha operado fuera de México | Debe aprender leyes, proveedores y costumbres nuevas |
 | **D3** | Va atrás en lo digital: sin programa de lealtad | Las grandes cadenas usan apps y datos para retener clientes |
 
-**Relaciones:** F3 → D1 (formato chico = poca inversión); F2 → D3 (el trato y la frescura compensan la falta de app); F1 → D2 (la Universidad Merco forma al equipo local, con apoyo de un socio guatemalteco).
+**Relaciones (mapa visual en la lámina 2):** F3 → D1 (tienda chica = poca inversión); F2 → D3 (el trato vale más que una app); F1 → D2 (Universidad Merco + socio local).
 
 **Recursos a fortalecer:** capital para la expansión, un socio local, plataforma digital y lealtad, y la Universidad Merco adaptada a Guatemala.
 
@@ -63,14 +63,14 @@ Recomendación: **B. Sí a Guatemala, paso a paso (aprobar con condiciones).**
 
 ## Ficha 4. Oportunidades, desafíos y decisión final
 
-- **Oportunidad 1:** familias con más dinero para gastar (remesas récord y economía en crecimiento).
+- **Oportunidad 1 (prioridad 1):** familias con más dinero para gastar: remesas +18.7% en 2025 y economía +4.1%.
 - **Oportunidad 2:** llevar a las familias de la tienda de barrio a un súper cercano (48% aún compra en tiendas pequeñas).
-- **Desafío 1:** Walmart ya está ahí → competir con trato, frescura y cercanía, no solo con precio.
-- **Desafío 2:** abastecer a distancia → socio local y productores guatemaltecos para lo fresco.
-- **Acción estratégica:** 2 tiendas de cercanía en la Ciudad de Guatemala, 18 meses y 1 socio guatemalteco. Inversión: `[validar con EMIS]`.
+- **Desafío 1 (prioridad 1):** Walmart ya está ahí (276 tiendas) → competir con trato, frescura y cercanía, como en Monterrey.
+- **Desafío 2:** recursos para un país nuevo (dinero, gente y proveedores) → socio local y productores guatemaltecos.
+- **Acción estratégica:** entrar con un socio guatemalteco y 2 tiendas piloto de cercanía en la Ciudad de Guatemala durante 18 meses. Aprovecha O1 y O2, resuelve D2 y ayuda a competir contra Walmart (D1). Metas: ventas por m², clientes que regresan y rotación menor a 41%. Inversión: `[validar con EMIS]`.
 - **Recomendación:** **B. Sí a Guatemala, paso a paso.**
-- **3 argumentos:** (1) el mercado crece: +4.1% y remesas récord; (2) Merco sabe ganar: su gente y sus tiendas que rinden; (3) el riesgo es bajo: 2 tiendas y un socio.
-- **Siguientes pasos:** (1) elegir socio y lugares (0–6 meses); (2) abrir 2 tiendas y medir; (3) crecer a más ciudades (Quetzaltenango, Escuintla).
+- **3 argumentos:** (1) el mercado crece: economía +4.1% y remesas +18.7% (Banguat); (2) Merco sabe ganar: rotación de 98% a 41% y $118,000 por m² (caso Merco); (3) el riesgo es bajo: 2 tiendas = 5% de su tamaño actual de 39.
+- **Siguientes pasos:** (1) ene–jun 2027: elegir socio y locales; (2) jul 2027–dic 2028: abrir 2 tiendas y medir; (3) 2029: crecer a Quetzaltenango y Escuintla.
 
 ---
 
