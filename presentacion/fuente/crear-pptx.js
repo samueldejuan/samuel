@@ -233,16 +233,11 @@ function photoCaption(slide, label) {
   await card(s, { x: 668, y: 682, w: 518, h: 185, fill: HEX.pale, icon: "LuKeyRound", iconColor: HEX.blue, title: "D2 · Lejos y con inseguridad", body: "+2,100 km y extorsiones: almacén local y socio", titleColor: HEX.navy, bodyColor: HEX.muted, name: "Desafío 2" });
   s.addText("Fuentes: Banguat; Kantar; Walmart (2025); Prensa Latina (2025)", { placeholder: "source" });
 
-  // 6 · Acción estratégica (con el botón a la tienda)
+  // 6 · Acción estratégica
   pres.addSection({ title: "Propuesta" });
   s = pres.addSlide({ masterName: "Celeste", sectionTitle: "Propuesta" });
   s.addText("PASO 4 · ACCIÓN ESTRATÉGICA", { placeholder: "kicker" });
   s.addText("PASO A PASO: UN SOCIO LOCAL\nY 2 TIENDAS PILOTO", { placeholder: "title" });
-  text(s, "Demo: así se vería Merco GT", { x: 1348, y: 160, w: 440, h: 36, bold: true, fontSize: 10.5, color: HEX.blue, align: "center", valign: "middle" });
-  text(s, [{ text: "VER LA TIENDA →", options: { hyperlink: { url: "merco-guatemala.html", tooltip: "Abrir la tienda Merco GT" } } }], {
-    x: 1368, y: 206, w: 400, h: 88, fontFace: HEAD, bold: true, fontSize: 18, color: "FFFFFF", align: "center", valign: "middle",
-    fill: { color: HEX.orange }, shape: pres.shapes.ROUNDED_RECTANGLE, rectRadius: 0.1, name: "Botón ver la tienda",
-  });
   const steps = [
     { cx: 357, fill: HEX.mid, num: HEX.navy, when: "MESES 0 A 6", what: "Socio guatemalteco, almacén y proveedores locales" },
     { cx: 960, fill: HEX.blue, num: "FFFFFF", when: "MESES 6 A 24", what: "Abrir 2 tiendas de cercanía en la capital y medir" },
@@ -316,7 +311,7 @@ function photoCaption(slide, label) {
     ref("Dess, G. G. et al. (2021). Strategic management (10.ª ed.). McGraw-Hill."),
     ref("[Passport, Statista y EMIS: agregar]"),
     { text: "Fotos (Wikimedia Commons): ", options: { bold: true } },
-    ref("Chad Davis, CC BY-SA 2.0 (Antigua); Juan Francisco, CC BY-SA 2.0 (Ciudad de Guatemala); Francisco Anzola, CC BY 2.0 (mercado); Toby Argüelles, CC BY-SA 2.0 (Chichicastenango). Fotos de productos de la tienda demo: créditos en la página. Mapa: Natural Earth."),
+    ref("Chad Davis, CC BY-SA 2.0 (Antigua); Juan Francisco, CC BY-SA 2.0 (Ciudad de Guatemala); Francisco Anzola, CC BY 2.0 (mercado); Toby Argüelles, CC BY-SA 2.0 (Chichicastenango). Mapa: Natural Earth."),
     { text: "Uso de IA: ", options: { bold: true } },
     ref("Claude (Anthropic, 2026) para investigar, buscar fotos libres y diseñar; cada dato se revisó en su fuente.", true),
   ], { x: 984, y: 255, w: 805, h: 700, fontSize: 10.5, color: HEX.navy, name: "Fuentes columna 2" });
