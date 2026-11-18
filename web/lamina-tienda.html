@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Lámina: así se vería Merco GT</title>
+<style>
+  @font-face { font-family: 'Oswald'; font-weight: 700; src: url('../node_modules/@fontsource/oswald/files/oswald-latin-700-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Inter'; font-weight: 400; src: url('../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Inter'; font-weight: 600; src: url('../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Inter'; font-weight: 800; src: url('../node_modules/@fontsource/inter/files/inter-latin-800-normal.woff2') format('woff2'); }
+  @page { size: 1920px 1080px; margin: 0; }
+  :root { --bg: #DCEAF7; --blue: #2A6EB5; --navy: #0F2D5C; --mid: #3F8FD0; --muted: #4A5D7A; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--navy); position: relative; }
+  .kicker { position: absolute; left: 130px; top: 128px; font-family: 'Oswald'; font-weight: 700; font-size: 38px; letter-spacing: .12em; color: var(--blue); }
+  h1 { position: absolute; left: 127px; top: 196px; margin: 0; font-family: 'Oswald'; font-weight: 700; font-size: 104px; line-height: 1; color: var(--blue); text-transform: uppercase; }
+  .browser {
+    position: absolute; left: 130px; top: 360px; width: 1120px; height: 590px;
+    background: #fff; border-radius: 22px; overflow: hidden;
+    box-shadow: 0 24px 60px rgba(15,45,92,.22);
+  }
+  .chrome { height: 46px; background: #EEF2F7; display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; }
+  .url { margin-left: 14px; flex: 1; height: 28px; border-radius: 8px; background: #fff; font-size: 17px; color: var(--muted); display: flex; align-items: center; padding: 0 14px; }
+  .shot { width: 100%; height: calc(100% - 46px); object-fit: cover; object-position: top; display: block; }
+  .side { position: absolute; left: 1330px; top: 380px; width: 470px; }
+  .item { display: flex; gap: 20px; margin-bottom: 34px; }
+  .num { flex: 0 0 auto; width: 58px; height: 58px; border-radius: 50%; background: var(--blue); color: #fff; font-family: 'Oswald'; font-weight: 700; font-size: 32px; display: grid; place-items: center; }
+  .item b { display: block; font-family: 'Oswald'; font-weight: 700; font-size: 32px; text-transform: uppercase; color: var(--blue); line-height: 1.1; }
+  .item span { font-size: 25px; line-height: 1.35; font-weight: 600; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 14px; margin-top: 8px;
+    background: var(--navy); color: #fff; text-decoration: none;
+    font-family: 'Oswald'; font-weight: 700; font-size: 38px; letter-spacing: .03em; text-transform: uppercase;
+    padding: 20px 34px; border-radius: 18px;
+  }
+  .tag { position: absolute; left: 1030px; top: 318px; transform: rotate(-7deg); background: var(--navy); color: #fff; font-family: 'Oswald'; font-weight: 700; font-size: 34px; line-height: 1.05; text-align: center; padding: 12px 24px; border-radius: 8px; box-shadow: 0 8px 20px rgba(15,45,92,.3); }
+  .foot { position: absolute; left: 130px; bottom: 56px; font-size: 23px; color: var(--muted); }
+  .page { position: absolute; right: 130px; bottom: 56px; font-size: 23px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="kicker">PASO 4 · DEMOSTRACIÓN</div>
+  <h1>Así se vería Merco GT</h1>
+
+  <div class="browser">
+    <div class="chrome">
+      <div class="dot" style="background:#F26B5B"></div>
+      <div class="dot" style="background:#F5BE4F"></div>
+      <div class="dot" style="background:#5CC46A"></div>
+      <div class="url">merco-guatemala.html · concepto</div>
+    </div>
+    <img class="shot" src="web-shot.png" alt="Captura de la tienda Merco GT">
+  </div>
+  <div class="tag">¡OFERTAS DE<br>APERTURA!</div>
+
+  <div class="side">
+    <div class="item"><div class="num">1</div><div><b>Sabor chapín</b><span>Frijol, maíz y café de proveedores locales</span></div></div>
+    <div class="item"><div class="num">2</div><div><b>Lo mejor de México</b><span>Lo que distingue a Merco, importado</span></div></div>
+    <div class="item"><div class="num">3</div><div><b>Rinde más tu remesa</b><span>Combo familiar a precio fijo (O1)</span></div></div>
+    <a class="btn" id="open" href="merco-guatemala.html">Abrir la tienda →</a>
+  </div>
+
+  <div class="foot">Concepto propio · Precios ilustrativos en quetzales · Fotos: Wikimedia Commons (créditos en la página)</div>
+  <div class="page">6b</div>
+</body>
+</html>

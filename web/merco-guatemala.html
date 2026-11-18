@@ -107,7 +107,9 @@
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .card:hover { transform: translateY(-4px); box-shadow: 0 14px 34px rgba(15,45,92,.14); }
-  .pic { height: 140px; border-radius: 14px; display: grid; place-items: center; font-size: 76px; margin-bottom: 14px; }
+  .pic { height: 170px; border-radius: 14px; display: grid; place-items: center; font-size: 76px; margin-bottom: 14px; position: relative; overflow: hidden; }
+  .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .badge, .origin { z-index: 1; }
   .badge { position: absolute; top: 14px; left: 14px; background: var(--red); color: var(--white); font-family: var(--head); font-size: 22px; padding: 4px 12px; border-radius: 10px; }
   .origin { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,.9); font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; color: var(--navy); }
   .card h3 { margin: 0; font-size: 18px; color: var(--navy); }
@@ -142,6 +144,8 @@
   footer { background: var(--navy); color: var(--sky); margin-top: 72px; }
   .foot { max-width: 1280px; margin: 0 auto; padding: 36px 24px; display: flex; gap: 24px; justify-content: space-between; flex-wrap: wrap; font-size: 14px; }
   .foot b { color: var(--white); }
+  .credits { max-width: 1280px; margin: 0 auto; padding: 0 24px 30px; font-size: 12px; line-height: 1.6; opacity: .75; }
+  .credits a { color: var(--sky); }
 
   .hint { position: fixed; bottom: 16px; right: 16px; background: rgba(15,45,92,.9); color: var(--white); font-size: 13px; padding: 10px 14px; border-radius: 12px; z-index: 20; }
   .hint kbd { background: rgba(255,255,255,.15); border-radius: 5px; padding: 1px 6px; font-family: inherit; }
@@ -212,10 +216,10 @@
     <div class="why"><b>Estrategia semiglobal:</b> el surtido se adapta al gusto guatemalteco con frijol, maíz y café de proveedores locales.</div>
   </div>
   <div class="grid" data-items='[
-    {"e":"🫘","n":"Frijol negro","u":"Bolsa 2 lb","o":"Guatemala","was":18.00,"now":13.50,"bg":"#EFE6DD"},
-    {"e":"🌽","n":"Tortillas de maíz","u":"Paquete 30 uds.","o":"Guatemala","was":12.00,"now":9.00,"bg":"#FBF1D5"},
-    {"e":"☕","n":"Café de Huehuetenango","u":"Molido · 1 lb","o":"Guatemala","was":55.00,"now":42.00,"bg":"#EADFD5"},
-    {"e":"🧀","n":"Queso fresco","u":"1 lb","o":"Guatemala","was":32.00,"now":25.50,"bg":"#FFF6E2"}
+    {"e":"🫘","n":"Frijol negro","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Black_Turtle_Bean.jpg/500px-Black_Turtle_Bean.jpg","u":"Bolsa 2 lb","o":"Guatemala","was":18.00,"now":13.50,"bg":"#EFE6DD"},
+    {"e":"🌽","n":"Tortillas de maíz","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Stacks_of_corn_tortillas_and_flour_tortillas%2C_top_view.jpg/500px-Stacks_of_corn_tortillas_and_flour_tortillas%2C_top_view.jpg","u":"Paquete 30 uds.","o":"Guatemala","was":12.00,"now":9.00,"bg":"#FBF1D5"},
+    {"e":"☕","n":"Café de Huehuetenango","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Grounded_coffee_beans_in_white_bowl.png/500px-Grounded_coffee_beans_in_white_bowl.png","u":"Molido · 1 lb","o":"Guatemala","was":55.00,"now":42.00,"bg":"#EADFD5"},
+    {"e":"🧀","n":"Queso fresco","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Queso_fresco.JPG/500px-Queso_fresco.JPG","u":"1 lb","o":"Guatemala","was":32.00,"now":25.50,"bg":"#FFF6E2"}
   ]'></div>
 </section>
 
@@ -225,10 +229,10 @@
     <div class="why"><b>Ventaja de origen:</b> México ya es el 3.<sup>er</sup> proveedor de Guatemala. Traemos lo que distingue a Merco.</div>
   </div>
   <div class="grid" data-items='[
-    {"e":"🌶️","n":"Salsa picante","u":"Botella 370 ml","o":"México","was":19.00,"now":14.00,"bg":"#FBE3DE"},
-    {"e":"🫙","n":"Chiles jalapeños","u":"Lata 380 g","o":"México","was":16.00,"now":12.00,"bg":"#E2F1E2"},
-    {"e":"🍪","n":"Galletas surtidas","u":"Caja 500 g","o":"México","was":28.00,"now":21.00,"bg":"#F6EBDD"},
-    {"e":"🥫","n":"Frijoles refritos","u":"Lata 580 g","o":"México","was":14.00,"now":10.50,"bg":"#EDE3DB"}
+    {"e":"🌶️","n":"Salsa picante","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Molcajete_con_salsa_roja_mexicana_-_1.jpg/500px-Molcajete_con_salsa_roja_mexicana_-_1.jpg","u":"Botella 370 ml","o":"México","was":19.00,"now":14.00,"bg":"#FBE3DE"},
+    {"e":"🫙","n":"Chiles jalapeños","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Bowl_of_jalape%C3%B1os.jpg/500px-Bowl_of_jalape%C3%B1os.jpg","u":"Lata 380 g","o":"México","was":16.00,"now":12.00,"bg":"#E2F1E2"},
+    {"e":"🍪","n":"Galletas surtidas","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Oatmeal_cookies_on_a_plate.jpg/500px-Oatmeal_cookies_on_a_plate.jpg","u":"Caja 500 g","o":"México","was":28.00,"now":21.00,"bg":"#F6EBDD"},
+    {"e":"🥫","n":"Frijoles refritos","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Refried_beans-frijoles_refritos.jpg/500px-Refried_beans-frijoles_refritos.jpg","u":"Lata 580 g","o":"México","was":14.00,"now":10.50,"bg":"#EDE3DB"}
   ]'></div>
 </section>
 
@@ -238,10 +242,10 @@
     <div class="why"><b>Contra Walmart:</b> Merco no gana por tamaño, gana por frescura y trato, el mismo modelo que rinde $118,000 por m² en México.</div>
   </div>
   <div class="grid" data-items='[
-    {"e":"🥑","n":"Aguacate Hass","u":"Unidad","o":"Guatemala","was":6.00,"now":4.00,"bg":"#E3F0DC"},
-    {"e":"🍌","n":"Plátano maduro","u":"Libra","o":"Guatemala","was":4.50,"now":3.25,"bg":"#FBF3D0"},
-    {"e":"🥚","n":"Huevos","u":"Cartón 30 uds.","o":"Guatemala","was":42.00,"now":34.00,"bg":"#F7EEE4"},
-    {"e":"🍅","n":"Tomate","u":"Libra","o":"Guatemala","was":7.00,"now":5.00,"bg":"#FBE0DC"}
+    {"e":"🥑","n":"Aguacate Hass","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Avocado_Hass_-_single_and_halved.jpg/500px-Avocado_Hass_-_single_and_halved.jpg","u":"Unidad","o":"Guatemala","was":6.00,"now":4.00,"bg":"#E3F0DC"},
+    {"e":"🍌","n":"Plátano maduro","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Ripe_plantains_bunches.jpg/500px-Ripe_plantains_bunches.jpg","u":"Libra","o":"Guatemala","was":4.50,"now":3.25,"bg":"#FBF3D0"},
+    {"e":"🥚","n":"Huevos","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Egg_cartons_with_chicken_eggs_03.jpg/500px-Egg_cartons_with_chicken_eggs_03.jpg","u":"Cartón 30 uds.","o":"Guatemala","was":42.00,"now":34.00,"bg":"#F7EEE4"},
+    {"e":"🍅","n":"Tomate","img":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Tomatoes_plain_and_sliced.jpg/500px-Tomatoes_plain_and_sliced.jpg","u":"Libra","o":"Guatemala","was":7.00,"now":5.00,"bg":"#FBE0DC"}
   ]'></div>
 </section>
 
@@ -278,6 +282,7 @@
     <div><b>Merco GT</b> · Propuesta de internacionalización de Supermercados Merco<br>Samuel de Juan Ortiz · Estrategia y globalización (Gpo 504)</div>
     <div>Concepto académico: no es una tienda real.<br>Precios y productos ilustrativos.</div>
   </div>
+  <div class="credits">Fotos de Wikimedia Commons · <a href="https://commons.wikimedia.org/wiki/File:Black_Turtle_Bean.jpg">Frijol negro</a>: Sanjay Acharya (CC BY-SA 3.0); <a href="https://commons.wikimedia.org/wiki/File:Stacks_of_corn_tortillas_and_flour_tortillas,_top_view.jpg">Tortillas de maíz</a>: Vigilantcosmicpenguin (CC BY 4.0); <a href="https://commons.wikimedia.org/wiki/File:Grounded_coffee_beans_in_white_bowl.png">Café de Huehuetenango</a>: Alorin (CC BY 4.0); <a href="https://commons.wikimedia.org/wiki/File:Queso_fresco.JPG">Queso fresco</a>: Geoff (CC BY-SA 3.0); <a href="https://commons.wikimedia.org/wiki/File:Molcajete_con_salsa_roja_mexicana_-_1.jpg">Salsa picante</a>: ProtoplasmaKid (CC BY-SA 4.0); <a href="https://commons.wikimedia.org/wiki/File:Bowl_of_jalape%C3%B1os.jpg">Chiles jalapeños</a>: Geo Lightspeed7 (CC BY-SA 4.0); <a href="https://commons.wikimedia.org/wiki/File:Oatmeal_cookies_on_a_plate.jpg">Galletas surtidas</a>: Evan Prodromou (CC0); <a href="https://commons.wikimedia.org/wiki/File:Refried_beans-frijoles_refritos.jpg">Frijoles refritos</a>: Drywontonmee at English Wikipedia (CC BY 2.5); <a href="https://commons.wikimedia.org/wiki/File:Avocado_Hass_-_single_and_halved.jpg">Aguacate Hass</a>: Ivar Leidus (CC BY-SA 4.0); <a href="https://commons.wikimedia.org/wiki/File:Ripe_plantains_bunches.jpg">Plátano maduro</a>: Fatimah Bello (CC0); <a href="https://commons.wikimedia.org/wiki/File:Egg_cartons_with_chicken_eggs_03.jpg">Huevos</a>: Krzysztof Golik (CC BY-SA 4.0); <a href="https://commons.wikimedia.org/wiki/File:Tomatoes_plain_and_sliced.jpg">Tomate</a>: User:FoeNyx (CC BY-SA 3.0)</div>
 </footer>
 
 <div class="hint"><kbd>←</kbd> <kbd>→</kbd> secciones · <kbd>N</kbd> ocultar notas</div>
@@ -291,7 +296,7 @@
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-        <div class="pic" style="background:${p.bg}">${p.e}</div>
+        <div class="pic" style="background:${p.bg}">${p.e}${p.img ? `<img src="${p.img}" alt="${p.n}" loading="lazy" onerror="this.remove()">` : ''}</div>
         <div class="badge">-${off}%</div>
         <div class="origin">${p.o === 'Guatemala' ? '🇬🇹' : '🇲🇽'} ${p.o}</div>
         <h3>${p.n}</h3>
