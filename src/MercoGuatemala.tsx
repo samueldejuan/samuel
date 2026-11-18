@@ -1,7 +1,9 @@
-import "@fontsource/oswald/700.css";
+import "@fontsource/inter/300.css";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/600.css";
-import "@fontsource/inter/700.css";
+import "@fontsource/inter/800.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
 import { getLength, getPointAtLength } from "@remotion/paths";
 import { geoMercator, geoPath } from "d3-geo";
 import { curveCatmullRom, line } from "d3-shape";
@@ -14,20 +16,24 @@ import {
   Audio,
   Easing,
   interpolate,
+  random,
   spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 
-// Colores de la presentación
-const NAVY = "#0F2D5C";
-const BLUE = "#2B6CB0";
-const LIGHT = "#E6EEF8";
-const OCEAN = "#D4E2F2";
-const WHITE = "#FFFFFF";
-const HEAD = "'Oswald', sans-serif";
-const BODY = "'Inter', sans-serif";
+// Paleta nocturna, estilo cinematográfico
+const BG = "#050A15";
+const LAND = "#0F1C33";
+const LAND_DIM = "#0A1426";
+const BORDER = "#22406B";
+const ACCENT = "#4EA8FF";
+const GOLD = "#FFB547";
+const WHITE = "#F4F7FB";
+const MUTED = "#8DA2C0";
+const SANS = "'Inter', sans-serif";
+const MONO = "'JetBrains Mono', monospace";
 
 const W = 1920;
 const H = 1080;
@@ -38,10 +44,10 @@ const T = {
   routeStart: 105,
   routeEnd: 200,
   zoomStart: 215,
-  zoomEnd: 255,
-  step1: 255,
-  step2: 300,
-  step3: 345,
+  zoomEnd: 260,
+  step1: 258,
+  step2: 303,
+  step3: 348,
   closingIn: 395,
 };
 
@@ -92,8 +98,8 @@ const projection = geoMercator().fitExtent(
     geometry: {
       type: "MultiPoint",
       coordinates: [
-        [-121, 33.5],
-        [-80, 11.5],
+        [-118, 32],
+        [-83, 12],
       ],
     },
   },
@@ -104,549 +110,736 @@ const project = (p: LonLat) => projection(p) as [number, number];
 const routeD = line().curve(curveCatmullRom.alpha(0.5))(ROUTE.map(project))!;
 const routeLength = getLength(routeD);
 
-// Encuadre final: Guatemala a la derecha, hueco a la izquierda para los pasos
 const ZOOM = 3.8;
-const guateCenter = project([-90.5, 15.2]);
+const focus = project([-90.5, 15.2]);
 
+// Cámara: zoom en 2D dentro del plano + inclinación 3D del plano
 const useCamera = () => {
   const frame = useCurrentFrame();
   const p = interpolate(frame, [T.zoomStart, T.zoomEnd], [0, 1], {
     ...clamp,
     easing: ease,
   });
-  // Escala en logarítmico para que el zoom se sienta uniforme; el centro de
-  // Guatemala viaja de su posición inicial a su sitio final en pantalla.
   const k = Math.exp(interpolate(p, [0, 1], [0, Math.log(ZOOM)]));
-  const sx = interpolate(p, [0, 1], [guateCenter[0], W * 0.68]);
-  const sy = interpolate(p, [0, 1], [guateCenter[1], H * 0.5]);
-  const x = sx - guateCenter[0] * k;
-  const y = sy - guateCenter[1] * k;
+  const sx = interpolate(p, [0, 1], [focus[0], W * 0.66]);
+  const sy = interpolate(p, [0, 1], [focus[1], H * 0.5]);
+  const x = sx - focus[0] * k;
+  const y = sy - focus[1] * k;
+  // Entrada tipo dron: muy inclinado al principio, se va enderezando
+  const tilt = interpolate(
+    frame,
+    [T.titleOut, T.routeEnd, T.zoomEnd],
+    [58, 38, 30],
+    {
+      ...clamp,
+      easing: Easing.out(Easing.cubic),
+    },
+  );
+  const rotZ = interpolate(
+    frame,
+    [T.titleOut, T.zoomEnd, T.closingIn],
+    [-10, -2, 2],
+    clamp,
+  );
+  const lift = interpolate(
+    frame,
+    [T.titleOut, T.routeStart + 20],
+    [1.35, 1.08],
+    {
+      ...clamp,
+      easing: Easing.out(Easing.cubic),
+    },
+  );
   return {
     k,
     x,
     y,
-    toScreen: (pt: [number, number]): [number, number] => [
+    tilt,
+    rotZ,
+    lift,
+    toPlane: (pt: [number, number]): [number, number] => [
       pt[0] * k + x,
       pt[1] * k + y,
     ],
   };
 };
 
-const Pin: React.FC<{
+// Marca en el plano con etiqueta "de pie" mirando a la cámara
+const Marker: React.FC<{
   at: [number, number];
   show: number;
+  tilt: number;
   color?: string;
-  size?: number;
   label?: string;
   sub?: string;
-  side?: "left" | "right";
-  // Si se indica, la etiqueta se coloca separada y unida con una línea guía
-  offset?: [number, number];
-}> = ({
-  at,
-  show,
-  color = BLUE,
-  size = 26,
-  label,
-  sub,
-  side = "right",
-  offset,
-}) => {
+  height?: number;
+  dx?: number;
+}> = ({ at, show, tilt, color = ACCENT, label, sub, height = 120, dx = 0 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const s = spring({ frame: frame - show, fps, config: { damping: 12 } });
-  const pulse = (frame - show) / 30;
   if (frame < show) {
     return null;
   }
+  const s = spring({ frame: frame - show, fps, config: { damping: 14 } });
+  const pole = spring({
+    frame: frame - show - 4,
+    fps,
+    config: { damping: 20 },
+  });
+  const pulse = ((frame - show) / 36) % 1;
   return (
     <div
       style={{
         position: "absolute",
         left: at[0],
         top: at[1],
-        transform: "translate(-50%, -50%)",
+        transformStyle: "preserve-3d",
       }}
     >
+      {/* Onda en el suelo */}
       <div
         style={{
           position: "absolute",
-          left: "50%",
-          top: "50%",
-          width: size * 3,
-          height: size * 3,
-          marginLeft: (-size * 3) / 2,
-          marginTop: (-size * 3) / 2,
+          width: 120,
+          height: 120,
+          left: -60,
+          top: -60,
           borderRadius: "50%",
           border: `3px solid ${color}`,
-          opacity: Math.max(0, 0.7 - (pulse % 1) * 0.7),
-          transform: `scale(${0.4 + (pulse % 1) * 0.8})`,
+          opacity: (1 - pulse) * 0.8,
+          transform: `scale(${0.2 + pulse})`,
         }}
       />
       <div
         style={{
-          width: size,
-          height: size,
+          position: "absolute",
+          width: 18,
+          height: 18,
+          left: -9,
+          top: -9,
           borderRadius: "50%",
           background: color,
-          border: `${size * 0.18}px solid ${WHITE}`,
-          boxShadow: "0 4px 14px rgba(15,45,92,0.35)",
+          boxShadow: `0 0 24px 6px ${color}`,
           transform: `scale(${s})`,
         }}
       />
-      {label && offset ? (
-        <svg
-          style={{
-            position: "absolute",
-            left: size / 2,
-            top: size / 2,
-            overflow: "visible",
-          }}
-          width={1}
-          height={1}
-        >
-          <line
-            x1={0}
-            y1={0}
-            x2={offset[0] * Math.min(1, s)}
-            y2={offset[1] * Math.min(1, s)}
-            stroke={NAVY}
-            strokeWidth={3}
-          />
-        </svg>
-      ) : null}
       {label ? (
+        // Panel vertical: se contrarresta la inclinación del plano
         <div
           style={{
             position: "absolute",
-            ...(offset
-              ? {
-                  left: size / 2 + offset[0],
-                  top: size / 2 + offset[1],
-                  transform: `translate(-50%, -50%) scale(${0.6 + 0.4 * Math.min(1, s)})`,
-                }
-              : {
-                  top: "50%",
-                  [side === "right" ? "left" : "right"]: size + 10,
-                  transform: `translateY(-50%) translateX(${(1 - s) * (side === "right" ? -20 : 20)}px)`,
-                }),
-            opacity: Math.min(1, s),
-            whiteSpace: "nowrap",
-            textAlign: side === "right" ? "left" : "right",
-            background: WHITE,
-            padding: "10px 18px",
-            borderRadius: 12,
-            boxShadow: "0 6px 20px rgba(15,45,92,0.18)",
+            left: 0,
+            top: 0,
+            transformOrigin: "0 0",
+            transform: `rotateX(${-tilt}deg)`,
+            transformStyle: "preserve-3d",
           }}
         >
           <div
             style={{
-              fontFamily: HEAD,
-              fontSize: 30,
-              color: NAVY,
-              textTransform: "uppercase",
-              letterSpacing: "0.02em",
+              position: "absolute",
+              left: -1,
+              bottom: 0,
+              width: 2,
+              height: height * pole,
+              background: `linear-gradient(to top, ${color}, rgba(255,255,255,0.0))`,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: dx,
+              bottom: height * pole,
+              transform: `translateX(-50%) translateY(${(1 - s) * 20}px)`,
+              opacity: Math.min(1, s),
+              whiteSpace: "nowrap",
+              padding: "14px 22px",
+              borderRadius: 14,
+              background: "rgba(8,16,32,0.72)",
+              border: `1px solid ${color}55`,
+              boxShadow: `0 0 40px ${color}33`,
+              backdropFilter: "blur(8px)",
+              textAlign: "center",
             }}
           >
-            {label}
-          </div>
-          {sub ? (
-            <div style={{ fontFamily: BODY, fontSize: 20, color: "#4A5D7A" }}>
-              {sub}
+            <div
+              style={{
+                fontFamily: SANS,
+                fontWeight: 800,
+                fontSize: 30,
+                color: WHITE,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {label}
             </div>
-          ) : null}
+            {sub ? (
+              <div
+                style={{ fontFamily: MONO, fontSize: 17, color, marginTop: 4 }}
+              >
+                {sub}
+              </div>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>
   );
 };
 
-const MapLayer: React.FC = () => {
+const MapPlane: React.FC = () => {
   const frame = useCurrentFrame();
   const cam = useCamera();
   const routeP = interpolate(frame, [T.routeStart, T.routeEnd], [0, 1], {
     ...clamp,
     easing: Easing.inOut(Easing.quad),
   });
-  const truck = getPointAtLength(routeD, routeLength * routeP);
-  const truckScreen = truck ? cam.toScreen([truck.x, truck.y]) : [0, 0];
-  const km = Math.round(routeP * 2100);
+  const head = getPointAtLength(routeD, routeLength * routeP);
+  const headPlane = head ? cam.toPlane([head.x, head.y]) : [0, 0];
+  const trail = routeLength * 0.12;
 
-  // Rutas de expansión dentro de Guatemala (paso 3)
   const branch = (to: LonLat) =>
     `M${project(GUATE).join(",")} L${project(to).join(",")}`;
   const branchP = interpolate(frame, [T.step3 + 5, T.step3 + 30], [0, 1], {
     ...clamp,
     easing: ease,
   });
-
-  const guateHighlight = interpolate(
+  const gtGlow = interpolate(
     frame,
-    [T.zoomStart, T.zoomEnd],
+    [T.routeEnd - 10, T.zoomEnd],
     [0, 1],
     clamp,
   );
-  const routeFade = interpolate(
+  const routeDim = interpolate(
     frame,
     [T.zoomEnd - 10, T.zoomEnd + 15],
-    [1, 0.25],
+    [1, 0.35],
+    clamp,
+  );
+  const appear = interpolate(
+    frame,
+    [T.titleOut - 10, T.titleOut + 25],
+    [0, 1],
     clamp,
   );
 
+  // Rejilla tipo HUD que se mueve con el mapa
+  const grid = 120 * cam.k;
+
   return (
-    <AbsoluteFill style={{ background: OCEAN }}>
-      <svg width={W} height={H} style={{ position: "absolute" }}>
-        <g transform={`translate(${cam.x} ${cam.y}) scale(${cam.k})`}>
-          {shapes.map((f) => {
-            const id = String(f.id);
-            const isMx = id === "484";
-            const isGt = id === "320";
-            return (
-              <path
-                key={id}
-                d={pathGen(f) ?? undefined}
-                fill={
-                  isGt
-                    ? interpolateColor(guateHighlight, "#BFD5EE", BLUE)
-                    : isMx
-                      ? WHITE
-                      : "#EEF2F7"
-                }
-                stroke={isGt ? NAVY : "#9DB3CF"}
-                strokeWidth={(isGt || isMx ? 2 : 1) / cam.k}
-                strokeLinejoin="round"
-              />
-            );
-          })}
-          {/* Ruta completa en punteado y progreso en sólido */}
-          <path
-            d={routeD}
-            fill="none"
-            stroke={NAVY}
-            strokeOpacity={0.35 * routeFade}
-            strokeWidth={4 / cam.k}
-            strokeDasharray={`${10 / cam.k} ${10 / cam.k}`}
-            strokeLinecap="round"
-          />
-          <path
-            d={routeD}
-            fill="none"
-            stroke={NAVY}
-            strokeOpacity={routeFade}
-            strokeWidth={7 / cam.k}
-            strokeLinecap="round"
-            strokeDasharray={`${routeLength * routeP} ${routeLength + 1}`}
-          />
-          {[XELA, ESCUINTLA].map((to) => {
-            const d = branch(to);
-            const len = getLength(d);
-            return (
-              <path
-                key={to.join()}
-                d={d}
-                fill="none"
-                stroke={WHITE}
-                strokeWidth={5 / cam.k}
-                strokeLinecap="round"
-                strokeDasharray={`${len * branchP} ${len + 1}`}
-              />
-            );
-          })}
-        </g>
-      </svg>
-
-      {/* Etiquetas de la vista general */}
-      {frame < T.zoomStart ? (
-        <Pin
-          at={cam.toScreen(project(MONTERREY))}
-          show={T.routeStart - 20}
-          color={NAVY}
-          label="Monterrey"
-          sub="Hoy todo sale de Nuevo León"
-        />
-      ) : null}
-      {frame < T.zoomStart + 10 ? (
-        <Pin
-          at={cam.toScreen(project(GUATE))}
-          show={T.routeEnd - 5}
-          color={BLUE}
-          label="Ciudad de Guatemala"
-          side="right"
-        />
-      ) : null}
-
-      {/* Camión / punto que recorre la ruta */}
-      {routeP > 0 && routeP < 1 ? (
+    <AbsoluteFill style={{ perspective: 1400, perspectiveOrigin: "50% 30%" }}>
+      <AbsoluteFill
+        style={{
+          transformStyle: "preserve-3d",
+          transform: `translateY(60px) rotateX(${cam.tilt}deg) rotateZ(${cam.rotZ}deg) scale(${cam.lift})`,
+          opacity: appear,
+        }}
+      >
         <div
           style={{
             position: "absolute",
-            left: truckScreen[0],
-            top: truckScreen[1],
-            width: 30,
-            height: 30,
-            marginLeft: -15,
-            marginTop: -15,
-            borderRadius: "50%",
-            background: "#F2A93B",
-            border: `5px solid ${WHITE}`,
-            boxShadow: "0 0 0 8px rgba(242,169,59,0.3)",
+            left: -W,
+            top: -H,
+            width: W * 3,
+            height: H * 3,
+            backgroundImage: `linear-gradient(${BORDER}33 1px, transparent 1px), linear-gradient(90deg, ${BORDER}33 1px, transparent 1px)`,
+            backgroundSize: `${grid}px ${grid}px`,
+            backgroundPosition: `${cam.x + W}px ${cam.y + H}px`,
           }}
         />
-      ) : null}
+        <svg
+          width={W}
+          height={H}
+          style={{ position: "absolute", overflow: "visible" }}
+        >
+          <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation={6 / cam.k} result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <g transform={`translate(${cam.x} ${cam.y}) scale(${cam.k})`}>
+            {shapes.map((f) => {
+              const id = String(f.id);
+              const isMx = id === "484";
+              const isGt = id === "320";
+              if (isGt) {
+                return null;
+              }
+              return (
+                <path
+                  key={id}
+                  d={pathGen(f) ?? undefined}
+                  fill={isMx ? LAND : LAND_DIM}
+                  stroke={isMx ? "#3A6194" : BORDER}
+                  strokeWidth={(isMx ? 1.6 : 1) / cam.k}
+                  strokeLinejoin="round"
+                />
+              );
+            })}
+            {shapes
+              .filter((f) => String(f.id) === "320")
+              .map((f) => (
+                <g key="gt">
+                  <path
+                    d={pathGen(f) ?? undefined}
+                    fill={`rgba(78,168,255,${0.06 + 0.12 * gtGlow})`}
+                  />
+                  <path
+                    d={pathGen(f) ?? undefined}
+                    fill="none"
+                    stroke={ACCENT}
+                    strokeOpacity={0.4 + 0.6 * gtGlow}
+                    strokeWidth={2.5 / cam.k}
+                    strokeLinejoin="round"
+                    filter={gtGlow > 0 ? "url(#glow)" : undefined}
+                  />
+                </g>
+              ))}
+            <path
+              d={routeD}
+              fill="none"
+              stroke={GOLD}
+              strokeOpacity={0.25 * routeDim}
+              strokeWidth={3 / cam.k}
+              strokeDasharray={`${3 / cam.k} ${9 / cam.k}`}
+              strokeLinecap="round"
+            />
+            <path
+              d={routeD}
+              fill="none"
+              stroke={GOLD}
+              strokeOpacity={0.85 * routeDim}
+              strokeWidth={4 / cam.k}
+              strokeLinecap="round"
+              strokeDasharray={`${routeLength * routeP} ${routeLength + 1}`}
+              filter="url(#glow)"
+            />
+            {routeP > 0 && routeP < 1 ? (
+              <path
+                d={routeD}
+                fill="none"
+                stroke="#FFF3D6"
+                strokeWidth={6 / cam.k}
+                strokeLinecap="round"
+                strokeDasharray={`0 ${Math.max(0, routeLength * routeP - trail)} ${Math.min(trail, routeLength * routeP)} ${routeLength * 2}`}
+                filter="url(#glow)"
+              />
+            ) : null}
+            {[XELA, ESCUINTLA].map((to) => {
+              const d = branch(to);
+              const len = getLength(d);
+              return (
+                <path
+                  key={to.join()}
+                  d={d}
+                  fill="none"
+                  stroke={GOLD}
+                  strokeWidth={4 / cam.k}
+                  strokeLinecap="round"
+                  strokeDasharray={`${len * branchP} ${len + 1}`}
+                  filter="url(#glow)"
+                />
+              );
+            })}
+          </g>
+        </svg>
 
-      {/* Contador de distancia */}
-      <DistanceBadge km={km} />
+        {routeP > 0 && routeP < 1 ? (
+          <div
+            style={{
+              position: "absolute",
+              left: headPlane[0] - 14,
+              top: headPlane[1] - 14,
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: "#FFF6E0",
+              boxShadow: `0 0 30px 12px ${GOLD}`,
+            }}
+          />
+        ) : null}
 
-      {/* Pines de los pasos (vista de Guatemala) */}
-      <Pin
-        at={cam.toScreen(project(GUATE))}
-        show={T.step1 + 6}
-        color={NAVY}
-        size={30}
-        label="Almacén + socio local"
-        sub="Ciudad de Guatemala"
-        offset={[-40, -230]}
-      />
-      <Pin
-        at={cam.toScreen(project([-90.4, 14.7]))}
-        show={T.step2 + 6}
-        color="#F2A93B"
-      />
-      <Pin
-        at={cam.toScreen(project([-90.44, 14.56]))}
-        show={T.step2 + 12}
-        color="#F2A93B"
-        label="2 tiendas piloto"
-        sub="¡Ofertas de apertura!"
-        offset={[270, -60]}
-      />
-      <Pin
-        at={cam.toScreen(project(XELA))}
-        show={T.step3 + 28}
-        color={WHITE}
-        label="Quetzaltenango"
-        offset={[-130, 150]}
-      />
-      <Pin
-        at={cam.toScreen(project(ESCUINTLA))}
-        show={T.step3 + 34}
-        color={WHITE}
-        label="Escuintla"
-        offset={[200, 110]}
+        {frame < T.zoomStart + 5 ? (
+          <Marker
+            at={cam.toPlane(project(MONTERREY))}
+            show={T.routeStart - 18}
+            tilt={cam.tilt}
+            color={GOLD}
+            label="Monterrey"
+            sub="25.67°N · 100.31°O"
+            height={140}
+          />
+        ) : null}
+        {frame < T.zoomStart + 5 ? (
+          <Marker
+            at={cam.toPlane(project(GUATE))}
+            show={T.routeEnd - 6}
+            tilt={cam.tilt}
+            color={ACCENT}
+            label="Ciudad de Guatemala"
+            sub="14.63°N · 90.51°O"
+            height={150}
+          />
+        ) : null}
+
+        {/* Pasos sobre Guatemala */}
+        <Marker
+          at={cam.toPlane(project(GUATE))}
+          show={T.step1 + 8}
+          tilt={cam.tilt}
+          color={ACCENT}
+          label="Almacén + socio local"
+          sub="Ciudad de Guatemala"
+          height={250}
+          dx={-40}
+        />
+        <Marker
+          at={cam.toPlane(project([-90.38, 14.7]))}
+          show={T.step2 + 6}
+          tilt={cam.tilt}
+          color={GOLD}
+        />
+        <Marker
+          at={cam.toPlane(project([-90.42, 14.55]))}
+          show={T.step2 + 12}
+          tilt={cam.tilt}
+          color={GOLD}
+          label="2 tiendas piloto"
+          sub="¡Ofertas de apertura!"
+          height={120}
+          dx={230}
+        />
+        <Marker
+          at={cam.toPlane(project(XELA))}
+          show={T.step3 + 28}
+          tilt={cam.tilt}
+          color={GOLD}
+          label="Quetzaltenango"
+          height={110}
+          dx={-120}
+        />
+        <Marker
+          at={cam.toPlane(project(ESCUINTLA))}
+          show={T.step3 + 34}
+          tilt={cam.tilt}
+          color={GOLD}
+          label="Escuintla"
+          height={30}
+          dx={250}
+        />
+      </AbsoluteFill>
+      {/* Niebla en el horizonte */}
+      <AbsoluteFill
+        style={{
+          background: `linear-gradient(180deg, ${BG} 0%, ${BG}EE 14%, ${BG}00 42%)`,
+        }}
       />
     </AbsoluteFill>
   );
 };
 
-const interpolateColor = (t: number, a: string, b: string) => {
-  const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
-  const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
-  const c = pa.map((v, i) => Math.round(v + (pb[i] - v) * t));
-  return `rgb(${c.join(",")})`;
+// Palabras que suben desde una máscara, una tras otra
+const Reveal: React.FC<{
+  text: string;
+  start: number;
+  size: number;
+  weight?: number;
+  color?: string;
+  highlight?: string[];
+  stagger?: number;
+}> = ({
+  text,
+  start,
+  size,
+  weight = 800,
+  color = WHITE,
+  highlight = [],
+  stagger = 4,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  return (
+    <div
+      style={{
+        fontFamily: SANS,
+        fontWeight: weight,
+        fontSize: size,
+        lineHeight: 1.04,
+        letterSpacing: "-0.035em",
+        color,
+      }}
+    >
+      {text.split(" ").map((word, i) => {
+        const s = spring({
+          frame: frame - start - i * stagger,
+          fps,
+          config: { damping: 200 },
+          durationInFrames: 22,
+        });
+        const clean = word.replace(/[¿?,.]/g, "");
+        return (
+          <span
+            key={i}
+            style={{
+              display: "inline-block",
+              overflow: "hidden",
+              verticalAlign: "top",
+              paddingBottom: "0.08em",
+              marginRight: "0.24em",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                transform: `translateY(${(1 - s) * 110}%)`,
+                color: highlight.includes(clean) ? GOLD : undefined,
+              }}
+            >
+              {word}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
 };
 
-const DistanceBadge: React.FC<{ km: number }> = ({ km }) => {
+const Label: React.FC<{
+  children: React.ReactNode;
+  opacity?: number;
+  color?: string;
+}> = ({ children, opacity = 1, color = ACCENT }) => (
+  <div
+    style={{
+      fontFamily: MONO,
+      fontSize: 22,
+      letterSpacing: "0.18em",
+      textTransform: "uppercase",
+      color,
+      opacity,
+      display: "flex",
+      alignItems: "center",
+      gap: 16,
+    }}
+  >
+    <span style={{ width: 40, height: 2, background: color }} />
+    {children}
+  </div>
+);
+
+const Hud: React.FC = () => {
   const frame = useCurrentFrame();
-  const show = interpolate(
+  const a = interpolate(
+    frame,
+    [T.titleOut + 10, T.titleOut + 30],
+    [0, 1],
+    clamp,
+  );
+  const swap = interpolate(
+    frame,
+    [T.zoomStart, T.zoomStart + 15],
+    [0, 1],
+    clamp,
+  );
+  const routeP = interpolate(frame, [T.routeStart, T.routeEnd], [0, 1], {
+    ...clamp,
+    easing: Easing.inOut(Easing.quad),
+  });
+  const km = Math.round(routeP * 2100);
+  const kmShow = interpolate(
     frame,
     [T.routeStart, T.routeStart + 15],
     [0, 1],
     clamp,
   );
-  const hide = interpolate(
-    frame,
-    [T.zoomStart, T.zoomStart + 12],
-    [0, 1],
-    clamp,
-  );
-  return (
-    <div
-      style={{
-        position: "absolute",
-        right: 90,
-        top: 90,
-        opacity: show * (1 - hide),
-        transform: `translateY(${(1 - show) * 20}px)`,
-        background: NAVY,
-        color: WHITE,
-        borderRadius: 18,
-        padding: "22px 34px",
-        boxShadow: "0 10px 30px rgba(15,45,92,0.3)",
-      }}
-    >
-      <div style={{ fontFamily: BODY, fontSize: 22, opacity: 0.8 }}>
-        Distancia por carretera
-      </div>
-      <div style={{ fontFamily: HEAD, fontSize: 72, lineHeight: 1.1 }}>
-        {km >= 2100 ? "+" : ""}
-        {km.toLocaleString("en-US")} km
-      </div>
-    </div>
-  );
-};
-
-const Header: React.FC = () => {
-  const frame = useCurrentFrame();
-  const a = interpolate(frame, [T.titleOut, T.titleOut + 20], [0, 1], clamp);
-  const swap = interpolate(
-    frame,
-    [T.zoomStart, T.zoomStart + 20],
-    [0, 1],
-    clamp,
-  );
-  const style: React.CSSProperties = {
-    position: "absolute",
-    left: 90,
-    top: 80,
-    background: "rgba(255,255,255,0.92)",
-    borderRadius: 18,
-    padding: "22px 34px",
-    boxShadow: "0 10px 30px rgba(15,45,92,0.15)",
-  };
   return (
     <>
-      <div style={{ ...style, opacity: a * (1 - swap) }}>
-        <Kicker>El reto · Paso 2</Kicker>
-        <Title size={56}>De Monterrey a Guatemala</Title>
+      <div
+        style={{
+          position: "absolute",
+          left: 100,
+          top: 90,
+          opacity: a * (1 - swap),
+        }}
+      >
+        <Label>01 — El reto</Label>
+        <div style={{ marginTop: 18 }}>
+          <Reveal
+            text="De Monterrey a Guatemala"
+            start={T.titleOut + 12}
+            size={72}
+          />
+        </div>
       </div>
-      <div style={{ ...style, opacity: swap }}>
-        <Kicker>Acción estratégica · Paso 4</Kicker>
-        <Title size={56}>Cómo llegamos, paso a paso</Title>
+      <div style={{ position: "absolute", left: 100, top: 90, opacity: swap }}>
+        <Label>02 — El plan</Label>
+        <div style={{ marginTop: 18 }}>
+          <Reveal text="Paso a paso" start={T.zoomStart + 4} size={72} />
+        </div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          right: 100,
+          top: 90,
+          textAlign: "right",
+          opacity: kmShow * (1 - swap),
+        }}
+      >
+        <div
+          style={{
+            fontFamily: MONO,
+            fontSize: 20,
+            letterSpacing: "0.18em",
+            color: MUTED,
+          }}
+        >
+          DISTANCIA POR CARRETERA
+        </div>
+        <div
+          style={{
+            fontFamily: SANS,
+            fontWeight: 800,
+            fontSize: 120,
+            letterSpacing: "-0.04em",
+            color: WHITE,
+            lineHeight: 1,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {km >= 2100 ? "+" : ""}
+          {km.toLocaleString("en-US")}
+          <span style={{ color: GOLD, fontSize: 56, marginLeft: 12 }}>km</span>
+        </div>
+        <div
+          style={{ fontFamily: SANS, fontSize: 24, color: MUTED, marginTop: 8 }}
+        >
+          Hoy todo sale de Nuevo León
+        </div>
       </div>
     </>
   );
 };
 
-const Kicker: React.FC<{ children: React.ReactNode; color?: string }> = ({
-  children,
-  color = BLUE,
-}) => (
-  <div
-    style={{
-      fontFamily: HEAD,
-      fontSize: 24,
-      letterSpacing: "0.12em",
-      textTransform: "uppercase",
-      color,
-    }}
-  >
-    {children}
-  </div>
-);
-
-const Title: React.FC<{
-  children: React.ReactNode;
-  size: number;
-  color?: string;
-}> = ({ children, size, color = NAVY }) => (
-  <div
-    style={{
-      fontFamily: HEAD,
-      fontSize: size,
-      lineHeight: 1.05,
-      textTransform: "uppercase",
-      color,
-    }}
-  >
-    {children}
-  </div>
-);
-
 const STEPS = [
   {
     at: T.step1,
-    n: "1",
-    when: "Meses 0 a 6",
+    n: "01",
+    when: "Meses 0–6",
     what: "Socio guatemalteco, almacén y proveedores locales",
   },
   {
     at: T.step2,
-    n: "2",
-    when: "Meses 6 a 24",
-    what: "Abrir 2 tiendas de cercanía en la capital y medir",
+    n: "02",
+    when: "Meses 6–24",
+    what: "2 tiendas de cercanía en la capital, y medir",
   },
   {
     at: T.step3,
-    n: "3",
+    n: "03",
     when: "Mes 24",
-    what: "Si cumple las metas, crecer a Quetzaltenango y Escuintla",
+    what: "Si cumple metas: Quetzaltenango y Escuintla",
   },
 ];
 
 const Steps: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const out = interpolate(
+    frame,
+    [T.closingIn - 5, T.closingIn + 10],
+    [1, 0],
+    clamp,
+  );
   return (
     <div
       style={{
         position: "absolute",
-        left: 90,
-        top: 270,
-        width: 640,
-        display: "flex",
-        flexDirection: "column",
-        gap: 26,
+        left: 100,
+        top: 300,
+        width: 560,
+        opacity: out,
       }}
     >
-      {STEPS.map((s) => {
-        const p = spring({ frame: frame - s.at, fps, config: { damping: 16 } });
-        const active =
-          frame >= s.at &&
-          (STEPS.find((o) => o.at > s.at)?.at ?? Infinity) > frame;
+      {STEPS.map((s, i) => {
+        const p = spring({
+          frame: frame - s.at,
+          fps,
+          config: { damping: 200 },
+          durationInFrames: 20,
+        });
+        const next = STEPS[i + 1]?.at ?? Infinity;
+        const active = frame >= s.at && frame < next;
+        const bar = interpolate(
+          frame,
+          [s.at, Math.min(next, T.closingIn)],
+          [0, 1],
+          clamp,
+        );
         return (
           <div
             key={s.n}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 24,
-              background: active ? NAVY : WHITE,
-              color: active ? WHITE : NAVY,
-              borderRadius: 20,
-              padding: "24px 30px",
-              boxShadow: "0 10px 30px rgba(15,45,92,0.18)",
-              opacity: Math.min(1, p),
-              transform: `translateX(${(1 - p) * -60}px)`,
+              position: "relative",
+              padding: "26px 0 26px 34px",
+              borderLeft: `2px solid ${active ? GOLD : "rgba(141,162,192,0.25)"}`,
+              opacity: p * (active ? 1 : 0.5),
+              transform: `translateX(${(1 - p) * -40}px)`,
             }}
           >
-            <div
-              style={{
-                flex: "0 0 auto",
-                width: 76,
-                height: 76,
-                borderRadius: "50%",
-                background: active ? WHITE : BLUE,
-                color: active ? NAVY : WHITE,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: HEAD,
-                fontSize: 44,
-              }}
-            >
-              {s.n}
-            </div>
-            <div>
+            {active ? (
               <div
                 style={{
-                  fontFamily: HEAD,
-                  fontSize: 34,
+                  position: "absolute",
+                  left: -2,
+                  top: 0,
+                  width: 2,
+                  height: `${bar * 100}%`,
+                  background: WHITE,
+                  boxShadow: `0 0 12px ${GOLD}`,
+                }}
+              />
+            ) : null}
+            <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontWeight: 500,
+                  fontSize: 22,
+                  color: active ? GOLD : MUTED,
+                }}
+              >
+                {s.n}
+              </span>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 22,
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  color: active ? "#9EC5F0" : BLUE,
+                  color: active ? GOLD : MUTED,
                 }}
               >
                 {s.when}
-              </div>
-              <div
-                style={{
-                  fontFamily: BODY,
-                  fontWeight: 600,
-                  fontSize: 26,
-                  lineHeight: 1.3,
-                }}
-              >
-                {s.what}
-              </div>
+              </span>
+            </div>
+            <div
+              style={{
+                fontFamily: SANS,
+                fontWeight: active ? 800 : 600,
+                fontSize: active ? 40 : 30,
+                lineHeight: 1.15,
+                letterSpacing: "-0.02em",
+                color: WHITE,
+                marginTop: 8,
+              }}
+            >
+              {s.what}
             </div>
           </div>
         );
@@ -657,71 +850,42 @@ const Steps: React.FC = () => {
 
 const TitleCard: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const out = interpolate(frame, [T.titleOut, T.titleOut + 22], [0, 1], {
+  const out = interpolate(frame, [T.titleOut - 6, T.titleOut + 14], [0, 1], {
     ...clamp,
     easing: Easing.in(Easing.cubic),
   });
-  const s1 = spring({ frame: frame - 4, fps, config: { damping: 18 } });
-  const s2 = spring({ frame: frame - 14, fps, config: { damping: 18 } });
-  const s3 = spring({ frame: frame - 26, fps, config: { damping: 18 } });
+  const line = interpolate(frame, [2, 30], [0, 1], { ...clamp, easing: ease });
   if (out >= 1) {
     return null;
   }
   return (
     <AbsoluteFill
       style={{
-        background: NAVY,
-        transform: `translateY(${-out * 100}%)`,
         justifyContent: "center",
         paddingLeft: 140,
+        opacity: 1 - out,
+        transform: `scale(${1 + out * 0.08})`,
+        filter: `blur(${out * 12}px)`,
       }}
     >
-      <div style={{ opacity: s1, transform: `translateY(${(1 - s1) * 30}px)` }}>
-        <Kicker color="#9EC5F0">
-          Supermercados Merco · Internacionalización
-        </Kicker>
+      <Label opacity={line}>Supermercados Merco · Internacionalización</Label>
+      <div style={{ marginTop: 30 }}>
+        <Reveal text="¿Cómo llegaría Merco" start={8} size={140} />
+        <Reveal
+          text="a Guatemala?"
+          start={18}
+          size={140}
+          highlight={["Guatemala"]}
+        />
       </div>
       <div
         style={{
-          opacity: s2,
-          transform: `translateY(${(1 - s2) * 30}px)`,
-          marginTop: 16,
+          marginTop: 34,
+          width: 700 * line,
+          height: 2,
+          background: `linear-gradient(90deg, ${GOLD}, transparent)`,
         }}
-      >
-        <Title size={130} color={WHITE}>
-          ¿Cómo llegaría Merco
-        </Title>
-        <Title size={130} color={WHITE}>
-          a{" "}
-          <span
-            style={{
-              display: "inline-block",
-              background: WHITE,
-              color: NAVY,
-              lineHeight: 1,
-              padding: "6px 20px 10px",
-              margin: "14px 0 0",
-              borderRadius: 8,
-            }}
-          >
-            Guatemala
-          </span>
-          ?
-        </Title>
-      </div>
-      <div
-        style={{
-          opacity: s3,
-          transform: `translateY(${(1 - s3) * 30}px)`,
-          marginTop: 30,
-          fontFamily: BODY,
-          fontSize: 34,
-          color: "#C9DAF0",
-        }}
-      >
-        De Monterrey a Ciudad de Guatemala, en 3 pasos
-      </div>
+      />
     </AbsoluteFill>
   );
 };
@@ -729,77 +893,141 @@ const TitleCard: React.FC = () => {
 const ClosingCard: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const inP = interpolate(frame, [T.closingIn, T.closingIn + 18], [0, 1], {
-    ...clamp,
-    easing: Easing.out(Easing.cubic),
-  });
-  const s = spring({
-    frame: frame - T.closingIn - 10,
-    fps,
-    config: { damping: 16 },
-  });
-  const stamp = spring({
-    frame: frame - T.closingIn - 24,
-    fps,
-    config: { damping: 10 },
-  });
   if (frame < T.closingIn) {
     return null;
   }
+  const veil = interpolate(
+    frame,
+    [T.closingIn, T.closingIn + 14],
+    [0, 1],
+    clamp,
+  );
+  const badge = spring({
+    frame: frame - T.closingIn - 26,
+    fps,
+    config: { damping: 200 },
+    durationInFrames: 18,
+  });
   return (
-    <AbsoluteFill
-      style={{
-        background: NAVY,
-        clipPath: `circle(${inP * 120}% at 70% 55%)`,
-        justifyContent: "center",
-        paddingLeft: 140,
-      }}
-    >
-      <div style={{ opacity: s, transform: `translateY(${(1 - s) * 30}px)` }}>
-        <Kicker color="#9EC5F0">Recomendación final</Kicker>
-        <div style={{ marginTop: 16 }}>
-          <Title size={110} color={WHITE}>
-            Sí a Guatemala,
-          </Title>
-          <Title size={110} color={WHITE}>
-            paso a paso, con un
-          </Title>
-          <Title size={110} color={WHITE}>
-            socio local
-          </Title>
+    <AbsoluteFill>
+      <AbsoluteFill style={{ background: `${BG}`, opacity: veil * 0.86 }} />
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: 140 }}>
+        <Label opacity={veil} color={GOLD}>
+          Recomendación final
+        </Label>
+        <div style={{ marginTop: 26 }}>
+          <Reveal
+            text="Sí a Guatemala."
+            start={T.closingIn + 4}
+            size={150}
+            highlight={["Guatemala"]}
+          />
+          <Reveal
+            text="Paso a paso, con un socio local."
+            start={T.closingIn + 12}
+            size={72}
+            weight={300}
+            stagger={2}
+          />
         </div>
         <div
           style={{
-            marginTop: 30,
-            fontFamily: BODY,
-            fontSize: 32,
-            color: "#C9DAF0",
+            marginTop: 40,
+            display: "flex",
+            gap: 16,
+            opacity: badge,
+            transform: `translateY(${(1 - badge) * 16}px)`,
           }}
         >
-          2027: socio y almacén · 2028: 2 tiendas · 2029: crecer
+          {["2027 · Socio y almacén", "2028 · 2 tiendas", "2029 · Crecer"].map(
+            (t) => (
+              <div
+                key={t}
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 22,
+                  color: WHITE,
+                  padding: "12px 22px",
+                  borderRadius: 999,
+                  border: "1px solid rgba(255,255,255,0.25)",
+                  background: "rgba(255,255,255,0.06)",
+                }}
+              >
+                {t}
+              </div>
+            ),
+          )}
+          <div
+            style={{
+              fontFamily: MONO,
+              fontSize: 22,
+              color: BG,
+              padding: "12px 22px",
+              borderRadius: 999,
+              background: GOLD,
+              fontWeight: 500,
+            }}
+          >
+            Aprobado con condiciones
+          </div>
         </div>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          right: 160,
-          top: 200,
-          transform: `rotate(-8deg) scale(${stamp})`,
-          border: `6px solid ${WHITE}`,
-          borderRadius: 14,
-          padding: "14px 30px",
-          fontFamily: HEAD,
-          fontSize: 44,
-          color: WHITE,
-          textTransform: "uppercase",
-          textAlign: "center",
-          lineHeight: 1.1,
-        }}
-      >
-        Aprobado con
-        <br />
-        condiciones
-      </div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+// Partículas de polvo flotando delante de la cámara
+const Particles: React.FC = () => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      {new Array(40).fill(0).map((_, i) => {
+        const x = random(`x${i}`) * W;
+        const y =
+          (random(`y${i}`) * H -
+            frame * (0.3 + random(`v${i}`) * 0.8) +
+            H * 2) %
+          H;
+        const r = 1 + random(`r${i}`) * 2.5;
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: x,
+              top: y,
+              width: r * 2,
+              height: r * 2,
+              borderRadius: "50%",
+              background: WHITE,
+              opacity: 0.08 + random(`o${i}`) * 0.25,
+              filter: "blur(1px)",
+            }}
+          />
+        );
+      })}
+    </AbsoluteFill>
+  );
+};
+
+const Grain: React.FC = () => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill
+      style={{ pointerEvents: "none", mixBlendMode: "overlay", opacity: 0.35 }}
+    >
+      <svg width={W} height={H}>
+        <filter id="grain">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency={0.85}
+            numOctaves={2}
+            seed={frame % 12}
+          />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width={W} height={H} filter="url(#grain)" />
+      </svg>
     </AbsoluteFill>
   );
 };
@@ -808,13 +1036,35 @@ export const MercoGuatemala: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   const stepsVisible = frame >= T.step1 - 5 && frame < T.closingIn + 20;
+  const fadeIn = interpolate(frame, [0, 8], [0, 1], clamp);
+  const fadeOut = interpolate(
+    frame,
+    [durationInFrames - 10, durationInFrames],
+    [1, 0],
+    clamp,
+  );
   return (
-    <AbsoluteFill style={{ background: LIGHT }}>
-      <MapLayer />
-      <Header />
-      {stepsVisible ? <Steps /> : null}
-      <TitleCard />
-      <ClosingCard />
+    <AbsoluteFill
+      style={{
+        background: `radial-gradient(ellipse at 60% 40%, #0C1A33 0%, ${BG} 65%)`,
+      }}
+    >
+      <AbsoluteFill style={{ opacity: fadeIn * fadeOut }}>
+        <MapPlane />
+        <Particles />
+        <Hud />
+        {stepsVisible ? <Steps /> : null}
+        <TitleCard />
+        <ClosingCard />
+        {/* Viñeta */}
+        <AbsoluteFill
+          style={{
+            background:
+              "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%)",
+          }}
+        />
+        <Grain />
+      </AbsoluteFill>
       <Audio
         src={staticFile("musica-pitch.mp3")}
         volume={(f) =>
