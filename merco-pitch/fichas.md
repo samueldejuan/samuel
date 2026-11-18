@@ -36,10 +36,10 @@ Recomendación: **B. Sí a Guatemala, paso a paso (aprobar con condiciones).**
 
 - **País elegido:** Guatemala.
 - **Tamaño y crecimiento:** 18.7 millones de habitantes, la mayor población de Centroamérica (Banco Mundial, 2025). La economía crecerá alrededor de 4.1% en 2025–2026, más que América Latina (2.4%) (Banco de Guatemala, dic. 2025).
-- **Demanda potencial:** las remesas llegaron a US$25,530 millones en 2025, +18.7%, unos US$100 millones al día (Banco de Guatemala, 2026). El 48% de las compras de consumo masivo todavía se hace en tiendas de barrio (Kantar).
-- **Consumidor y poder adquisitivo:** país joven, con edad media de 28.4 años (SEGEPLAN/UNFPA, 2024); precios estables, con inflación de 1.73% a noviembre de 2025 (Banguat). `[Agregar ingreso o gasto por hogar: Passport/Statista]`
+- **Demanda potencial (gancho de la portada):** 1 de cada 2 compras se hace en la tienda de barrio (Kantar). las remesas llegaron a US$25,530 millones en 2025, +18.7%, unos US$100 millones al día (Banco de Guatemala, 2026). El 48% de las compras de consumo masivo todavía se hace en tiendas de barrio (Kantar).
+- **Consumidor y poder adquisitivo:** cliente que cuida su dinero: PIB por persona de US$6,506 en 2025 (FocusEconomics; otras fuentes dan entre US$6,500 y US$6,800). País joven, con edad media de 28.4 años (SEGEPLAN/UNFPA, 2024); precios estables, con inflación de 1.73% a noviembre de 2025 (Banguat). `[Agregar ingreso o gasto por hogar: Passport/Statista]`
 - **3 competidores:** Walmart (276 tiendas a oct. 2025: Despensa Familiar, Maxi Despensa, Paiz y Walmart Supercenter; Walmart corporativo), La Torre (cadena local de segmento alto) y Súper del Barrio (200 tiendas de cercanía; Emisoras Unidas, 2025).
-- **Barreras de entrada:** competencia de Walmart; trámites para abrir empresa y contratar; abasto a distancia desde Monterrey; cambio de moneda (quetzal).
+- **Barreras de entrada:** el tamaño de Walmart; inseguridad (las cámaras empresariales reportaron más extorsiones a repartidores en 2025, Prensa Latina); unos 2,100 km de carretera desde Monterrey; trámites y cambio de moneda.
 - **Por qué este país (3 líneas):** es el mercado más grande de Centroamérica y crece más que la región; las familias tienen cada vez más dinero gracias a las remesas récord; y casi la mitad todavía compra en tiendas de barrio, justo donde un súper de cercanía como Merco puede ganar.
 - **Relación con F/D:** premia F2 (cercanía) y F3 (formato eficiente); pide resolver D1 y D2 con un socio y una entrada por etapas.
 
@@ -57,7 +57,7 @@ Recomendación: **B. Sí a Guatemala, paso a paso (aprobar con condiciones).**
 | Recursos | Entrar adaptado y con socio necesita menos inversión que una estrategia global |
 
 - **Área 1: producto.** Básicos guatemaltecos (frijol, maíz, café) junto con lo mejor de México.
-- **Área 2: distribución.** Frescos de productores locales; abarrotes importados de México, que ya es el tercer país del que más importa Guatemala (MINECO).
+- **Área 2: distribución.** Hoy todo sale de Nuevo León: abrir un almacén en Ciudad de Guatemala, comprar lo fresco a productores locales e importar de México solo los abarrotes que pida el cliente (México ya es el tercer proveedor de Guatemala, MINECO).
 
 ---
 
@@ -66,10 +66,10 @@ Recomendación: **B. Sí a Guatemala, paso a paso (aprobar con condiciones).**
 - **Oportunidad 1 (prioridad 1):** familias con más dinero para gastar: remesas +18.7% en 2025 y economía +4.1%.
 - **Oportunidad 2:** llevar a las familias de la tienda de barrio a un súper cercano (48% aún compra en tiendas pequeñas).
 - **Desafío 1 (prioridad 1):** Walmart ya está ahí (276 tiendas) → competir con trato, frescura y cercanía, como en Monterrey.
-- **Desafío 2:** recursos para un país nuevo (dinero, gente y proveedores) → socio local y productores guatemaltecos.
-- **Acción estratégica:** entrar con un socio guatemalteco y 2 tiendas piloto de cercanía en la Ciudad de Guatemala durante 18 meses. Aprovecha O1 y O2, resuelve D2 y ayuda a competir contra Walmart (D1). Metas: ventas por m², clientes que regresan y rotación menor a 41%. Inversión: `[validar con EMIS]`.
+- **Desafío 2:** operar lejos y con inseguridad (+2,100 km y extorsiones) → almacén en la capital, proveedores locales y socio que sabe operar con seguridad.
+- **Acción estratégica (paso a paso):** meses 0–6: socio guatemalteco, almacén y proveedores locales; meses 6–24: 2 tiendas de cercanía en la capital con ofertas de apertura; mes 24: si se cumplen las metas (ventas por m², clientes que regresan y rotación menor al 41%), crecer a más ciudades. Inversión: `[validar con EMIS]`.
 - **Recomendación:** **B. Sí a Guatemala, paso a paso.**
-- **3 argumentos:** (1) el mercado crece: economía +4.1% y remesas +18.7% (Banguat); (2) Merco sabe ganar: rotación de 98% a 41% y $118,000 por m² (caso Merco); (3) el riesgo es bajo: 2 tiendas = 5% de su tamaño actual de 39.
+- **3 argumentos:** (1) el mercado crece: economía +4.1% y remesas +18.7% (Banguat); (2) Merco sabe ganar: rotación de 98% a 41% y $118,000 por m² (caso Merco); (3) riesgo real pero acotado: Walmart e inseguridad, por eso solo 2 tiendas (5% de su tamaño).
 - **Siguientes pasos:** (1) ene–jun 2027: elegir socio y locales; (2) jul 2027–dic 2028: abrir 2 tiendas y medir; (3) 2029: crecer a Quetzaltenango y Escuintla.
 
 ---
@@ -84,7 +84,7 @@ Recomendación: **B. Sí a Guatemala, paso a paso (aprobar con condiciones).**
 | Operaciones | ¿Y la cultura? | Líderes formados en la Universidad Merco e ingreso digno desde el día uno. |
 | Comercial | ¿Por qué Guatemala? | Es el mercado más grande de Centroamérica, crece más que la región y tiene remesas récord. |
 | Comercial | ¿Cómo le ganamos a Walmart? | Con cercanía, frescura y trato; casi la mitad aún compra en tiendas de barrio. |
-| Riesgos | Carta de crisis (bajan las remesas o cierra la frontera) | La economía también crece por consumo interno; lo fresco es local y hay plan B con proveedores guatemaltecos. |
+| Riesgos | Carta de crisis (bajan las remesas, cierra la frontera o hay una extorsión) | La economía también crece por consumo interno; lo fresco es local y hay almacén en la capital. Ante la inseguridad: socio local, protocolos de seguridad y denuncia, y rutas de reparto variables. |
 | Riesgos | ¿Y si falla? | Son solo 2 tiendas; la operación en México no se toca. |
 | General | ¿Qué decido hoy? | Aprobar el paso 1: elegir socio y lugares. |
 | General | ¿Es coherente? | Sí: crecer sin perder la cultura, como Merco pasó de 17 tiendas a más de 40 puntos en el norte. |
@@ -97,6 +97,9 @@ Recomendación: **B. Sí a Guatemala, paso a paso (aprobar con condiciones).**
 - Banco de Guatemala (2025, dic.). Proyección de crecimiento 2025–2026. Vía Emisoras Unidas: https://emisorasunidas.com/nacional/2025/12/12/banguat-proyeccion-crecimiento-economico-guatemala-2025-2026/
 - Inflación a noviembre 2025: https://centroamerica360.com/economia/menor-costo-del-petroleo-energia-y-productos-agricolas-freno-la-inflacion-en-guatemala
 - Banco Mundial (2025). Población total, Guatemala. https://data.worldbank.org
+- FocusEconomics (2026). Guatemala: PIB per cápita en US$. https://www.focus-economics.com/country-indicator/guatemala/gdp-per-capita-usd
+- Prensa Latina (2025, 27 ago.). Cámaras empresariales de Guatemala señalaron aumento de extorsiones. https://www.prensa-latina.cu/2025/08/27/camaras-empresariales-de-guatemala-senalaron-aumento-de-extorsiones/
+- Fotos de Wikimedia Commons: Chad Davis (CC BY-SA 2.0), Juan Francisco (CC BY-SA 2.0), Francisco Anzola (CC BY 2.0), Toby Argüelles (CC BY-SA 2.0). Mapa: Natural Earth.
 - SEGEPLAN y UNFPA (2024). Análisis de situación de población. https://guatemala.unfpa.org/sites/default/files/pub-pdf/2024-08/asp-_version_final_0.pdf
 - Kantar (2022). Canales de consumo masivo en Guatemala. https://www.kantar.com/latin-america/inspiracion/consumo-masivo/cam-2022-desarrollo-de-nueva-cadena
 - Walmart (2025). Central America: retail units. https://corporate.walmart.com/about/international/markets/central-america
