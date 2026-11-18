@@ -1,5 +1,6 @@
 import { Composition, Folder } from "remotion";
 import { BuenaVida } from "./BuenaVida";
+import { MercoGuatemala } from "./MercoGuatemala";
 import { HelloWorld } from "./HelloWorld";
 import { Logo } from "./HelloWorld/Logo";
 import { Title } from "./HelloWorld/Title";
@@ -17,6 +18,15 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      {/* Vídeo de 15 s para el pitch de Merco (16:9) */}
+      <Composition
+        id="MercoGuatemala"
+        component={MercoGuatemala}
+        durationInFrames={450}
+        fps={30}
+        width={1920}
+        height={1080}
       />
       <Folder name="Elements">
         <Composition
