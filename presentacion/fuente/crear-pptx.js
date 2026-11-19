@@ -268,7 +268,7 @@ async function sticker(slide, name, o) {
     box(s, { x: 575 + i * 415, y: 878, w: 405, h: 68, fill: HEX.paper, line: HEX.blue, lineW: 2.5, dash: "dash", radius: 0.3, name: g });
     text(s, g, { x: 575 + i * 415, y: 878, w: 405, h: 68, bold: true, fontSize: 12.5, color: HEX.navy, align: "center", valign: "middle" });
   }
-  s.addText("Propuesta propia a partir del diagnóstico · Inversión: se define en el estudio de factibilidad [validar con EMIS]", { placeholder: "source" });
+  s.addText("Propuesta propia a partir del diagnóstico · Inversión: se define en el estudio de factibilidad", { placeholder: "source" });
   s.addNotes("La acción tiene tres fases, y no pasamos a la siguiente sin cumplir la anterior. Fase 1, preparar (meses 0 a 6): firmar con un socio guatemalteco, abrir el almacén en la capital y elegir proveedores locales. Fase 2, probar (meses 6 a 24): abrir 2 tiendas de cercanía en Ciudad de Guatemala con ofertas de apertura y medir tres metas: ventas por metro cuadrado, clientes que regresan y rotación menor al 41%, como en México. Fase 3, crecer (desde el mes 24): llevar el modelo a Quetzaltenango y Escuintla, solo si el piloto funciona. Esta acción aprovecha O1 y O2, resuelve D2 con el socio y el almacén, y compite con Walmart con trato, no con precio. Y arriesga poco: 2 tiendas son el 5% del tamaño de Merco.");
 
   // 7 · Recomendación final
@@ -314,7 +314,6 @@ async function sticker(slide, name, o) {
     ref("Emisoras Unidas (2025). Súper del Barrio celebra su tienda 200 en Guatemala."),
     ref("Dess, G. G. et al. (2021). Strategic management (10.ª ed.). McGraw-Hill."),
     ref("Equipo 2 (2026). Diagnóstico externo, diagnóstico interno y matriz FODA de Supermercados Merco."),
-    ref("[Passport, Statista y EMIS: agregar]"),
     { text: "Fotos (Wikimedia Commons): ", options: { bold: true } },
     ref("Francisco Anzola, CC BY 2.0 (mercado); Toby Argüelles, CC BY-SA 2.0 (Chichicastenango). Mapa: Natural Earth. Iconos: Lucide (ISC)."),
     { text: "Uso de IA: ", options: { bold: true } },
