@@ -142,12 +142,12 @@ async function sticker(slide, name, o) {
   poster(s, [[["MAPA DE FORTALEZAS Y DEBILIDADES"]]], { x: 116, y: 150, w: 1270, h: 120, fontSize: 33, color: HEX.blue });
   stamp(s, "PREPARACIÓN MEDIA:\nLISTA PARA EMPEZAR", { x: 1390, y: 96, w: 460, h: 130, fontSize: 17, color: HEX.red, rotate: -7, name: "Sello preparación" });
   const cols2 = [
-    { head: "LO QUE LLEVA", color: HEX.green, x: 120, items: [
+    { head: "FORTALEZAS", color: HEX.green, x: 120, items: [
       { i: "LuUsers", v: "41%", l: "de rotación (antes 98%)" },
       { i: "LuStore", v: "$118K", l: "por m², más que Walmart" },
       { i: "LuHeartHandshake", v: "80", l: "años de súper de barrio" },
     ] },
-    { head: "LO QUE LE FALTA", color: HEX.red, x: 980, items: [
+    { head: "DEBILIDADES", color: HEX.red, x: 980, items: [
       { i: "LuMapPin", v: "39", l: "tiendas en solo 2 estados" },
       { i: "LuRoute", v: "0", l: "países fuera de México" },
       { i: "LuSmartphone", v: "0", l: "programas de lealtad" },
