@@ -78,7 +78,7 @@ function text(slide, runs, o) {
 }
 function box(slide, o) {
   slide.addShape(o.shape || pres.shapes.ROUNDED_RECTANGLE, {
-    x: P(o.x), y: P(o.y), w: P(o.w), h: P(o.h), rectRadius: o.radius ?? 0.1,
+    x: P(o.x), y: P(o.y), w: P(o.w), h: P(o.h), rectRadius: o.shape === pres.shapes.OVAL ? undefined : o.radius ?? 0.1,
     fill: { color: o.fill }, line: o.line ? { color: o.line, width: o.lineW || 2, dashType: o.dash } : { type: "none" },
     rotate: o.rotate, objectName: o.name, shadow: o.shadow,
   });
@@ -116,6 +116,19 @@ async function sticker(slide, name, o) {
   box(slide, { x: o.x, y: o.y, w: o.d, h: o.d, fill: o.fill, shape: pres.shapes.OVAL, line: o.ring, lineW: o.ringW || 5, shadow: SHADOW(), name: `Sticker ${name}` });
   const pad = o.d * 0.25;
   slide.addImage({ data: await icon(name, o.color), x: P(o.x + pad), y: P(o.y + pad), w: P(o.d - 2 * pad), h: P(o.d - 2 * pad), altText: o.alt || name });
+}
+
+// Quita los marcadores de posición vacíos que pptxgenjs copia del diseño
+// (en el editor salen como "Haga clic para agregar un título").
+async function limpiar(file) {
+  const JSZip = require("jszip");
+  const zip = await JSZip.loadAsync(fs.readFileSync(file));
+  for (const name of Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))) {
+    const xml = await zip.file(name).async("string");
+    const out = xml.replace(/<p:sp>(?:(?!<p:sp>)[\s\S])*?<\/p:sp>/g, (sp) => (sp.includes("<p:ph") && !sp.includes('type="sldNum"') && !/<a:t>[^<]/.test(sp) ? "" : sp));
+    zip.file(name, out);
+  }
+  fs.writeFileSync(file, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 }
 
 (async () => {
@@ -322,5 +335,6 @@ async function sticker(slide, name, o) {
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
+  await limpiar(OUT);
   console.log("ok", OUT);
 })().catch((e) => { console.error(e); process.exit(1); });
