@@ -1,5 +1,4 @@
-// Genera Pitch_Merco_Guatemala.pptx: estilo editorial (serio y atractivo) y compatible:
-// sin giros, sombras ni formas especiales, para que se vea igual en cualquier programa.
+// Genera Pitch_Merco_Guatemala.pptx (editable) con estilo póster de folleto de súper.
 // Uso: node crear-pptx.js <carpeta-de-recursos> <salida.pptx> <apply_theme.js>
 const fs = require("fs");
 const path = require("path");
@@ -14,25 +13,25 @@ const { applyTheme } = require(APPLY_THEME);
 const A = (f) => path.join(ASSETS, f);
 const G = JSON.parse(fs.readFileSync(A("graficos.json")));
 
-const HEX = {
-  navy: "16223D", navy2: "24345A", gold: "C9A04A", goldTint: "F3E9D2", ivory: "F7F4EE", white: "FFFFFF",
-  teal: "1E6B66", tealTint: "DDECEA", terra: "B5523B", terraTint: "F5E3DD", gray: "5E6472", line: "E3DED3",
-  soft: "C8CFDC", map: "E8EDF3",
-};
-const SERIF = "Georgia";
 const THEME = {
-  name: "Merco Guatemala",
-  headFontFace: SERIF,
+  name: "Merco Guatemala · Póster",
+  headFontFace: "Impact",
   bodyFontFace: "Arial",
   colors: {
-    dk1: HEX.navy, lt1: HEX.white, dk2: HEX.navy2, lt2: HEX.ivory,
-    accent1: HEX.navy, accent2: HEX.gold, accent3: HEX.teal, accent4: HEX.terra,
-    accent5: HEX.gray, accent6: HEX.soft, hlink: HEX.teal, folHlink: HEX.navy,
+    dk1: "1D1A33", lt1: "FFFFFF", dk2: "0E6E73", lt2: "FFF4E0",
+    accent1: "0E6E73", accent2: "C2185B", accent3: "FFC845", accent4: "4B2C82",
+    accent5: "2A9D6F", accent6: "F28C28", hlink: "0E6E73", folHlink: "1D1A33",
   },
+};
+// Paleta inspirada en los textiles de Guatemala
+const HEX = {
+  blue: "0E6E73", navy: "1D1A33", cream: "FFF4E0", paper: "FFFDF7", yellow: "FFC845",
+  red: "C2185B", brightRed: "FF6B9A", green: "2A9D6F", purple: "4B2C82", muted: "5E5A6E",
 };
 
 // Medidas en píxeles de una lámina de 1920×1080
 const P = (v) => v / 192;
+const HEAD = "+mj-lt";
 
 const pres = new pptxgen();
 pres.layout = "LAYOUT_16x9";
@@ -43,303 +42,284 @@ pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFac
 async function icon(name, hex) {
   const Comp = lu[name];
   if (!Comp) throw new Error(`Icono no encontrado: ${name}`);
-  const svg = ReactDOMServer.renderToStaticMarkup(React.createElement(Comp, { size: 256, color: `#${hex}`, strokeWidth: 1.8 }));
+  const svg = ReactDOMServer.renderToStaticMarkup(React.createElement(Comp, { size: 256, color: `#${hex}`, strokeWidth: 2 }));
   const buf = await sharp(Buffer.from(svg)).png().toBuffer();
   return "image/png;base64," + buf.toString("base64");
 }
 
 // ---------- Diseños (layouts) ----------
-function layout(name, bg, { kicker, title, source, x = 120, w = 1680, number = true }) {
-  const def = {
+function layout(name, bg, { kicker, title, source }) {
+  pres.defineSlideMaster({
     title: name,
-    background: { color: bg },
+    background: { path: A(`fondo-${bg}.jpg`) },
     objects: [
-      { placeholder: { options: { name: "kicker", type: "body", x: P(x), y: P(84), w: P(w), h: P(36), fontSize: 11, bold: true, charSpacing: 1, color: kicker, margin: 0, valign: "middle" }, text: "" } },
-      { placeholder: { options: { name: "title", type: "title", x: P(x), y: P(124), w: P(w), h: P(150), fontFace: SERIF, fontSize: 28, color: title, margin: 0, valign: "top", align: "left", lineSpacingMultiple: 0.95 }, text: "" } },
-      { placeholder: { options: { name: "source", type: "body", x: P(x), y: P(1010), w: P(w - 120), h: P(36), fontSize: 9, color: source, margin: 0, valign: "middle" }, text: "" } },
+      { placeholder: { options: { name: "kicker", type: "body", x: P(120), y: P(96), w: P(1200), h: P(46), fontSize: 13, bold: true, charSpacing: 3, color: kicker, margin: 0, valign: "middle" }, text: "" } },
+      { placeholder: { options: { name: "title", type: "title", x: P(116), y: P(146), w: P(1300), h: P(200), fontSize: 40, color: title, margin: 0, valign: "top", align: "left", lineSpacingMultiple: 0.9 }, text: "" } },
+      { placeholder: { options: { name: "source", type: "body", x: P(120), y: P(1000), w: P(1520), h: P(40), fontSize: 9.5, color: source, margin: 0, valign: "middle" }, text: "" } },
     ],
-  };
-  if (number) def.slideNumber = { x: P(1720), y: P(1010), w: P(80), h: P(36), fontSize: 9, color: source, align: "right", margin: 0 };
-  pres.defineSlideMaster(def);
+    slideNumber: { x: P(1700), y: P(1000), w: P(100), h: P(40), fontSize: 10, color: source, align: "right", margin: 0 },
+  });
 }
-layout("Marfil", HEX.ivory, { kicker: HEX.gold, title: HEX.navy, source: HEX.gray });
-layout("Marfil con foto", HEX.ivory, { kicker: HEX.gold, title: HEX.navy, source: HEX.gray, x: 740, w: 1060 });
-layout("Azul", HEX.navy, { kicker: HEX.gold, title: HEX.white, source: HEX.soft, w: 1100 });
+layout("Turquesa", "turquesa", { kicker: HEX.yellow, title: HEX.cream, source: "CDE8E6" });
+layout("Magenta", "magenta", { kicker: HEX.yellow, title: HEX.cream, source: "F6D3E0" });
+layout("Morado", "morado", { kicker: HEX.yellow, title: HEX.cream, source: "DDD3EE" });
+layout("Crema", "crema", { kicker: HEX.red, title: HEX.blue, source: HEX.muted });
 
 // ---------- Ayudantes ----------
+const SHADOW = () => ({ type: "outer", color: "140F26", blur: 0, offset: 3, angle: 45, opacity: 0.55 });
 function text(slide, runs, o) {
   slide.addText(runs, {
     x: P(o.x), y: P(o.y), w: P(o.w), h: P(o.h), margin: o.margin ?? 0, isTextBox: true,
-    valign: o.valign || "top", align: o.align || "left", fontSize: o.fontSize || 13,
-    fontFace: o.serif ? SERIF : undefined, charSpacing: o.charSpacing,
-    color: o.color || HEX.navy, bold: o.bold, lineSpacingMultiple: o.lineSpacingMultiple, objectName: o.name,
-    fill: o.fill ? { color: o.fill } : undefined, shape: o.fill ? pres.shapes.RECTANGLE : undefined, paraSpaceAfter: o.paraSpaceAfter,
+    valign: o.valign || "top", align: o.align || "left", fontSize: o.fontSize || 12,
+    color: o.color || HEX.navy, bold: o.bold, fontFace: o.fontFace, rotate: o.rotate,
+    charSpacing: o.charSpacing, lineSpacingMultiple: o.lineSpacingMultiple, objectName: o.name,
+    fill: o.fill, line: o.line, shape: o.shape, rectRadius: o.rectRadius, shadow: o.shadow,
   });
 }
-function rect(slide, o) {
-  slide.addShape(o.oval ? pres.shapes.OVAL : pres.shapes.RECTANGLE, {
-    x: P(o.x), y: P(o.y), w: P(o.w), h: P(o.h),
-    fill: { color: o.fill }, line: o.line ? { color: o.line, width: o.lineW || 1 } : { type: "none" }, objectName: o.name,
+function box(slide, o) {
+  slide.addShape(o.shape || pres.shapes.ROUNDED_RECTANGLE, {
+    x: P(o.x), y: P(o.y), w: P(o.w), h: P(o.h), rectRadius: o.radius ?? 0.1,
+    fill: { color: o.fill }, line: o.line ? { color: o.line, width: o.lineW || 2, dashType: o.dash } : { type: "none" },
+    rotate: o.rotate, objectName: o.name, shadow: o.shadow,
   });
 }
-function hline(slide, x, y, w, color, width = 1.5) {
-  slide.addShape(pres.shapes.LINE, { x: P(x), y: P(y), w: P(w), h: 0, line: { color, width }, objectName: "Línea" });
+// Título grande en Impact con palabras resaltadas: [["TEXTO ", color], ...] por línea
+function poster(slide, lines, o) {
+  const runs = [];
+  lines.forEach((line, li) => line.forEach(([t, c, size], i) => runs.push({ text: t, options: { color: c || o.color, fontSize: size || o.fontSize, breakLine: i === line.length - 1 && li < lines.length - 1 } })));
+  text(slide, runs, { x: o.x, y: o.y, w: o.w, h: o.h, fontFace: HEAD, fontSize: o.fontSize, lineSpacingMultiple: 0.9, shadow: SHADOW(), name: o.name || "Título" });
 }
-async function iconCircle(slide, name, o) {
-  rect(slide, { x: o.x, y: o.y, w: o.d, h: o.d, fill: o.fill, oval: true, name: `Icono ${name}` });
-  const pad = o.d * 0.27;
+// Etiqueta de precio (imagen) con texto editable encima
+function priceTag(slide, x, y, w, rot, big, small, o = {}) {
+  const k = w / G.etiqueta.W, h = G.etiqueta.H * k, ta = G.etiqueta.textArea;
+  slide.addImage({ path: A("etiqueta.png"), x: P(x), y: P(y), w: P(w), h: P(h), rotate: rot, altText: "Etiqueta de precio" });
+  text(slide, [
+    { text: big, options: { fontFace: HEAD, fontSize: o.bigSize || 40, color: HEX.red, breakLine: true } },
+    { text: small, options: { bold: true, fontSize: o.smallSize || 12, color: HEX.navy } },
+  ], { x: x + ta.x * k, y: y + ta.y * k, w: ta.w * k, h: ta.h * k, valign: "middle", align: "center", rotate: rot, name: `Etiqueta ${big}` });
+}
+function stamp(slide, label, o) {
+  text(slide, label, {
+    x: o.x, y: o.y, w: o.w, h: o.h, fontFace: HEAD, fontSize: o.fontSize, color: o.color, align: "center", valign: "middle",
+    rotate: o.rotate, line: { color: o.color, width: 4, dashType: "dash" }, shape: pres.shapes.ROUNDED_RECTANGLE, rectRadius: 0.1,
+    lineSpacingMultiple: 0.95, name: o.name, charSpacing: 1,
+  });
+}
+function chip(slide, label, o) {
+  text(slide, label, {
+    x: o.x, y: o.y, w: o.w, h: o.h || 56, fontFace: o.head ? HEAD : undefined, bold: !o.head, fontSize: o.fontSize || 14,
+    color: o.color || HEX.navy, align: "center", valign: "middle", fill: { color: o.fill }, shape: pres.shapes.ROUNDED_RECTANGLE,
+    rectRadius: o.radius ?? 0.25, rotate: o.rotate, name: o.name || label, shadow: o.shadow ? SHADOW() : undefined, charSpacing: o.charSpacing,
+  });
+}
+async function sticker(slide, name, o) {
+  box(slide, { x: o.x, y: o.y, w: o.d, h: o.d, fill: o.fill, shape: pres.shapes.OVAL, line: o.ring, lineW: o.ringW || 5, shadow: SHADOW(), name: `Sticker ${name}` });
+  const pad = o.d * 0.25;
   slide.addImage({ data: await icon(name, o.color), x: P(o.x + pad), y: P(o.y + pad), w: P(o.d - 2 * pad), h: P(o.d - 2 * pad), altText: o.alt || name });
 }
-const kicker = (slide, t, x, y, w, color = HEX.gold) => text(slide, t.toUpperCase(), { x, y, w, h: 32, fontSize: 10.5, bold: true, charSpacing: 1, color, valign: "middle" });
 
 (async () => {
   // 1 · Portada
   pres.addSection({ title: "Inicio" });
-  let s = pres.addSlide({ masterName: "Azul", sectionTitle: "Inicio" });
-  s.addImage({ path: A("foto-portada.jpg"), x: P(820), y: 0, w: P(1100), h: P(1080), altText: "Arco de Santa Catalina, Antigua Guatemala" });
-  s.addImage({ path: A("degradado-azul.png"), x: P(818), y: 0, w: P(420), h: P(1080), altText: "Degradado decorativo" });
-  text(s, "PROPUESTA DE EXPANSIÓN · MERCO", { x: 120, y: 320, w: 880, h: 32, fontSize: 11, bold: true, charSpacing: 1, color: HEX.gold, valign: "middle" });
-  text(s, [
-    { text: "Próxima parada:", options: { breakLine: true } },
-    { text: "Guatemala", options: { color: HEX.gold, italic: true } },
-  ], { x: 120, y: 366, w: 920, h: 250, serif: true, fontSize: 42, color: HEX.white, lineSpacingMultiple: 0.95, name: "Título" });
-  hline(s, 124, 668, 110, HEX.gold, 2.5);
-  text(s, "En Guatemala, 1 de cada 2 compras se hace en la tienda de barrio. Merco lleva 80 años siendo ese súper en el norte de México.", { x: 120, y: 700, w: 760, h: 110, fontSize: 15, color: HEX.soft, lineSpacingMultiple: 1.1 });
-  text(s, "Samuel de Juan Ortiz · A01833027 · Estrategia y globalización (Gpo 504)", { x: 120, y: 990, w: 900, h: 36, fontSize: 10, color: HEX.soft, valign: "middle" });
-  text(s, "Dato: Kantar (2022) · Foto: Chad Davis, CC BY-SA 2.0", { x: 1300, y: 1036, w: 600, h: 30, fontSize: 9, color: HEX.white, align: "right", valign: "middle" });
-  s.addNotes("En Guatemala, 1 de cada 2 compras se hace en la tienda de barrio (Kantar). Merco lleva 80 años siendo justo eso en el norte de México: un súper cercano para familias que cuidan su dinero. Hoy proponemos llevar ese modelo a Ciudad de Guatemala, paso a paso. Vamos a ver si Merco está lista, por qué Guatemala, cómo entraríamos y qué recomendamos.");
+  let s = pres.addSlide({ masterName: "Turquesa", sectionTitle: "Inicio" });
+  s.addImage({ path: A("polaroid-antigua.png"), x: P(1180), y: P(96), w: P(580), h: P(580 * 932 / 750), altText: "Polaroid: Arco de Santa Catalina, Antigua Guatemala" });
+  s.addImage({ path: A("sticker-ruta.png"), x: P(980), y: P(560), w: P(380), h: P(380), altText: "Pegatina con la ruta de Monterrey a Guatemala" });
+  stamp(s, "MONTERREY → GUATEMALA", { x: 1350, y: 860, w: 480, h: 84, fontSize: 14, color: HEX.yellow, rotate: -6, name: "Sello ruta" });
+  s.addText("PROPUESTA DE EXPANSIÓN · MERCO", { placeholder: "kicker" });
+  poster(s, [
+    [["PRÓXIMA PARADA:"]],
+    [["GUATEMALA", HEX.yellow, 78]],
+  ], { x: 116, y: 150, w: 1000, h: 380, fontSize: 48, color: HEX.cream });
+  text(s, "El súper de barrio del norte de México cruza la frontera.", { x: 122, y: 520, w: 860, h: 90, bold: true, fontSize: 20, color: HEX.cream, name: "Subtítulo" });
+  priceTag(s, 70, 650, 640, -5, "1 DE CADA 2", "compras en Guatemala se hacen en la tienda de barrio", { bigSize: 31, smallSize: 11 });
+  s.addText("Samuel de Juan Ortiz · A01833027 · Estrategia y globalización (Gpo 504) · Fuente: Kantar · Mapa: Natural Earth", { placeholder: "source" });
+  s.addNotes("En Guatemala, 1 de cada 2 compras se hace en la tienda de barrio (Kantar). Merco lleva 80 años siendo justo eso en el norte de México: un súper cercano para familias que cuidan su dinero. Hoy les proponemos llevar ese modelo de Monterrey a Ciudad de Guatemala. Vamos a ver si Merco está lista, por qué Guatemala, cómo entraríamos y qué recomendamos.");
 
-  // 2 · Mapa de fortalezas y debilidades
+  // 2 · Diagnóstico
   pres.addSection({ title: "Análisis" });
-  s = pres.addSlide({ masterName: "Marfil", sectionTitle: "Análisis" });
-  s.addText("01 · DIAGNÓSTICO", { placeholder: "kicker" });
-  s.addText("Mapa de fortalezas y debilidades", { placeholder: "title" });
-  kicker(s, "Fortaleza", 120, 262, 400, HEX.teal);
-  text(s, "CÓMO AYUDA", { x: 826, y: 262, w: 268, h: 32, fontSize: 10.5, bold: true, charSpacing: 1, color: HEX.gray, align: "center", valign: "middle" });
-  kicker(s, "Debilidad que cubre", 1100, 262, 500, HEX.terra);
-  const map = [
-    { f: ["$118K", "Tiendas que rinden", "Vende más por m² que Soriana y Walmart"], m: "Con tiendas chicas, abrir cuesta poco", d: ["39", "Es pequeña", "Tiendas en solo 2 estados"] },
-    { f: ["80", "Experta en cercanía", "Años vendiendo a familias que cuidan su dinero"], m: "El trato cercano vale más que una app", d: ["0", "Atrás en lo digital", "Sin programa de lealtad"] },
-    { f: ["41%", "Cuida a su gente", "Empleados que se van al año (antes 98%)"], m: "Forma a su gente y se apoya en un socio", d: ["0", "Nunca ha salido", "Sin experiencia fuera de México"] },
-  ];
-  for (const [i, r] of map.entries()) {
-    const y = 306 + i * 178;
-    rect(s, { x: 120, y, w: 700, h: 158, fill: HEX.navy, name: `Fortaleza ${i + 1}` });
-    text(s, r.f[0], { x: 150, y, w: 220, h: 158, bold: true, fontSize: 28, color: HEX.gold, valign: "middle" });
-    text(s, [{ text: r.f[1], options: { bold: true, fontSize: 15, color: HEX.white, breakLine: true } }, { text: r.f[2], options: { fontSize: 12, color: HEX.soft } }], { x: 380, y, w: 420, h: 158, valign: "middle" });
-    text(s, r.m, { x: 836, y: y + 14, w: 248, h: 80, fontSize: 11.5, bold: true, color: HEX.navy, align: "center", valign: "bottom" });
-    s.addShape(pres.shapes.RIGHT_ARROW, { x: P(880), y: P(y + 104), w: P(160), h: P(22), fill: { color: HEX.gold }, line: { type: "none" }, objectName: `Flecha ${i + 1}` });
-    rect(s, { x: 1100, y, w: 700, h: 158, fill: HEX.white, line: HEX.line, name: `Debilidad ${i + 1}` });
-    text(s, r.d[0], { x: 1130, y, w: 160, h: 158, bold: true, fontSize: 30, color: HEX.terra, valign: "middle" });
-    text(s, [{ text: r.d[1], options: { bold: true, fontSize: 15, breakLine: true } }, { text: r.d[2], options: { fontSize: 12, color: HEX.gray } }], { x: 1300, y, w: 480, h: 158, valign: "middle" });
-  }
-  rect(s, { x: 120, y: 862, w: 1680, h: 112, fill: HEX.goldTint, name: "Conclusión" });
-  text(s, [{ text: "PREPARACIÓN", options: { fontSize: 10, bold: true, charSpacing: 1, color: HEX.gray, breakLine: true } }, { text: "Media", options: { fontFace: SERIF, fontSize: 24, color: HEX.navy } }], { x: 150, y: 862, w: 260, h: 112, valign: "middle" });
-  rect(s, { x: 420, y: 884, w: 2, h: 68, fill: HEX.gold, name: "Separador" });
-  text(s, "Su forma de trabajar funciona, pero es pequeña y nunca ha salido de México. Por eso debe empezar con 2 tiendas y un socio local.", { x: 450, y: 862, w: 1320, h: 112, fontSize: 14, color: HEX.navy, valign: "middle" });
-  s.addText("Fuentes: diagnóstico interno del Equipo 2; caso Merco (Carreón et al., 2026); Great Place to Work (2025)", { placeholder: "source" });
-  s.addNotes("Este mapa conecta cada fortaleza con la debilidad que ayuda a cubrir. Sus tiendas chicas venden $118,000 por metro cuadrado, más que Soriana y Walmart: como no necesita tiendas grandes, ser pequeña (39 tiendas en 2 estados) pesa menos. Lleva 80 años como súper de barrio: su trato cercano compensa que no tenga programa de lealtad. Y cuida a su gente: antes se le iba el 98% de los empleados al año y ahora solo el 41%; formando a la gente nueva y con un socio local puede trabajar en un país donde nunca ha estado. Conclusión: preparación media. Está lista para empezar, pero en pequeño y con un socio local.");
-
-  // 3 · Mercado seleccionado y datos clave
-  s = pres.addSlide({ masterName: "Marfil", sectionTitle: "Análisis" });
-  rect(s, { x: 1180, y: 0, w: 740, h: 1080, fill: HEX.map, name: "Panel mapa" });
-  s.addText("02 · EL MERCADO", { placeholder: "kicker" });
-  text(s, "Mercado seleccionado\ny datos clave", { x: 120, y: 124, w: 1000, h: 160, serif: true, fontSize: 28, color: HEX.navy, name: "Título" });
-  const stats = [
-    { v: "18.7 M", l: "personas: el país con más gente de Centroamérica", src: "Banco Mundial, 2025" },
-    { v: "+4.1%", l: "crecerá su economía, más que América Latina", src: "Banguat, 2025" },
-    { v: "+18.7%", l: "de remesas: dinero de familiares en el extranjero", src: "Banguat, 2026" },
-  ];
-  for (const [i, st] of stats.entries()) {
-    const x = 120 + i * 335;
-    hline(s, x, 318, 300, HEX.gold, 2);
-    text(s, st.v, { x, y: 330, w: 310, h: 80, bold: true, fontSize: 28, color: HEX.navy, valign: "middle" });
-    text(s, [{ text: st.l, options: { breakLine: true } }, { text: st.src, options: { fontSize: 9.5, color: HEX.gray, bold: false } }], { x, y: 414, w: 300, h: 130, fontSize: 11.5, bold: true, color: HEX.navy });
-  }
-  const lists = [
-    { x: 120, head: "Encaja con Merco", color: HEX.teal, tint: HEX.tealTint, rows: [
-      ["LuPiggyBank", "Cuida su dinero", "Ingreso medio: US$6,506 por persona"],
-      ["LuMapPin", "Entrada por la capital", "Ciudad de Guatemala"],
-      ["LuHandshake", "Cerca de México", "México ya es su 3.er proveedor"],
+  s = pres.addSlide({ masterName: "Crema", sectionTitle: "Análisis" });
+  s.addText("PASO 1 · LA MALETA DE MERCO", { placeholder: "kicker" });
+  poster(s, [[["MAPA DE FORTALEZAS Y DEBILIDADES"]]], { x: 116, y: 150, w: 1270, h: 120, fontSize: 33, color: HEX.blue });
+  stamp(s, "PREPARACIÓN MEDIA:\nLISTA PARA EMPEZAR", { x: 1390, y: 96, w: 460, h: 130, fontSize: 17, color: HEX.red, rotate: -7, name: "Sello preparación" });
+  const cols2 = [
+    { head: "FORTALEZAS", color: HEX.green, x: 120, items: [
+      { i: "LuUsers", v: "41%", l: "se van al año (antes 98%)" },
+      { i: "LuStore", v: "$118K", l: "por m², más que Walmart" },
+      { i: "LuHeartHandshake", v: "80", l: "años de súper de barrio" },
     ] },
-    { x: 640, head: "Competencia (amenaza)", color: HEX.terra, tint: HEX.terraTint, rows: [
-      ["LuStore", "Walmart", "276 tiendas"],
-      ["LuStore", "Súper del Barrio", "200 tiendas de cercanía"],
-      ["LuStore", "La Torre", "Cadena local de supermercados"],
+    { head: "DEBILIDADES", color: HEX.red, x: 980, items: [
+      { i: "LuMapPin", v: "39", l: "tiendas en solo 2 estados" },
+      { i: "LuRoute", v: "0", l: "países fuera de México" },
+      { i: "LuSmartphone", v: "0", l: "programas de lealtad" },
     ] },
   ];
-  for (const ls of lists) {
-    rect(s, { x: ls.x, y: 580, w: 490, h: 400, fill: HEX.white, line: HEX.line, name: ls.head });
-    kicker(s, ls.head, ls.x + 30, 598, 440, ls.color);
-    for (const [i, [ic, t, b]] of ls.rows.entries()) {
-      const y = 642 + i * 108;
-      await iconCircle(s, ic, { x: ls.x + 30, y: y + 14, d: 62, fill: ls.tint, color: ls.color });
-      text(s, [{ text: t, options: { bold: true, fontSize: 13, breakLine: true } }, { text: b, options: { fontSize: 11, color: HEX.gray } }], { x: ls.x + 112, y, w: 360, h: 90, valign: "middle" });
+  for (const c of cols2) {
+    chip(s, c.head, { x: c.x, y: 318, w: 490, h: 60, head: true, fontSize: 24, color: HEX.cream, fill: c.color, rotate: -2, radius: 0.15, shadow: true, charSpacing: 2 });
+    for (const [i, it] of c.items.entries()) {
+      const y = 404 + i * 160;
+      box(s, { x: c.x, y, w: 820, h: 140, fill: HEX.paper, line: c.color, lineW: 2.5, dash: "dash", radius: 0.12, name: it.l });
+      await sticker(s, it.i, { x: c.x + 26, y: y + 25, d: 90, fill: c.color, color: "FFFFFF" });
+      text(s, it.v, { x: c.x + 140, y, w: 320, h: 140, fontFace: HEAD, fontSize: 48, color: c.color, valign: "middle", name: `${it.l} cifra` });
+      text(s, it.l, { x: c.x + 470, y, w: 330, h: 140, bold: true, fontSize: 16, color: HEX.navy, valign: "middle" });
     }
   }
-  const mw = 740, mk = mw / G.mapa.W, mh = G.mapa.H * mk, mx = 1180, my = 250;
-  s.addImage({ path: A("mapa-ruta.png"), x: P(mx), y: P(my), w: P(mw), h: P(mh), altText: "Mapa de la ruta de Monterrey a Ciudad de Guatemala" });
-  const [ax, ay] = [mx + G.mapa.mty[0] * mk, my + G.mapa.mty[1] * mk];
-  const [gx, gy] = [mx + G.mapa.gt[0] * mk, my + G.mapa.gt[1] * mk];
-  text(s, "Monterrey", { x: ax - 180, y: ay - 44, w: 170, h: 32, fontSize: 12.5, bold: true, color: HEX.navy, align: "right", valign: "middle" });
-  text(s, "Ciudad de Guatemala", { x: gx - 300, y: gy + 16, w: 280, h: 32, fontSize: 12.5, bold: true, color: HEX.navy, align: "right", valign: "middle" });
-  text(s, [{ text: "≈ 2,100 km", options: { bold: true, fontSize: 26, color: HEX.navy, breakLine: true } }, { text: "por carretera desde Nuevo León", options: { fontSize: 11.5, color: HEX.gray } }], { x: 1240, y: 820, w: 620, h: 100, align: "center", valign: "middle" });
-  s.addText("Fuentes: Banco Mundial (2025); Banguat (2025, 2026); FocusEconomics (2026); MINECO (2025); Walmart (2025); Emisoras Unidas (2025) · Mapa: Natural Earth", { placeholder: "source", w: P(1020) });
-  s.addNotes("Elegimos Guatemala y entramos por su capital. Tres datos clave: es el país con más gente de Centroamérica, 18.7 millones de personas; su economía crecerá 4.1%, más que América Latina; y las remesas, el dinero que mandan los familiares desde fuera, subieron 18.7% en 2025, hasta US$25,530 millones. Encaja con Merco porque el cliente cuida su dinero (ingreso medio de US$6,506 por persona) y México ya es su tercer proveedor. La competencia es la principal amenaza: Walmart tiene 276 tiendas, Súper del Barrio 200 y está La Torre. Y estamos a unos 2,100 km de Nuevo León.");
+  chip(s, "→  ENTRAR EN PEQUEÑO Y CON UN SOCIO LOCAL", { x: 385, y: 896, w: 1150, h: 76, head: true, fontSize: 20, color: HEX.cream, fill: HEX.blue, radius: 0.2, shadow: true, charSpacing: 1 });
+  s.addText("Fuentes: diagnóstico interno del Equipo 2; caso Merco (Carreón et al., 2026); Great Place to Work (2025)", { placeholder: "source" });
+  s.addNotes("Lo que Merco hace bien: su gente se queda —la rotación bajó de 98% a 41% gracias al ingreso digno y la Universidad Merco—; sus tiendas chicas venden $118,000 por metro cuadrado, más que Soriana y Walmart; y lleva 80 años como súper de barrio para familias que cuidan su dinero. Lo que le falta: es chica, con 39 tiendas en 2 estados frente a las 3,316 de Walmart; nunca ha operado fuera de México; y no tiene programa de lealtad. Por eso la preparación es media: está lista para empezar, pero en pequeño y con un socio local.");
 
-  // 4 · Estrategia semiglobal y 2 áreas de adaptación
-  s = pres.addSlide({ masterName: "Marfil con foto", sectionTitle: "Análisis" });
-  s.addImage({ path: A("foto-mercado-alta.jpg"), x: 0, y: 0, w: P(640), h: P(1080), altText: "Mercado de Guatemala con frutas y especias" });
-  text(s, "Foto: Francisco Anzola, CC BY 2.0", { x: 20, y: 1036, w: 600, h: 30, fontSize: 9, color: HEX.white, valign: "middle" });
-  s.addText("03 · LA ESTRATEGIA", { placeholder: "kicker" });
-  s.addText("Estrategia semiglobal y 2 áreas de adaptación", { placeholder: "title" });
-  text(s, [{ text: "Semiglobal: ", options: { bold: true, color: HEX.gold } }, { text: "lo que hace especial a Merco se queda igual; solo cambiamos 2 cosas para el cliente de Guatemala." }],
-    { x: 740, y: 300, w: 1060, h: 84, fontSize: 13.5, color: HEX.white, fill: HEX.navy, valign: "middle", margin: 12 });
-  kicker(s, "Se queda igual", 740, 400, 600, HEX.teal);
-  const keep = [
-    ["LuUsers", "Su gente", "Buen sueldo y formación propia"],
-    ["LuShieldCheck", "Sus garantías", "Frescura y 30 días para devolver"],
-    ["LuStore", "Súper de barrio", "Tiendas chicas y cercanas"],
+  // 3 · El mercado
+  s = pres.addSlide({ masterName: "Magenta", sectionTitle: "Análisis" });
+  s.addText("PASO 2 · UN PAÍS CON HAMBRE DE SÚPER", { placeholder: "kicker" });
+  poster(s, [[["MERCADO SELECCIONADO"]], [["Y DATOS CLAVE", HEX.yellow]]], { x: 116, y: 136, w: 1260, h: 300, fontSize: 46, color: HEX.cream });
+  chip(s, "MERCADO ELEGIDO", { x: 1390, y: 166, w: 440, h: 64, head: true, fontSize: 18, color: HEX.navy, fill: HEX.yellow, rotate: 4, radius: 0.15, shadow: true, charSpacing: 1 });
+  priceTag(s, 60, 440, 620, -5, "18.7 M", "personas: la mayor población de Centroamérica", { bigSize: 40, smallSize: 11 });
+  priceTag(s, 660, 465, 620, 3, "+4.1%", "crecerá su economía, más que América Latina", { bigSize: 40, smallSize: 11 });
+  priceTag(s, 1260, 440, 620, -4, "+18.7%", "más dinero de familiares en el extranjero", { bigSize: 40, smallSize: 11 });
+  chip(s, "AMENAZAS", { x: 100, y: 800, w: 300, h: 66, head: true, fontSize: 21, color: HEX.navy, fill: HEX.yellow, rotate: -3, radius: 0.15, shadow: true, charSpacing: 2 });
+  const retos = [
+    { i: "LuStore", t: "Walmart: 276 tiendas", x: 420 },
+    { i: "LuRoute", t: "A 2,100 km", x: 880 },
+    { i: "LuShieldAlert", t: "Extorsiones", x: 1340 },
   ];
-  for (const [i, [ic, t, b]] of keep.entries()) {
-    const x = 740 + i * 360;
-    await iconCircle(s, ic, { x, y: 466, d: 60, fill: HEX.tealTint, color: HEX.teal });
-    text(s, [{ text: t, options: { bold: true, fontSize: 13, breakLine: true } }, { text: b, options: { fontSize: 11, color: HEX.gray } }], { x: x + 74, y: 448, w: 270, h: 96, valign: "middle" });
+  for (const r of retos) {
+    box(s, { x: r.x, y: 800, w: 440, h: 66, fill: HEX.cream, radius: 0.3, shadow: SHADOW(), name: r.t });
+    s.addImage({ data: await icon(r.i, HEX.red), x: P(r.x + 22), y: P(814), w: P(38), h: P(38), altText: r.t });
+    text(s, r.t, { x: r.x + 76, y: 800, w: 350, h: 66, bold: true, fontSize: 13, color: HEX.navy, valign: "middle" });
   }
-  kicker(s, "Se adapta: 2 áreas", 740, 562, 600, HEX.gold);
+  s.addText("Fuentes: Banco Mundial (2025); Banguat (2025, 2026); Walmart (2025); Prensa Latina (2025)", { placeholder: "source" });
+  s.addNotes("Elegimos Guatemala por tres datos. Es el país más poblado de Centroamérica, con 18.7 millones de personas (Banco Mundial). Su economía crecerá 4.1%, más que América Latina (Banguat). Y las remesas subieron 18.7% en 2025, hasta US$25,530 millones: las familias tienen más dinero para el súper. Además el cliente cuida su dinero (PIB por persona de US$6,506), igual que el de Merco. El reto: Walmart ya tiene 276 tiendas, hay extorsiones a comercios y estamos a más de 2,100 km de Nuevo León.");
+
+  // 4 · Estrategia semiglobal
+  s = pres.addSlide({ masterName: "Morado", sectionTitle: "Análisis" });
+  s.addImage({ path: A("polaroid-mercado.png"), x: P(1330), y: P(170), w: P(530), h: P(530 * 922 / 736), altText: "Polaroid: mercado de Guatemala" });
+  s.addText("PASO 3 · MISMO CORAZÓN, NUEVO SABOR", { placeholder: "kicker" });
+  poster(s, [[["ESTRATEGIA SEMIGLOBAL"]], [["Y 2 ÁREAS DE ADAPTACIÓN", HEX.yellow]]], { x: 116, y: 136, w: 1200, h: 300, fontSize: 43, color: HEX.cream });
+  chip(s, "SE QUEDA IGUAL", { x: 120, y: 508, w: 460, h: 58, head: true, fontSize: 22, color: HEX.navy, fill: HEX.cream, rotate: -2, radius: 0.15, shadow: true, charSpacing: 1 });
+  const same = [
+    { i: "LuUsers", t: "SU GENTE" },
+    { i: "LuShieldCheck", t: "SUS GARANTÍAS" },
+    { i: "LuStore", t: "SÚPER DE BARRIO" },
+  ];
+  for (const [i, it] of same.entries()) {
+    const cx = 230 + i * 360;
+    await sticker(s, it.i, { x: cx - 62, y: 578, d: 124, fill: HEX.cream, color: HEX.purple, ring: HEX.yellow, ringW: 6 });
+    text(s, it.t, { x: cx - 170, y: 708, w: 340, h: 44, fontFace: HEAD, fontSize: 18, color: HEX.cream, align: "center", valign: "middle", shadow: SHADOW() });
+  }
+  chip(s, "SE ADAPTA", { x: 120, y: 770, w: 330, h: 58, head: true, fontSize: 22, color: HEX.navy, fill: HEX.yellow, rotate: -2, radius: 0.15, shadow: true, charSpacing: 1 });
   const adapt = [
-    { n: "1", t: "Producto", hoy: "Surtido del norte", gt: "Frijol negro, maíz y café local + lo mejor de México", por: "El cliente quiere lo de siempre" },
-    { n: "2", t: "Distribución", hoy: "Todo sale de Nuevo León", gt: "Almacén en la capital y proveedores locales", por: "Lo fresco no aguanta 2,100 km" },
+    { i: "LuWheat", t: "PRODUCTO CHAPÍN", b: "frijol, maíz y café local" },
+    { i: "LuWarehouse", t: "ALMACÉN LOCAL", b: "en Ciudad de Guatemala" },
   ];
-  for (const [i, a] of adapt.entries()) {
-    const x = 740 + i * 545;
-    rect(s, { x, y: 602, w: 515, h: 384, fill: HEX.white, line: HEX.line, name: a.t });
-    text(s, [{ text: `${a.n} `, options: { color: HEX.gold } }, { text: a.t }], { x: x + 30, y: 614, w: 460, h: 56, serif: true, fontSize: 21, color: HEX.navy, valign: "middle" });
-    hline(s, x + 30, 678, 455, HEX.line, 1);
+  for (const [i, it] of adapt.entries()) {
+    const x = 120 + i * 580;
+    box(s, { x, y: 846, w: 555, h: 130, fill: HEX.yellow, radius: 0.15, shadow: SHADOW(), name: it.t });
+    await sticker(s, it.i, { x: x + 22, y: 862, d: 98, fill: HEX.paper, color: HEX.purple });
     text(s, [
-      { text: "Hoy: ", options: { bold: true, color: HEX.gray } }, { text: a.hoy, options: { color: HEX.gray, breakLine: true } },
-      { text: "En Guatemala: ", options: { bold: true, color: HEX.teal } }, { text: a.gt, options: { bold: true, breakLine: true } },
-      { text: "Por qué: ", options: { bold: true, color: HEX.gold } }, { text: a.por },
-    ], { x: x + 30, y: 692, w: 460, h: 280, fontSize: 11.5, paraSpaceAfter: 7 });
+      { text: it.t, options: { fontFace: HEAD, fontSize: 20, color: HEX.navy, breakLine: true } },
+      { text: it.b, options: { bold: true, fontSize: 12, color: HEX.navy } },
+    ], { x: x + 140, y: 846, w: 400, h: 130, valign: "middle" });
   }
-  s.addText("Marco: Dess et al. (2021), cap. 1 · México, 3.er proveedor de Guatemala (MINECO, 2025)", { placeholder: "source" });
-  s.addNotes("Nuestra estrategia es semiglobal: mantenemos lo que hace especial a Merco y cambiamos solo dos cosas. Se queda igual su gente (buen sueldo y su propia universidad), sus garantías (frescura garantizada y 30 días para devolver) y su formato de súper de barrio. Cambiamos, primero, el producto: en Guatemala la gente busca frijol negro, maíz y café local, así que mezclamos lo chapín con lo mejor de México. Y segundo, la distribución: hoy todo sale de 3 centros en Nuevo León, pero lo fresco no aguanta 2,100 km, así que abrimos un almacén en Ciudad de Guatemala con proveedores locales. ¿Por qué semiglobal? Porque su cultura sí viaja, pero el gusto local es distinto, y cambiar solo 2 cosas cuesta menos.");
+  s.addText("Marco: Dess et al. (2021), cap. 1 · México, 3.er proveedor de Guatemala (MINECO)", { placeholder: "source" });
+  s.addNotes("Nuestra estrategia es semiglobal: lo que hace única a Merco se queda igual y solo adaptamos dos áreas. Se queda igual su gente (ingreso digno y Universidad Merco), sus garantías (frescura garantizada y 30 días para devolver) y su formato de súper de barrio. Adaptamos, primero, el producto: en Guatemala la gente busca frijol negro, maíz y café local, así que el surtido mezcla lo chapín con lo mejor de México. Y segundo, la distribución: hoy todo sale de 3 centros en Nuevo León, pero a más de 2,100 km lo fresco no llega bien, así que abrimos un almacén en Ciudad de Guatemala con proveedores locales. ¿Por qué semiglobal? Porque su cultura sí viaja, el gusto local es distinto y adaptar solo 2 áreas cuesta menos.");
 
-  // 5 · 2 oportunidades y 2 desafíos
-  s = pres.addSlide({ masterName: "Marfil", sectionTitle: "Análisis" });
-  s.addText("04 · OPORTUNIDADES Y AMENAZAS", { placeholder: "kicker" });
-  s.addText("2 oportunidades y 2 desafíos", { placeholder: "title" });
+  // 5 · Oportunidades y desafíos
+  s = pres.addSlide({ masterName: "Turquesa", sectionTitle: "Análisis" });
+  s.addImage({ path: A("polaroid-chichi.png"), x: P(1400), y: P(290), w: P(470), h: P(470 * 922 / 736), altText: "Polaroid: mercado de Chichicastenango" });
+  s.addText("PASO 4 · LA OPORTUNIDAD ES REAL", { placeholder: "kicker" });
+  poster(s, [[["2 OPORTUNIDADES"]], [["Y 2 DESAFÍOS", HEX.yellow]]], { x: 116, y: 136, w: 1280, h: 280, fontSize: 46, color: HEX.cream });
   const od = [
-    { x: 120, y: 280, head: "OPORTUNIDAD 1 · PRIORIDAD", fill: HEX.teal, c: HEX.teal, v: "+18.7%", t: "Más dinero en casa", b: "Llega más dinero de familiares en el extranjero", r: "Combos familiares y precios claros" },
-    { x: 120, y: 636, head: "OPORTUNIDAD 2", fill: HEX.teal, c: HEX.teal, v: "48%", t: "Del barrio al súper", b: "Aún compra en tiendas pequeñas", r: "Súper de barrio moderno, cerca de casa" },
-    { x: 980, y: 280, head: "DESAFÍO 1 · PRIORIDAD", fill: HEX.terra, c: HEX.terra, v: "276", t: "Walmart ya está", b: "Tiendas en Guatemala con precios bajos", r: "Ganar con trato y frescura, no con precio" },
-    { x: 980, y: 636, head: "DESAFÍO 2", fill: HEX.terra, c: HEX.terra, v: "2,100 km", t: "Lejos y con inseguridad", b: "Lejos de México y extorsiones a tiendas", r: "Almacén local y socio guatemalteco" },
+    { tag: "OPORTUNIDAD", tagFill: HEX.green, v: "+18.7%", l: "más dinero de familiares de fuera", r: "combos familiares", x: 120, y: 452 },
+    { tag: "OPORTUNIDAD", tagFill: HEX.green, v: "48%", l: "compra en tiendas pequeñas", r: "súper de barrio", x: 760, y: 452 },
+    { tag: "AMENAZA", tagFill: HEX.navy, v: "276", l: "tiendas de Walmart", r: "trato y frescura", x: 120, y: 728 },
+    { tag: "AMENAZA", tagFill: HEX.navy, v: "2,100 km", l: "de distancia + extorsiones", r: "socio + almacén", x: 760, y: 728 },
   ];
   for (const it of od) {
-    rect(s, { x: it.x, y: it.y, w: 820, h: 330, fill: HEX.white, line: HEX.line, name: `${it.head} ${it.t}` });
-    text(s, it.head, { x: it.x, y: it.y, w: 820, h: 50, fontSize: 10.5, bold: true, charSpacing: 1, color: HEX.white, fill: it.fill, valign: "middle", margin: 12 });
-    text(s, it.v, { x: it.x + 32, y: it.y + 66, w: 350, h: 130, bold: true, fontSize: 28, color: it.c, valign: "middle" });
-    text(s, [{ text: it.t, options: { bold: true, fontSize: 15, breakLine: true } }, { text: it.b, options: { fontSize: 12, color: HEX.gray } }], { x: it.x + 395, y: it.y + 66, w: 400, h: 130, valign: "middle" });
-    hline(s, it.x + 32, it.y + 220, 756, HEX.line, 1);
-    text(s, [{ text: "QUÉ HACEMOS  ", options: { fontSize: 10, bold: true, charSpacing: 1, color: it.c } }, { text: it.r, options: { fontSize: 14, bold: true, color: HEX.navy } }], { x: it.x + 32, y: it.y + 232, w: 760, h: 76, valign: "middle" });
+    box(s, { x: it.x, y: it.y, w: 610, h: 240, fill: HEX.paper, line: HEX.red, lineW: 2.5, dash: "dash", radius: 0.1, shadow: SHADOW(), name: `${it.tag} ${it.v}` });
+    chip(s, it.tag, { x: it.x + 24, y: it.y - 22, w: 290, h: 46, head: true, fontSize: 15, color: HEX.cream, fill: it.tagFill, radius: 0.2, charSpacing: 1 });
+    text(s, it.v, { x: it.x + 30, y: it.y + 24, w: 560, h: 116, fontFace: HEAD, fontSize: 50, color: HEX.red, valign: "middle" });
+    text(s, it.l, { x: it.x + 30, y: it.y + 138, w: 560, h: 36, bold: true, fontSize: 13, color: HEX.navy, valign: "middle" });
+    chip(s, `→ ${it.r}`, { x: it.x + 30, y: it.y + 180, w: 380, h: 44, fontSize: 12, color: HEX.cream, fill: HEX.blue });
   }
-  s.addText("Fuentes: Banguat (2025, 2026); Kantar (2022); Walmart (2025); Prensa Latina (2025)", { placeholder: "source" });
-  s.addNotes("Dos oportunidades y dos desafíos o amenazas, cada uno con lo que haríamos. Oportunidad 1, la principal: las remesas subieron 18.7%; hay más dinero en los hogares y lo aprovechamos con combos familiares y precios claros. Oportunidad 2: el 48% aún compra en tiendas pequeñas; hay espacio para un súper de barrio moderno, justo el formato de Merco. Desafío 1, el principal: Walmart ya tiene 276 tiendas y compite con precios bajos; nosotros ganamos con trato y frescura. Desafío 2: estamos a 2,100 km y hay extorsiones a comercios; lo resolvemos con un almacén local y un socio guatemalteco que conoce el terreno.");
+  s.addText("Fuentes: Banguat (2026); Kantar (2022); Walmart (2025); Prensa Latina (2025)", { placeholder: "source" });
+  s.addNotes("Dos oportunidades y dos desafíos, cada uno con su respuesta. O1: las remesas subieron 18.7% (US$25,530 millones) y la economía crece 4.1%: hay más dinero en los hogares, y lo aprovechamos con combos familiares y precios claros. O2: el 48% aún compra en tiendas pequeñas: hay espacio para un súper de barrio moderno, que es justo el formato de Merco. D1: Walmart ya tiene 276 tiendas y compite por precio; nosotros ganamos con trato y frescura. D2: estamos a 2,100 km y hay extorsiones a comercios; lo resolvemos con un almacén local y un socio guatemalteco que conoce el terreno.");
 
   // 6 · Acción estratégica
   pres.addSection({ title: "Propuesta" });
-  s = pres.addSlide({ masterName: "Marfil", sectionTitle: "Propuesta" });
-  s.addText("05 · ACCIÓN ESTRATÉGICA", { placeholder: "kicker" });
-  s.addText("Un socio local y 2 tiendas piloto, paso a paso", { placeholder: "title" });
+  s = pres.addSlide({ masterName: "Crema", sectionTitle: "Propuesta" });
+  s.addText("PASO 5 · ASÍ ABRIMOS LA PRIMERA TIENDA", { placeholder: "kicker" });
+  poster(s, [[["ACCIÓN ESTRATÉGICA"]], [["PASO A PASO", HEX.red]]], { x: 116, y: 152, w: 1320, h: 290, fontSize: 50, color: HEX.blue });
+  s.addShape(pres.shapes.LINE, { x: P(380), y: P(540), w: P(1160), h: 0, line: { color: HEX.blue, width: 5, dashType: "dash" }, objectName: "Ruta" });
   const phases = [
-    { ic: "LuHandshake", n: "01", head: "Preparar", when: "Meses 0–6", what: "Firmar con un socio, abrir el almacén y elegir proveedores locales", gate: "Almacén y proveedores listos" },
-    { ic: "LuStore", n: "02", head: "Probar", when: "Meses 6–24", what: "Abrir 2 tiendas de cercanía en Ciudad de Guatemala con ofertas de apertura", gate: "Cumplir las 3 metas del piloto" },
-    { ic: "LuTrendingUp", n: "03", head: "Crecer", when: "Desde el mes 24", what: "Llevar el modelo a Quetzaltenango y Escuintla", gate: "Solo si el piloto funciona" },
+    { cx: 380, i: "LuHandshake", fill: HEX.yellow, color: HEX.navy, head: "PREPARAR", when: "MESES 0–6", what: "Socio + almacén" },
+    { cx: 960, i: "LuStore", fill: HEX.red, color: "FFFFFF", head: "PROBAR", when: "MESES 6–24", what: "2 tiendas piloto" },
+    { cx: 1540, i: "LuTrendingUp", fill: HEX.green, color: "FFFFFF", head: "CRECER", when: "DESDE EL MES 24", what: "Quetzaltenango y Escuintla" },
   ];
-  hline(s, 210, 340, 1500, HEX.gold, 2);
   for (const [i, ph] of phases.entries()) {
-    const x = 120 + i * 568;
-    await iconCircle(s, ph.ic, { x: x + 40, y: 290, d: 100, fill: i === 1 ? HEX.gold : HEX.navy, color: HEX.white, alt: ph.head });
-    text(s, [{ text: ph.when.toUpperCase(), options: { fontSize: 10.5, bold: true, charSpacing: 1, color: HEX.gold, breakLine: true } }, { text: ph.head, options: { fontFace: SERIF, fontSize: 26, color: HEX.navy } }], { x: x + 40, y: 412, w: 480, h: 96, valign: "middle" });
-    text(s, ph.what, { x: x + 40, y: 514, w: 470, h: 130, fontSize: 13, color: HEX.navy });
-    text(s, [{ text: "PARA AVANZAR  ", options: { fontSize: 9.5, bold: true, charSpacing: 1, color: HEX.teal } }, { text: ph.gate, options: { fontSize: 12.5, bold: true } }], { x: x + 40, y: 660, w: 480, h: 74, fill: HEX.tealTint, valign: "middle", margin: 12 });
+    await sticker(s, ph.i, { x: ph.cx - 100, y: 440, d: 200, fill: ph.fill, color: ph.color, ring: "FFFFFF", ringW: 8 });
+    text(s, `${i + 1}`, { x: ph.cx + 56, y: 428, w: 64, h: 64, fontFace: HEAD, fontSize: 26, color: HEX.cream, align: "center", valign: "middle", fill: { color: HEX.blue }, shape: pres.shapes.OVAL });
+    text(s, ph.head, { x: ph.cx - 260, y: 650, w: 520, h: 84, fontFace: HEAD, fontSize: 40, color: HEX.blue, align: "center", valign: "middle" });
+    text(s, ph.when, { x: ph.cx - 260, y: 734, w: 520, h: 34, bold: true, fontSize: 12, color: HEX.red, align: "center", valign: "middle", charSpacing: 2 });
+    text(s, ph.what, { x: ph.cx - 260, y: 770, w: 520, h: 84, bold: true, fontSize: 15, color: HEX.navy, align: "center", valign: "middle" });
   }
-  rect(s, { x: 120, y: 770, w: 1160, h: 200, fill: HEX.navy, name: "Metas del piloto" });
-  kicker(s, "Metas del piloto", 160, 794, 600, HEX.gold);
-  const goals = [["LuChartColumn", "Vender bien"], ["LuRepeat", "Clientes que vuelven"], ["LuUsers", "El equipo se queda"]];
-  for (const [i, [ic, g]] of goals.entries()) {
-    const x = 160 + i * 370;
-    await iconCircle(s, ic, { x, y: 852, d: 64, fill: HEX.navy2, color: HEX.gold });
-    text(s, g, { x: x + 80, y: 852, w: 270, h: 64, fontSize: 14.5, bold: true, color: HEX.white, valign: "middle" });
+  text(s, "¡OFERTAS DE\nAPERTURA!", { x: 1200, y: 300, w: 380, h: 230, fontFace: HEAD, fontSize: 18, color: HEX.red, align: "center", valign: "middle", fill: { color: HEX.yellow }, shape: "irregularSeal1", rotate: 8, lineSpacingMultiple: 0.9, name: "Estrella ofertas" });
+  chip(s, "METAS DEL PILOTO", { x: 120, y: 880, w: 430, h: 64, head: true, fontSize: 18, color: HEX.cream, fill: HEX.blue, rotate: -2, radius: 0.15, shadow: true, charSpacing: 1 });
+  const goals = ["Vender bien", "Clientes que vuelven", "El equipo se queda"];
+  for (const [i, g] of goals.entries()) {
+    box(s, { x: 575 + i * 415, y: 878, w: 405, h: 68, fill: HEX.paper, line: HEX.blue, lineW: 2.5, dash: "dash", radius: 0.3, name: g });
+    text(s, g, { x: 575 + i * 415, y: 878, w: 405, h: 68, bold: true, fontSize: 12.5, color: HEX.navy, align: "center", valign: "middle" });
   }
-  rect(s, { x: 1310, y: 770, w: 490, h: 200, fill: HEX.goldTint, name: "Riesgo pequeño" });
-  text(s, "5%", { x: 1336, y: 770, w: 130, h: 200, bold: true, fontSize: 32, color: HEX.gold, valign: "middle" });
-  text(s, [{ text: "Riesgo pequeño", options: { bold: true, fontSize: 15, breakLine: true } }, { text: "2 tiendas = 5% del tamaño de Merco", options: { fontSize: 12, color: HEX.gray } }], { x: 1470, y: 770, w: 315, h: 200, valign: "middle" });
   s.addText("Propuesta propia a partir del diagnóstico · Inversión: se define en el estudio de factibilidad [validar con EMIS]", { placeholder: "source" });
-  s.addNotes("La acción tiene tres fases, y no pasamos a la siguiente sin cumplir la anterior. Fase 1, preparar (meses 0 a 6): firmar con un socio guatemalteco, abrir el almacén en la capital y elegir proveedores locales. Fase 2, probar (meses 6 a 24): abrir 2 tiendas de cercanía en Ciudad de Guatemala con ofertas de apertura y medir tres metas: que vendan bien por metro cuadrado, que los clientes vuelvan y que el equipo se quede (menos del 41% se va al año, como en México). Fase 3, crecer (desde el mes 24): llevar el modelo a Quetzaltenango y Escuintla, solo si el piloto funciona. Esta acción aprovecha las dos oportunidades, resuelve la distancia con el socio y el almacén, y compite con Walmart con trato. Y el riesgo es pequeño: 2 tiendas son el 5% del tamaño de Merco.");
+  s.addNotes("La acción tiene tres fases, y no pasamos a la siguiente sin cumplir la anterior. Fase 1, preparar (meses 0 a 6): firmar con un socio guatemalteco, abrir el almacén en la capital y elegir proveedores locales. Fase 2, probar (meses 6 a 24): abrir 2 tiendas de cercanía en Ciudad de Guatemala con ofertas de apertura y medir tres metas: ventas por metro cuadrado, clientes que regresan y rotación menor al 41%, como en México. Fase 3, crecer (desde el mes 24): llevar el modelo a Quetzaltenango y Escuintla, solo si el piloto funciona. Esta acción aprovecha O1 y O2, resuelve D2 con el socio y el almacén, y compite con Walmart con trato, no con precio. Y arriesga poco: 2 tiendas son el 5% del tamaño de Merco.");
 
   // 7 · Recomendación final
-  s = pres.addSlide({ masterName: "Azul", sectionTitle: "Propuesta" });
-  s.addImage({ path: A("foto-chichi-alta.jpg"), x: P(1280), y: 0, w: P(640), h: P(1080), altText: "Mercado de Chichicastenango" });
-  s.addImage({ path: A("degradado-azul.png"), x: P(1278), y: 0, w: P(300), h: P(1080), altText: "Degradado decorativo" });
-  text(s, "Foto: Toby Argüelles, CC BY-SA 2.0", { x: 1500, y: 1036, w: 400, h: 30, fontSize: 9, color: HEX.white, align: "right", valign: "middle" });
-  s.addText("06 · RECOMENDACIÓN FINAL", { placeholder: "kicker" });
-  text(s, [{ text: "Sí a Guatemala:", options: { breakLine: true } }, { text: "paso a paso y con un socio local", options: { color: HEX.gold, italic: true } }], { x: 120, y: 124, w: 1140, h: 160, serif: true, fontSize: 28, color: HEX.white, lineSpacingMultiple: 0.95, name: "Título" });
-  text(s, "APROBADO CON CONDICIONES", { x: 120, y: 300, w: 520, h: 46, fontSize: 11, bold: true, color: HEX.navy, fill: HEX.gold, align: "center", valign: "middle" });
-  const why = [
-    { v: "+4.1%", t: "El mercado crece", b: "Y llega más dinero a casa" },
-    { v: "41%", t: "Merco sabe ganar", b: "Su gente se queda (antes 98%)" },
-    { v: "5%", t: "Riesgo pequeño", b: "2 tiendas = 5% de su tamaño" },
-  ];
-  for (const [i, w] of why.entries()) {
-    const x = 120 + i * 372;
-    hline(s, x, 386, 340, HEX.gold, 2);
-    text(s, w.v, { x, y: 396, w: 340, h: 84, bold: true, fontSize: 30, color: HEX.gold, valign: "middle" });
-    text(s, [{ text: w.t, options: { bold: true, fontSize: 15, color: HEX.white, breakLine: true } }, { text: w.b, options: { fontSize: 12, color: HEX.soft } }], { x, y: 484, w: 340, h: 110 });
-  }
-  rect(s, { x: 120, y: 640, w: 520, h: 330, fill: HEX.navy2, name: "Condición" });
-  kicker(s, "La condición", 152, 662, 460);
-  text(s, "Solo abrimos más tiendas si las 2 primeras funcionan: venden bien, los clientes vuelven y el equipo se queda.", { x: 152, y: 706, w: 460, h: 240, fontSize: 14.5, bold: true, color: HEX.white, lineSpacingMultiple: 1.1 });
-  kicker(s, "Siguientes pasos", 680, 640, 500);
-  const steps = [["2027", "Socio, almacén y proveedores"], ["2028", "2 tiendas piloto con ofertas de apertura"], ["2029", "Crecer a Quetzaltenango y Escuintla"]];
-  for (const [i, [yr, t]] of steps.entries()) {
-    const y = 690 + i * 94;
-    text(s, yr, { x: 680, y, w: 130, h: 72, bold: true, fontSize: 19, color: HEX.gold, valign: "middle" });
-    text(s, t, { x: 820, y, w: 430, h: 72, fontSize: 13.5, color: HEX.white, valign: "middle" });
-    if (i < 2) hline(s, 680, y + 82, 540, HEX.navy2, 1);
+  s = pres.addSlide({ masterName: "Magenta", sectionTitle: "Propuesta" });
+  s.addText("PASO 6 · ¡VAMOS A GUATEMALA!", { placeholder: "kicker" });
+  poster(s, [[["RECOMENDACIÓN FINAL"]], [["¡SÍ A GUATEMALA!", HEX.yellow]]], { x: 116, y: 150, w: 1270, h: 300, fontSize: 50, color: HEX.cream });
+  stamp(s, "APROBADO CON\nCONDICIONES", { x: 1400, y: 140, w: 440, h: 160, fontSize: 22, color: HEX.yellow, rotate: -8, name: "Sello aprobado" });
+  priceTag(s, 60, 470, 620, -4, "+4.1%", "un mercado que crece", { bigSize: 48, smallSize: 13 });
+  priceTag(s, 660, 495, 620, 3, "41%", "se van al año: su gente se queda", { bigSize: 48, smallSize: 13 });
+  priceTag(s, 1260, 470, 620, -3, "5%", "de su tamaño: riesgo pequeño", { bigSize: 48, smallSize: 13 });
+  const steps = ["2027 · SOCIO Y ALMACÉN", "2028 · 2 TIENDAS PILOTO", "2029 · CRECER"];
+  for (const [i, st] of steps.entries()) {
+    chip(s, st, { x: 120 + i * 570, y: 860, w: 520, h: 72, head: true, fontSize: 17, color: i === 2 ? HEX.navy : HEX.cream, fill: i === 2 ? HEX.yellow : HEX.purple, radius: 0.2, shadow: true });
+    if (i < 2) {
+      s.addShape(pres.shapes.RIGHT_ARROW, { x: P(120 + i * 570 + 528), y: P(880), w: P(36), h: P(32), fill: { color: HEX.cream }, line: { type: "none" }, objectName: "Flecha" });
+    }
   }
   s.addText("Evidencia: láminas 2 a 6 · Fuentes completas en la lámina 8", { placeholder: "source" });
-  s.addNotes("Nuestra recomendación: sí a Guatemala, paso a paso y con un socio local. Comparamos tres caminos: quedarse en México no arriesga pero deja pasar un mercado que crece; entrar en grande es demasiado riesgo frente a Walmart y la distancia; entrar paso a paso es el equilibrio. Tres razones: el mercado crece (economía +4.1% y más remesas); Merco sabe ganar (su gente se queda y sus tiendas rinden); y el riesgo es pequeño, porque 2 tiendas son el 5% de su tamaño. La aprobamos con una condición: solo crecemos si las 2 primeras tiendas funcionan. Siguientes pasos: socio y almacén en 2027, 2 tiendas en 2028 y crecer en 2029. Gracias.");
+  s.addNotes("Nuestra recomendación: sí a Guatemala, paso a paso y con un socio local. Comparamos tres caminos: quedarse en México no arriesga pero deja pasar un mercado que crece; entrar en grande es demasiado riesgo frente a Walmart y la distancia; entrar paso a paso es el equilibrio. Tres razones: el mercado crece (economía +4.1% y remesas +18.7%); el modelo de Merco gana (rotación de 98% a 41% y $118,000 por m²); y el riesgo es pequeño, porque 2 tiendas son el 5% de su tamaño. La aprobamos con condiciones: solo crecemos si el piloto cumple sus metas. Siguientes pasos: socio y almacén en 2027, 2 tiendas en 2028 y crecer en 2029. Gracias.");
 
   // 8 · Fuentes
   pres.addSection({ title: "Anexo" });
-  s = pres.addSlide({ masterName: "Marfil", sectionTitle: "Anexo" });
+  s = pres.addSlide({ masterName: "Crema", sectionTitle: "Anexo" });
   s.addText("NO SE EXPONE", { placeholder: "kicker" });
-  s.addText("Fuentes", { placeholder: "title" });
-  const ref = (t, last) => ({ text: t, options: { breakLine: !last, paraSpaceAfter: 6 } });
+  s.addText("FUENTES", { placeholder: "title", h: P(90) });
+  const ref = (t, last) => ({ text: t, options: { breakLine: !last, paraSpaceAfter: 5 } });
   const left = [
     "Banco de Guatemala (2026). Ingreso de divisas por remesas familiares 2025. Vía AGN y Emisoras Unidas.",
     "Banco de Guatemala (2025, dic.). Proyección de crecimiento económico 2025–2026 e inflación. banguat.gob.gt",
     "Banco Mundial (2025). Población total, Guatemala. data.worldbank.org",
+    "Centroamérica 360 (2025). Inflación de Guatemala a noviembre: 1.73% (datos INE/Banguat).",
+    "SEGEPLAN y UNFPA (2024). Análisis de situación de población. guatemala.unfpa.org",
     "Kantar (2022). Canales de consumo masivo en Guatemala.",
     "FocusEconomics (2026). Guatemala: PIB per cápita en US$.",
     "Prensa Latina (2025, 27 ago.). Cámaras empresariales de Guatemala señalaron aumento de extorsiones.",
     "Walmart (2025). Central America: retail units. corporate.walmart.com",
     "MINECO Guatemala (2025). Informe de comercio exterior.",
-    "Emisoras Unidas (2025). Súper del Barrio celebra su tienda 200 en Guatemala.",
   ];
-  text(s, left.map((t, i) => ref(t, i === left.length - 1)), { x: 120, y: 250, w: 810, h: 720, fontSize: 11.5, color: HEX.navy, name: "Fuentes columna 1" });
+  text(s, left.map((t, i) => ref(t, i === left.length - 1)), { x: 120, y: 260, w: 810, h: 700, fontSize: 10.5, color: HEX.navy, name: "Fuentes columna 1" });
   text(s, [
     ref("Carreón Flores, H. et al. (2026). Supermercados Merco: Crecimiento centrado en las personas (RC32-11-270). Tec de Monterrey."),
     ref("Great Place to Work México (2025). Merco."),
+    ref("Emisoras Unidas (2025). Súper del Barrio celebra su tienda 200 en Guatemala."),
     ref("Dess, G. G. et al. (2021). Strategic management (10.ª ed.). McGraw-Hill."),
     ref("Equipo 2 (2026). Diagnóstico externo, diagnóstico interno y matriz FODA de Supermercados Merco."),
     ref("[Passport, Statista y EMIS: agregar]"),
     { text: "Fotos (Wikimedia Commons): ", options: { bold: true } },
-    ref("Chad Davis, CC BY-SA 2.0 (Antigua); Francisco Anzola, CC BY 2.0 (mercado); Toby Argüelles, CC BY-SA 2.0 (Chichicastenango). Mapa: Natural Earth. Iconos: Lucide (ISC)."),
+    ref("Francisco Anzola, CC BY 2.0 (mercado); Toby Argüelles, CC BY-SA 2.0 (Chichicastenango). Mapa: Natural Earth. Iconos: Lucide (ISC)."),
     { text: "Uso de IA: ", options: { bold: true } },
     ref("Claude (Anthropic, 2026) para investigar, buscar fotos libres y diseñar; cada dato se revisó en su fuente.", true),
-  ], { x: 990, y: 250, w: 810, h: 720, fontSize: 11.5, color: HEX.navy, name: "Fuentes columna 2" });
+  ], { x: 990, y: 260, w: 810, h: 700, fontSize: 10.5, color: HEX.navy, name: "Fuentes columna 2" });
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
