@@ -138,8 +138,8 @@ async function sticker(slide, name, o) {
   // 2 · Diagnóstico
   pres.addSection({ title: "Análisis" });
   s = pres.addSlide({ masterName: "Crema", sectionTitle: "Análisis" });
-  s.addText("PASO 1 · DIAGNÓSTICO", { placeholder: "kicker" });
-  s.addText("LA MALETA DE MERCO", { placeholder: "title" });
+  s.addText("PASO 1 · LA MALETA DE MERCO", { placeholder: "kicker" });
+  poster(s, [[["MAPA DE FORTALEZAS Y DEBILIDADES"]]], { x: 116, y: 150, w: 1270, h: 120, fontSize: 33, color: HEX.blue });
   stamp(s, "PREPARACIÓN MEDIA:\nLISTA PARA EMPEZAR", { x: 1390, y: 96, w: 460, h: 130, fontSize: 17, color: HEX.red, rotate: -7, name: "Sello preparación" });
   const cols2 = [
     { head: "LO QUE LLEVA", color: HEX.green, x: 120, items: [
@@ -169,8 +169,8 @@ async function sticker(slide, name, o) {
 
   // 3 · El mercado
   s = pres.addSlide({ masterName: "Magenta", sectionTitle: "Análisis" });
-  s.addText("PASO 2 · EL MERCADO", { placeholder: "kicker" });
-  poster(s, [[["UN PAÍS CON"]], [["HAMBRE DE SÚPER", HEX.yellow]]], { x: 116, y: 136, w: 1260, h: 300, fontSize: 50, color: HEX.cream });
+  s.addText("PASO 2 · UN PAÍS CON HAMBRE DE SÚPER", { placeholder: "kicker" });
+  poster(s, [[["MERCADO SELECCIONADO"]], [["Y DATOS CLAVE", HEX.yellow]]], { x: 116, y: 136, w: 1260, h: 300, fontSize: 46, color: HEX.cream });
   chip(s, "MERCADO ELEGIDO", { x: 1390, y: 166, w: 440, h: 64, head: true, fontSize: 18, color: HEX.navy, fill: HEX.yellow, rotate: 4, radius: 0.15, shadow: true, charSpacing: 1 });
   priceTag(s, 60, 440, 620, -5, "18.7 M", "personas: la mayor población de Centroamérica", { bigSize: 40, smallSize: 11 });
   priceTag(s, 660, 465, 620, 3, "+4.1%", "crecerá su economía, más que América Latina", { bigSize: 40, smallSize: 11 });
@@ -192,9 +192,8 @@ async function sticker(slide, name, o) {
   // 4 · Estrategia semiglobal
   s = pres.addSlide({ masterName: "Morado", sectionTitle: "Análisis" });
   s.addImage({ path: A("polaroid-mercado.png"), x: P(1330), y: P(170), w: P(530), h: P(530 * 922 / 736), altText: "Polaroid: mercado de Guatemala" });
-  s.addText("PASO 3 · LA ESTRATEGIA", { placeholder: "kicker" });
-  poster(s, [[["MISMO CORAZÓN,"]], [["NUEVO SABOR", HEX.yellow]]], { x: 116, y: 136, w: 1200, h: 340, fontSize: 56, color: HEX.cream });
-  chip(s, "SEMIGLOBAL", { x: 960, y: 350, w: 280, h: 58, head: true, fontSize: 18, color: HEX.navy, fill: HEX.yellow, rotate: 4, radius: 0.15, shadow: true, charSpacing: 1 });
+  s.addText("PASO 3 · MISMO CORAZÓN, NUEVO SABOR", { placeholder: "kicker" });
+  poster(s, [[["ESTRATEGIA SEMIGLOBAL"]], [["Y 2 ÁREAS DE ADAPTACIÓN", HEX.yellow]]], { x: 116, y: 136, w: 1200, h: 300, fontSize: 43, color: HEX.cream });
   chip(s, "SE QUEDA IGUAL", { x: 120, y: 508, w: 460, h: 58, head: true, fontSize: 22, color: HEX.navy, fill: HEX.cream, rotate: -2, radius: 0.15, shadow: true, charSpacing: 1 });
   const same = [
     { i: "LuUsers", t: "SU GENTE" },
@@ -226,8 +225,8 @@ async function sticker(slide, name, o) {
   // 5 · Oportunidades y desafíos
   s = pres.addSlide({ masterName: "Turquesa", sectionTitle: "Análisis" });
   s.addImage({ path: A("polaroid-chichi.png"), x: P(1400), y: P(290), w: P(470), h: P(470 * 922 / 736), altText: "Polaroid: mercado de Chichicastenango" });
-  s.addText("PASO 4 · OPORTUNIDADES Y DESAFÍOS", { placeholder: "kicker" });
-  poster(s, [[["LA OPORTUNIDAD ES REAL"]], [["(Y EL RETO TAMBIÉN)", HEX.yellow]]], { x: 116, y: 136, w: 1280, h: 280, fontSize: 46, color: HEX.cream });
+  s.addText("PASO 4 · LA OPORTUNIDAD ES REAL", { placeholder: "kicker" });
+  poster(s, [[["2 OPORTUNIDADES"]], [["Y 2 DESAFÍOS", HEX.yellow]]], { x: 116, y: 136, w: 1280, h: 280, fontSize: 46, color: HEX.cream });
   const od = [
     { tag: "OPORTUNIDAD", tagFill: HEX.green, v: "+18.7%", l: "más remesas", r: "combos familiares", x: 120, y: 452 },
     { tag: "OPORTUNIDAD", tagFill: HEX.green, v: "48%", l: "compra en tiendas pequeñas", r: "súper de barrio", x: 760, y: 452 },
@@ -247,8 +246,8 @@ async function sticker(slide, name, o) {
   // 6 · Acción estratégica
   pres.addSection({ title: "Propuesta" });
   s = pres.addSlide({ masterName: "Crema", sectionTitle: "Propuesta" });
-  s.addText("PASO 4 · ACCIÓN ESTRATÉGICA", { placeholder: "kicker" });
-  poster(s, [[["ASÍ ABRIMOS"]], [["LA PRIMERA TIENDA", HEX.red]]], { x: 116, y: 152, w: 1320, h: 290, fontSize: 50, color: HEX.blue });
+  s.addText("PASO 5 · ASÍ ABRIMOS LA PRIMERA TIENDA", { placeholder: "kicker" });
+  poster(s, [[["ACCIÓN ESTRATÉGICA"]], [["PASO A PASO", HEX.red]]], { x: 116, y: 152, w: 1320, h: 290, fontSize: 50, color: HEX.blue });
   s.addShape(pres.shapes.LINE, { x: P(380), y: P(540), w: P(1160), h: 0, line: { color: HEX.blue, width: 5, dashType: "dash" }, objectName: "Ruta" });
   const phases = [
     { cx: 380, i: "LuHandshake", fill: HEX.yellow, color: HEX.navy, head: "PREPARAR", when: "MESES 0–6", what: "Socio + almacén" },
@@ -274,13 +273,12 @@ async function sticker(slide, name, o) {
 
   // 7 · Recomendación final
   s = pres.addSlide({ masterName: "Magenta", sectionTitle: "Propuesta" });
-  s.addText("RECOMENDACIÓN FINAL", { placeholder: "kicker" });
-  poster(s, [[["¡VAMOS A "], ["GUATEMALA", HEX.yellow], ["!"]]], { x: 116, y: 160, w: 1270, h: 160, fontSize: 52, color: HEX.cream });
-  text(s, "Paso a paso y con un socio local.", { x: 124, y: 320, w: 1250, h: 60, bold: true, fontSize: 22, color: HEX.cream });
+  s.addText("PASO 6 · ¡VAMOS A GUATEMALA!", { placeholder: "kicker" });
+  poster(s, [[["RECOMENDACIÓN FINAL"]], [["¡SÍ A GUATEMALA!", HEX.yellow]]], { x: 116, y: 150, w: 1270, h: 300, fontSize: 50, color: HEX.cream });
   stamp(s, "APROBADO CON\nCONDICIONES", { x: 1400, y: 140, w: 440, h: 160, fontSize: 22, color: HEX.yellow, rotate: -8, name: "Sello aprobado" });
-  priceTag(s, 60, 420, 620, -4, "+4.1%", "un mercado que crece", { bigSize: 48, smallSize: 13 });
-  priceTag(s, 660, 450, 620, 3, "41%", "de rotación: su modelo gana", { bigSize: 48, smallSize: 13 });
-  priceTag(s, 1260, 420, 620, -3, "5%", "de su tamaño: riesgo pequeño", { bigSize: 48, smallSize: 13 });
+  priceTag(s, 60, 470, 620, -4, "+4.1%", "un mercado que crece", { bigSize: 48, smallSize: 13 });
+  priceTag(s, 660, 495, 620, 3, "41%", "de rotación: su modelo gana", { bigSize: 48, smallSize: 13 });
+  priceTag(s, 1260, 470, 620, -3, "5%", "de su tamaño: riesgo pequeño", { bigSize: 48, smallSize: 13 });
   const steps = ["2027 · SOCIO Y ALMACÉN", "2028 · 2 TIENDAS PILOTO", "2029 · CRECER"];
   for (const [i, st] of steps.entries()) {
     chip(s, st, { x: 120 + i * 570, y: 860, w: 520, h: 72, head: true, fontSize: 17, color: i === 2 ? HEX.navy : HEX.cream, fill: i === 2 ? HEX.yellow : HEX.purple, radius: 0.2, shadow: true });
