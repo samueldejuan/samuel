@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rumbo · Planificador de viajes</title>
+<meta name="description" content="Escribe tu destino y obtén una ruta organizada día a día, con horarios y mapa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root {
+    --bg: #F6F3EE;
+    --surface: #FFFFFF;
+    --surface-2: #EFEAE2;
+    --text: #1C2430;
+    --muted: #5E6878;
+    --line: #E2DBD0;
+    --accent: #0E7C66;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DCEFEA;
+    --warm: #E2683C;
+    --shadow: 0 1px 2px rgba(28,36,48,.06), 0 8px 24px rgba(28,36,48,.08);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11161D; --surface: #19202A; --surface-2: #222B37; --text: #ECEFF3;
+      --muted: #9AA5B4; --line: #2C3644; --accent: #3CC4A4; --accent-ink: #0B1712;
+      --accent-soft: #173A33; --warm: #F08A5D; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11161D; --surface: #19202A; --surface-2: #222B37; --text: #ECEFF3;
+    --muted: #9AA5B4; --line: #2C3644; --accent: #3CC4A4; --accent-ink: #0B1712;
+    --accent-soft: #173A33; --warm: #F08A5D; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 16px/1.5 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); }
+  button, input, select { font: inherit; color: inherit; }
+
+  /* Cabecera */
+  .hero { padding: 56px 16px 40px; text-align: center; background:
+      radial-gradient(1200px 400px at 50% -10%, var(--accent-soft), transparent 70%); }
+  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .02em; color: var(--accent); text-transform: uppercase; font-size: 13px; }
+  .brand svg { width: 20px; height: 20px; }
+  h1 { font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: clamp(32px, 6vw, 56px); line-height: 1.05; margin: 14px auto 12px; max-width: 760px; text-wrap: balance; }
+  .lead { color: var(--muted); max-width: 560px; margin: 0 auto 28px; font-size: 18px; }
+
+  form.planner { max-width: 860px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 10px; display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; text-align: left; }
+  .field { display: flex; flex-direction: column; padding: 6px 12px; border-radius: 12px; min-width: 0; }
+  .field:focus-within { background: var(--surface-2); }
+  .field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .field input, .field select { border: 0; background: transparent; outline: none; padding: 2px 0; font-size: 17px; font-weight: 500; min-width: 0; width: 100%; }
+  .field select { cursor: pointer; }
+  .go { border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 700; border-radius: 12px; padding: 0 24px; cursor: pointer; font-size: 16px; min-height: 52px; }
+  .go:hover { filter: brightness(1.06); }
+  .go:disabled { opacity: .6; cursor: wait; }
+
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 18px auto 0; max-width: 860px; }
+  .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer; user-select: none; }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .hint { color: var(--muted); font-size: 14px; margin-top: 16px; }
+  .hint button { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0 2px; font-weight: 600; }
+
+  /* Resultados */
+  main { max-width: 1240px; margin: 0 auto; padding: 0 16px 64px; }
+  .status { text-align: center; color: var(--muted); padding: 24px 0; }
+  .status.error { color: var(--warm); }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
+  .summary { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; padding: 8px 0 4px; }
+  .summary h2 { font-family: Fraunces, Georgia, serif; font-size: clamp(26px, 4vw, 36px); margin: 0; line-height: 1.1; }
+  .summary .meta { color: var(--muted); margin-top: 4px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { border-color: var(--accent); }
+
+  .tabs { grid-column: 1 / -1; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+  .tab { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+  .tab .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  .days { display: flex; flex-direction: column; gap: 18px; }
+  .day { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .day-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .day-head h3 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+  .day-num { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 14px; font-weight: 700; flex: none; }
+  .day-head small { color: var(--muted); font-weight: 500; font-size: 13px; display: block; }
+  .day-head a { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  ol.stops { list-style: none; margin: 0; padding: 8px 18px 14px; }
+  .stop { display: grid; grid-template-columns: 54px 1fr; gap: 12px; padding: 10px 0; cursor: pointer; }
+  .stop:hover .stop-name { color: var(--accent); }
+  .time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; padding-top: 2px; }
+  .stop-name { font-weight: 600; }
+  .stop-desc { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 1px 7px; margin-right: 6px; vertical-align: 1px; }
+  .leg { grid-column: 2; color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+  .leg::before { content: ""; width: 2px; height: 14px; background: var(--line); margin-left: -22px; margin-right: 14px; }
+  .stop.lunch .stop-name { color: var(--warm); }
+
+  .map-wrap { position: sticky; top: 16px; }
+  #map { height: calc(100vh - 32px); min-height: 420px; max-height: 780px; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow); background: var(--surface-2); }
+  .pin { width: 26px; height: 26px; border-radius: 50%; color: #fff; display: grid; place-items: center; font: 700 12px/1 Inter, sans-serif; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+  .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+  .ideas { max-width: 860px; margin: 36px auto 0; text-align: left; }
+  .ideas h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; text-align: center; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; cursor: pointer; text-align: left; }
+  .card:hover { border-color: var(--accent); }
+  .card b { display: block; }
+  .card span { color: var(--muted); font-size: 13px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
+
+  @media (max-width: 900px) {
+    .result { grid-template-columns: 1fr; }
+    .map-wrap { position: relative; top: 0; order: 1; grid-column: 1 / -1; }
+    .days { order: 2; }
+    #map { height: 52vh; min-height: 300px; }
+  }
+  @media (max-width: 720px) {
+    form.planner { grid-template-columns: 1fr 1fr; }
+    .field.dest { grid-column: 1 / -1; }
+    .go { grid-column: 1 / -1; }
+    .hero { padding-top: 36px; }
+  }
+  @media print {
+    .hero, .tabs, .actions, .map-wrap, footer { display: none !important; }
+    .result { display: block; }
+    .day { box-shadow: none; break-inside: avoid; margin-bottom: 12px; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></svg>
+    Rumbo · Viajes organizados
+  </div>
+  <h1>Dinos a dónde vas. Nosotros te armamos la ruta.</h1>
+  <p class="lead">Escribe un destino y en segundos tendrás un itinerario día a día, con horarios, trayectos y mapa.</p>
+
+  <form class="planner" id="planner" autocomplete="off">
+    <div class="field dest">
+      <label for="dest">Destino</label>
+      <input id="dest" name="destino" list="dest-list" placeholder="Ej. Roma, Tokio, Antigua Guatemala…" required>
+      <datalist id="dest-list"></datalist>
+    </div>
+    <div class="field">
+      <label for="days">Días</label>
+      <select id="days" name="dias">
+        <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="pace">Ritmo</label>
+      <select id="pace" name="ritmo">
+        <option value="relajado">Relajado</option>
+        <option value="normal" selected>Normal</option>
+        <option value="intenso">Intenso</option>
+      </select>
+    </div>
+    <button class="go" id="go" type="submit">Crear ruta</button>
+  </form>
+
+  <div class="chips" id="interests" aria-label="Intereses">
+    <button type="button" class="chip" data-i="monumento" aria-pressed="false">Historia y monumentos</button>
+    <button type="button" class="chip" data-i="museo" aria-pressed="false">Museos y arte</button>
+    <button type="button" class="chip" data-i="naturaleza" aria-pressed="false">Parques y naturaleza</button>
+    <button type="button" class="chip" data-i="gastronomia" aria-pressed="false">Gastronomía</button>
+    <button type="button" class="chip" data-i="mirador" aria-pressed="false">Miradores</button>
+    <button type="button" class="chip" data-i="barrio" aria-pressed="false">Barrios y compras</button>
+  </div>
+  <p class="hint">Funciona con cualquier ciudad del mundo. ¿Sin ideas? Prueba <button type="button" data-try="Roma">Roma</button>, <button type="button" data-try="Tokio">Tokio</button> o <button type="button" data-try="Antigua Guatemala">Antigua Guatemala</button>.</p>
+</header>
+
+<main id="main">
+  <section class="ideas" id="ideas">
+    <h4>Destinos destacados</h4>
+    <div class="cards" id="cards"></div>
+  </section>
+</main>
+
+<footer>
+  Mapas © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
+  Los horarios son orientativos: consulta aperturas y entradas antes de ir.
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ============================================================
+   Destinos destacados (ruta curada).
+   Cada parada: [nombre, lat, lon, categoría, horas, descripción]
+   El orden indica prioridad: los primeros son imprescindibles.
+   ============================================================ */
+const CURATED = {
+  madrid: { name: "Madrid", country: "España", stops: [
+    ["Museo del Prado", 40.4138, -3.6921, "museo", 2.5, "Velázquez, Goya y El Bosco en una de las pinacotecas más importantes del mundo."],
+    ["Palacio Real", 40.4180, -3.7143, "monumento", 1.5, "La residencia oficial de la Corona, con más de 3.000 salas."],
+    ["Plaza Mayor", 40.4155, -3.7074, "monumento", 0.5, "La plaza porticada del Madrid de los Austrias."],
+    ["Parque del Retiro", 40.4153, -3.6845, "naturaleza", 1.5, "Paseo en barca por el estanque y visita al Palacio de Cristal."],
+    ["Puerta del Sol", 40.4169, -3.7035, "barrio", 0.5, "El kilómetro cero de España y el reloj de las campanadas."],
+    ["Mercado de San Miguel", 40.4154, -3.7090, "gastronomia", 1, "Tapas, vermú y producto fresco bajo una estructura de hierro."],
+    ["Templo de Debod", 40.4240, -3.7177, "mirador", 0.5, "Templo egipcio con uno de los mejores atardeceres de la ciudad."],
+    ["Museo Reina Sofía", 40.4086, -3.6943, "museo", 2, "Arte contemporáneo con el Guernica de Picasso."],
+    ["Gran Vía", 40.4200, -3.7058, "barrio", 1, "Teatros, tiendas y arquitectura de principios del siglo XX."],
+    ["Catedral de la Almudena", 40.4157, -3.7146, "monumento", 0.5, "Frente al Palacio Real, con vistas a la Casa de Campo."],
+    ["Palacio de Cibeles", 40.4189, -3.6921, "mirador", 0.75, "Mirador en lo alto del antiguo Palacio de Comunicaciones."],
+    ["Puerta de Alcalá", 40.4200, -3.6887, "monumento", 0.25, "Puerta neoclásica, símbolo de la ciudad."],
+    ["Museo Thyssen-Bornemisza", 40.4161, -3.6949, "museo", 2, "Del gótico al pop art en una sola colección."],
+    ["Barrio de las Letras", 40.4140, -3.6985, "barrio", 1, "Calles de Cervantes y Lope de Vega, llenas de bares."],
+    ["La Latina y Cava Baja", 40.4110, -3.7110, "gastronomia", 1.5, "La ruta de tapas más castiza de Madrid."],
+    ["Estadio Santiago Bernabéu", 40.4531, -3.6883, "barrio", 1.5, "Tour por el estadio y el museo del Real Madrid."]
+  ]},
+  barcelona: { name: "Barcelona", country: "España", stops: [
+    ["Sagrada Família", 41.4036, 2.1744, "monumento", 2, "La obra maestra inacabada de Gaudí. Reserva la entrada con antelación."],
+    ["Park Güell", 41.4145, 2.1527, "naturaleza", 1.5, "Mosaicos, columnas y vistas de la ciudad desde la colina."],
+    ["Casa Batlló", 41.3916, 2.1649, "monumento", 1.25, "La casa de los huesos, joya modernista del Paseo de Gracia."],
+    ["Barrio Gótico", 41.3833, 2.1777, "barrio", 1.5, "Callejuelas medievales, plazas escondidas y restos romanos."],
+    ["La Rambla", 41.3809, 2.1735, "barrio", 0.75, "El paseo más famoso, de plaza Cataluña al puerto."],
+    ["Mercado de la Boqueria", 41.3817, 2.1716, "gastronomia", 1, "Zumos, jamón y tapas en el mercado más animado."],
+    ["La Pedrera", 41.3954, 2.1619, "monumento", 1.25, "Azotea de chimeneas guerreras y ondas de piedra."],
+    ["Catedral de Barcelona", 41.3840, 2.1762, "monumento", 0.75, "Catedral gótica con claustro de ocas."],
+    ["Santa Maria del Mar y El Born", 41.3838, 2.1820, "barrio", 1, "La catedral del mar y el barrio de moda."],
+    ["Museo Picasso", 41.3852, 2.1809, "museo", 1.5, "Los años de formación del pintor en cinco palacios medievales."],
+    ["Barceloneta", 41.3784, 2.1925, "naturaleza", 2, "Playa urbana, paseo marítimo y arroz frente al mar."],
+    ["Montjuïc", 41.3637, 2.1655, "mirador", 2, "Castillo, jardines y la Fuente Mágica al caer la tarde."],
+    ["Palau de la Música Catalana", 41.3875, 2.1753, "monumento", 0.75, "Sala de conciertos modernista Patrimonio de la Humanidad."],
+    ["Parc de la Ciutadella", 41.3880, 2.1870, "naturaleza", 1, "Arco de Triunfo, cascada monumental y lago."],
+    ["Bunkers del Carmel", 41.4192, 2.1617, "mirador", 1, "La vista de 360º más espectacular de Barcelona."]
+  ]},
+  paris: { name: "París", country: "Francia", stops: [
+    ["Torre Eiffel", 48.8584, 2.2945, "mirador", 2, "Sube al segundo piso o a la cima para ver todo París."],
+    ["Museo del Louvre", 48.8606, 2.3376, "museo", 3, "La Gioconda, la Victoria de Samotracia y miles de obras más."],
+    ["Notre-Dame", 48.8530, 2.3499, "monumento", 1, "La catedral gótica restaurada en la Île de la Cité."],
+    ["Montmartre y Sacré-Cœur", 48.8867, 2.3431, "barrio", 2, "Pintores en la place du Tertre y la basílica blanca."],
+    ["Arco del Triunfo", 48.8738, 2.2950, "mirador", 1, "Sube a la terraza para ver las 12 avenidas en estrella."],
+    ["Museo de Orsay", 48.8600, 2.3266, "museo", 2, "Impresionistas en una antigua estación de tren."],
+    ["Sainte-Chapelle", 48.8554, 2.3450, "monumento", 0.75, "Vidrieras del siglo XIII que parecen joyas."],
+    ["Campos Elíseos", 48.8698, 2.3078, "barrio", 1, "La avenida más famosa, de la Concordia al Arco."],
+    ["Le Marais", 48.8590, 2.3622, "barrio", 1.5, "Place des Vosges, falafel y tiendas de diseño."],
+    ["Jardín de Luxemburgo", 48.8462, 2.3372, "naturaleza", 1, "El jardín preferido de los parisinos."],
+    ["Crucero por el Sena", 48.8573, 2.3412, "mirador", 1, "Salida desde el Pont Neuf para ver los puentes desde el agua."],
+    ["Ópera Garnier", 48.8720, 2.3316, "monumento", 1, "El palacio de la ópera, todo oro y terciopelo."],
+    ["Jardín de las Tullerías", 48.8635, 2.3275, "naturaleza", 0.75, "Entre el Louvre y la plaza de la Concordia."],
+    ["Panteón", 48.8462, 2.3464, "monumento", 0.75, "Mausoleo de Voltaire, Victor Hugo y Marie Curie."],
+    ["Trocadéro", 48.8616, 2.2893, "mirador", 0.5, "La foto clásica de la Torre Eiffel."]
+  ]},
+  roma: { name: "Roma", country: "Italia", stops: [
+    ["Coliseo", 41.8902, 12.4922, "monumento", 2, "El anfiteatro más grande del Imperio romano."],
+    ["Foro Romano y Palatino", 41.8925, 12.4853, "monumento", 2, "El corazón político de la Roma antigua."],
+    ["Museos Vaticanos y Capilla Sixtina", 41.9065, 12.4536, "museo", 3, "Los frescos de Miguel Ángel. Mejor a primera hora."],
+    ["Basílica de San Pedro", 41.9022, 12.4539, "monumento", 1.5, "Sube a la cúpula para ver la plaza desde arriba."],
+    ["Fontana di Trevi", 41.9009, 12.4833, "monumento", 0.5, "Lanza una moneda para asegurar tu regreso."],
+    ["Panteón", 41.8986, 12.4769, "monumento", 0.75, "Templo de casi 2.000 años con su óculo abierto al cielo."],
+    ["Piazza Navona", 41.8992, 12.4731, "barrio", 0.75, "La fuente de los Cuatro Ríos de Bernini."],
+    ["Trastevere", 41.8897, 12.4700, "gastronomia", 1.5, "Cena de cacio e pepe entre calles empedradas."],
+    ["Plaza de España", 41.9057, 12.4823, "barrio", 0.5, "La escalinata y la via Condotti."],
+    ["Castillo de Sant'Angelo", 41.9031, 12.4663, "mirador", 1.25, "Mausoleo de Adriano con terraza sobre el Tíber."],
+    ["Villa Borghese y Galería Borghese", 41.9142, 12.4922, "museo", 2, "Esculturas de Bernini y un gran parque."],
+    ["Altar de la Patria", 41.8946, 12.4831, "mirador", 0.75, "Ascensor panorámico sobre la Roma antigua."],
+    ["Campo de' Fiori", 41.8956, 12.4722, "gastronomia", 0.5, "Mercado por la mañana, ambiente por la noche."],
+    ["Boca de la Verdad", 41.8881, 12.4814, "monumento", 0.25, "La leyenda dice que muerde a los mentirosos."],
+    ["Gianicolo", 41.8919, 12.4610, "mirador", 0.5, "Panorámica de cúpulas al atardecer."]
+  ]},
+  londres: { name: "Londres", country: "Reino Unido", stops: [
+    ["Big Ben y Parlamento", 51.5007, -0.1246, "monumento", 0.75, "El reloj más famoso del mundo a orillas del Támesis."],
+    ["Museo Británico", 51.5194, -0.1270, "museo", 2.5, "La piedra de Rosetta y las momias egipcias. Entrada gratuita."],
+    ["Torre de Londres", 51.5081, -0.0759, "monumento", 2, "Las joyas de la Corona y los famosos cuervos."],
+    ["Abadía de Westminster", 51.4993, -0.1273, "monumento", 1.5, "Coronaciones reales desde 1066."],
+    ["Tower Bridge", 51.5055, -0.0754, "mirador", 0.5, "Pasarela de cristal a 42 metros sobre el río."],
+    ["Palacio de Buckingham", 51.5014, -0.1419, "monumento", 0.75, "El cambio de guardia, a las 11:00 en días alternos."],
+    ["London Eye", 51.5033, -0.1196, "mirador", 1, "La noria con vistas de toda la ciudad."],
+    ["Trafalgar Square y National Gallery", 51.5080, -0.1281, "museo", 2, "Van Gogh, Turner y Velázquez gratis."],
+    ["Covent Garden", 51.5117, -0.1240, "barrio", 1, "Artistas callejeros y mercado cubierto."],
+    ["Catedral de San Pablo", 51.5138, -0.0984, "monumento", 1, "La gran cúpula de Christopher Wren."],
+    ["Borough Market", 51.5055, -0.0910, "gastronomia", 1, "El mercado gastronómico más antiguo de Londres."],
+    ["Tate Modern", 51.5076, -0.0994, "museo", 1.5, "Arte moderno en una antigua central eléctrica."],
+    ["Hyde Park", 51.5073, -0.1657, "naturaleza", 1.5, "Speakers' Corner y el lago Serpentine."],
+    ["Museo de Historia Natural", 51.4967, -0.1764, "museo", 2, "Dinosaurios bajo una catedral victoriana."],
+    ["Camden Market", 51.5413, -0.1463, "barrio", 1.5, "Puestos vintage y comida de todo el mundo."]
+  ]},
+  lisboa: { name: "Lisboa", country: "Portugal", stops: [
+    ["Barrio de Alfama", 38.7114, -9.1300, "barrio", 1.5, "Callejuelas, tranvía 28 y fado al anochecer."],
+    ["Torre de Belém", 38.6916, -9.2160, "monumento", 0.75, "Fortaleza manuelina a la orilla del Tajo."],
+    ["Monasterio de los Jerónimos", 38.6979, -9.2068, "monumento", 1.5, "Claustro de piedra labrada, Patrimonio de la Humanidad."],
+    ["Castillo de San Jorge", 38.7139, -9.1335, "mirador", 1.25, "Murallas moriscas con la mejor vista de Lisboa."],
+    ["Plaza del Comercio", 38.7075, -9.1364, "monumento", 0.5, "La gran plaza abierta al río."],
+    ["Pastéis de Belém", 38.6975, -9.2032, "gastronomia", 0.5, "Los pasteles de nata originales desde 1837."],
+    ["Barrio Alto y Chiado", 38.7110, -9.1440, "barrio", 1.5, "Cafés históricos de día y vida nocturna de noche."],
+    ["Mirador de Santa Luzia", 38.7118, -9.1302, "mirador", 0.25, "Azulejos y buganvillas sobre los tejados de Alfama."],
+    ["Elevador de Santa Justa", 38.7121, -9.1394, "mirador", 0.5, "Ascensor neogótico de hierro en la Baixa."],
+    ["Catedral de Lisboa", 38.7097, -9.1334, "monumento", 0.5, "La Sé, la iglesia más antigua de la ciudad."],
+    ["Padrão dos Descobrimentos", 38.6936, -9.2057, "monumento", 0.5, "Monumento a los navegantes portugueses."],
+    ["Time Out Market", 38.7069, -9.1459, "gastronomia", 1, "Los mejores chefs de Lisboa bajo un mismo techo."],
+    ["Mirador de São Pedro de Alcântara", 38.7155, -9.1446, "mirador", 0.25, "Jardín-mirador frente al castillo."],
+    ["LX Factory", 38.7034, -9.1784, "barrio", 1, "Antigua fábrica convertida en espacio creativo."],
+    ["Oceanario de Lisboa", 38.7635, -9.0937, "museo", 2, "Uno de los acuarios más grandes de Europa."]
+  ]},
+  "nueva york": { name: "Nueva York", country: "Estados Unidos", stops: [
+    ["Central Park", 40.7829, -73.9654, "naturaleza", 2, "Bethesda Terrace, Strawberry Fields y el lago."],
+    ["Estatua de la Libertad", 40.6892, -74.0445, "monumento", 3, "Ferri desde Battery Park con parada en Ellis Island."],
+    ["Times Square", 40.7580, -73.9855, "barrio", 0.75, "Pantallas gigantes y teatros de Broadway."],
+    ["Empire State Building", 40.7484, -73.9857, "mirador", 1.25, "El rascacielos más icónico, mirador en la planta 86."],
+    ["Puente de Brooklyn", 40.7061, -73.9969, "mirador", 1, "Crúzalo a pie hacia Manhattan."],
+    ["Museo Metropolitano (MET)", 40.7794, -73.9632, "museo", 3, "Cinco mil años de arte en la Quinta Avenida."],
+    ["Memorial y Museo del 11S", 40.7115, -74.0134, "museo", 1.5, "Las dos fuentes en la huella de las Torres Gemelas."],
+    ["High Line", 40.7480, -74.0048, "naturaleza", 1, "Parque elevado sobre una antigua vía de tren."],
+    ["Rockefeller Center", 40.7587, -73.9787, "mirador", 1, "Top of the Rock, con el Empire State de frente."],
+    ["Grand Central Terminal", 40.7527, -73.9772, "monumento", 0.5, "El vestíbulo con su techo de constelaciones."],
+    ["DUMBO", 40.7033, -73.9881, "barrio", 1, "La foto del puente de Manhattan entre ladrillos."],
+    ["Chelsea Market", 40.7424, -74.0060, "gastronomia", 1, "Langosta, tacos y donuts en una antigua fábrica."],
+    ["MoMA", 40.7614, -73.9776, "museo", 2, "La noche estrellada de Van Gogh y mucho más."],
+    ["Wall Street", 40.7060, -74.0090, "barrio", 0.5, "La Bolsa y el toro de bronce."],
+    ["Greenwich Village", 40.7336, -74.0027, "barrio", 1.5, "Washington Square, jazz y brownstones."],
+    ["Chinatown y Little Italy", 40.7170, -73.9970, "gastronomia", 1.5, "Dim sum y cannoli a dos calles de distancia."]
+  ]},
+  tokio: { name: "Tokio", country: "Japón", stops: [
+    ["Templo Senso-ji (Asakusa)", 35.7148, 139.7967, "monumento", 1.5, "El templo más antiguo de Tokio y la calle Nakamise."],
+    ["Cruce de Shibuya", 35.6595, 139.7005, "barrio", 0.75, "El paso de peatones más concurrido del mundo."],
+    ["Santuario Meiji", 35.6764, 139.6993, "monumento", 1, "Santuario sintoísta en medio de un bosque."],
+    ["Tokyo Skytree", 35.7101, 139.8107, "mirador", 1.25, "La torre más alta de Japón, con el Fuji en días claros."],
+    ["Harajuku y Takeshita-dori", 35.6716, 139.7031, "barrio", 1, "Moda, crepes y cultura kawaii."],
+    ["Mercado exterior de Tsukiji", 35.6655, 139.7707, "gastronomia", 1, "Sushi y tamagoyaki para desayunar."],
+    ["Shinjuku Gyoen", 35.6852, 139.7100, "naturaleza", 1.5, "Jardín japonés, inglés y francés en uno."],
+    ["Akihabara", 35.6984, 139.7731, "barrio", 1.5, "Electrónica, anime y cafés temáticos."],
+    ["Parque Ueno", 35.7156, 139.7745, "naturaleza", 1.5, "Cerezos, estanques y museos."],
+    ["Torre del Gobierno Metropolitano", 35.6896, 139.6917, "mirador", 0.75, "Mirador gratuito a 202 metros."],
+    ["Omoide Yokocho", 35.6930, 139.6995, "gastronomia", 1, "Callejón de yakitori junto a la estación de Shinjuku."],
+    ["Jardines del Palacio Imperial", 35.6852, 139.7528, "naturaleza", 1.25, "Los jardines del este, abiertos al público."],
+    ["Ginza", 35.6717, 139.7650, "barrio", 1.5, "Grandes almacenes y arquitectura de vanguardia."],
+    ["Museo Nacional de Tokio", 35.7188, 139.7765, "museo", 2, "La mayor colección de arte japonés."],
+    ["Odaiba y teamLab", 35.6260, 139.7840, "museo", 2.5, "Arte digital inmersivo en la bahía."]
+  ]},
+  "ciudad de mexico": { name: "Ciudad de México", country: "México", stops: [
+    ["Zócalo", 19.4326, -99.1332, "monumento", 0.5, "Una de las plazas más grandes del mundo."],
+    ["Museo Nacional de Antropología", 19.4260, -99.1863, "museo", 3, "La Piedra del Sol y las grandes culturas mesoamericanas."],
+    ["Templo Mayor", 19.4351, -99.1314, "monumento", 1.5, "Las ruinas del corazón de Tenochtitlan."],
+    ["Palacio de Bellas Artes", 19.4352, -99.1412, "museo", 1, "Murales de Rivera y Orozco bajo una cúpula art déco."],
+    ["Coyoacán", 19.3500, -99.1620, "barrio", 1.5, "Plazas coloniales, churros y mercado."],
+    ["Museo Frida Kahlo", 19.3551, -99.1625, "museo", 1.25, "La Casa Azul donde vivió la pintora."],
+    ["Bosque y Castillo de Chapultepec", 19.4204, -99.1819, "mirador", 2, "El único castillo real de América, con vista al Paseo de la Reforma."],
+    ["Catedral Metropolitana", 19.4344, -99.1332, "monumento", 0.75, "La catedral más grande de América."],
+    ["Palacio Nacional", 19.4320, -99.1312, "monumento", 1, "Los murales de Diego Rivera sobre la historia de México."],
+    ["Roma y Condesa", 19.4150, -99.1650, "gastronomia", 2, "Tacos, cafés y edificios art déco."],
+    ["Torre Latinoamericana", 19.4339, -99.1406, "mirador", 0.75, "Mirador en el piso 44 sobre el Centro Histórico."],
+    ["Xochimilco", 19.2570, -99.1030, "naturaleza", 3, "Paseo en trajinera por los canales con mariachis."],
+    ["Teotihuacán (excursión)", 19.6925, -98.8438, "monumento", 5, "Las pirámides del Sol y la Luna, a una hora de la ciudad."],
+    ["Mercado de San Juan", 19.4314, -99.1446, "gastronomia", 1, "Quesos, frutas exóticas e insectos para probar."],
+    ["Ángel de la Independencia", 19.4270, -99.1677, "monumento", 0.25, "El símbolo del Paseo de la Reforma."]
+  ]},
+  "antigua guatemala": { name: "Antigua Guatemala", country: "Guatemala", stops: [
+    ["Arco de Santa Catalina", 14.5600, -90.7340, "monumento", 0.5, "La postal de Antigua con el Volcán de Agua al fondo."],
+    ["Parque Central", 14.5573, -90.7339, "barrio", 0.5, "La plaza mayor con la fuente de las Sirenas."],
+    ["Cerro de la Cruz", 14.5660, -90.7310, "mirador", 1, "La mejor vista de la ciudad y los volcanes."],
+    ["Catedral de San José", 14.5568, -90.7332, "monumento", 0.5, "Fachada barroca y ruinas de la antigua catedral."],
+    ["Iglesia de La Merced", 14.5615, -90.7357, "monumento", 0.5, "Fachada amarilla de estilo barroco antigüeño."],
+    ["Casa Santo Domingo", 14.5586, -90.7290, "museo", 1.5, "Ruinas de un convento convertidas en museo y hotel."],
+    ["Convento de Capuchinas", 14.5602, -90.7310, "monumento", 1, "Claustro circular único en América."],
+    ["Mercado de Antigua", 14.5590, -90.7405, "gastronomia", 1, "Frutas, artesanías y comida típica."],
+    ["Palacio de los Capitanes Generales", 14.5566, -90.7342, "museo", 0.5, "Antigua sede del gobierno de Centroamérica."],
+    ["Iglesia de San Francisco el Grande", 14.5540, -90.7300, "monumento", 1, "Lugar de peregrinación del Santo Hermano Pedro."],
+    ["Ruinas de La Recolección", 14.5600, -90.7400, "monumento", 0.75, "Grandes bóvedas derrumbadas por los terremotos."],
+    ["Tanque La Unión", 14.5570, -90.7300, "barrio", 0.25, "Antiguas pilas públicas bajo las palmeras."],
+    ["ChocoMuseo", 14.5585, -90.7350, "gastronomia", 1, "Taller para hacer tu propio chocolate maya."],
+    ["Volcán Pacaya (excursión)", 14.3810, -90.6010, "naturaleza", 5, "Caminata a un volcán activo y malvaviscos en la lava."]
+  ]}
+};
+const ALIASES = { "paris": "paris", "rome": "roma", "london": "londres", "lisbon": "lisboa", "new york": "nueva york", "nyc": "nueva york", "tokyo": "tokio", "cdmx": "ciudad de mexico", "mexico": "ciudad de mexico", "df": "ciudad de mexico", "antigua": "antigua guatemala" };
+
+const CAT_LABEL = { monumento: "Monumento", museo: "Museo", naturaleza: "Naturaleza", gastronomia: "Gastronomía", mirador: "Mirador", barrio: "Barrio" };
+const DAY_COLORS = ["#0E7C66", "#E2683C", "#3B6FD6", "#B0408F", "#C99A06", "#5B5FC7", "#2E9BB5"];
+const PACE = { relajado: { hours: 5, start: 10 }, normal: { hours: 7, start: 9.5 }, intenso: { hours: 9, start: 9 } };
+
+const $ = s => document.querySelector(s);
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[,.]/g, " ").replace(/\s+/g, " ").trim();
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ---------- Geometría ---------- */
+function km(a, b) {
+  const R = 6371, toR = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * toR, dLon = (b.lon - a.lon) * toR;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * toR) * Math.cos(b.lat * toR) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function travel(a, b) {
+  const d = km(a, b) * 1.3; // factor de calles
+  if (d <= 2) return { mode: "a pie", min: Math.max(5, Math.round(d / 4.5 * 60)), d };
+  if (d <= 40) return { mode: "en transporte", min: Math.round(10 + d / 22 * 60), d };
+  return { mode: "en coche o tour", min: Math.round(15 + d / 55 * 60), d };
+}
+function centroid(pts) {
+  return { lat: pts.reduce((s, p) => s + p.lat, 0) / pts.length, lon: pts.reduce((s, p) => s + p.lon, 0) / pts.length };
+}
+
+/* ---------- Planificador ---------- */
+function plan(stops, days, paceKey, interests) {
+  const pace = PACE[paceKey];
+  // 1. Puntuar: prioridad original + intereses
+  const scored = stops.map((s, i) => ({ ...s, score: (stops.length - i) + (interests.has(s.cat) ? stops.length * 0.6 : 0) }))
+                      .sort((a, b) => b.score - a.score);
+  // 2. Elegir paradas que caben en el presupuesto total de horas
+  const budget = days * pace.hours;
+  const chosen = []; let used = 0;
+  for (const s of scored) {
+    const cost = s.hours + 0.4; // + trayecto medio
+    if (s.hours >= 4 && days < 3) continue; // excursiones largas solo en viajes largos
+    if (used + cost <= budget * 1.05) { chosen.push(s); used += cost; }
+  }
+  if (!chosen.length) chosen.push(scored[0]);
+  const k = Math.min(days, chosen.length);
+
+  // 3. Agrupar por cercanía (k-means con capacidad por día)
+  let cents = [chosen[0]];
+  while (cents.length < k) {
+    let best = null, bd = -1;
+    for (const p of chosen) { const d = Math.min(...cents.map(c => km(c, p))); if (d > bd) { bd = d; best = p; } }
+    cents.push(best);
+  }
+  cents = cents.map(c => ({ lat: c.lat, lon: c.lon }));
+  const cap = Math.max(pace.hours * 1.1, ...chosen.map(s => s.hours + 0.5));
+  let groups = [];
+  for (let it = 0; it < 12; it++) {
+    groups = cents.map(() => ({ items: [], load: 0 }));
+    // asignar primero a los que tienen más clara su opción
+    const order = chosen.map(p => {
+      const ds = cents.map(c => km(c, p)); const sorted = [...ds].sort((a, b) => a - b);
+      return { p, ds, regret: (sorted[1] ?? sorted[0]) - sorted[0] };
+    }).sort((a, b) => b.regret - a.regret);
+    for (const { p, ds } of order) {
+      const pref = ds.map((d, i) => [d, i]).sort((a, b) => a[0] - b[0]);
+      let placed = false;
+      for (const [, i] of pref) if (groups[i].load + p.hours + 0.4 <= cap) { groups[i].items.push(p); groups[i].load += p.hours + 0.4; placed = true; break; }
+      if (!placed) { const i = groups.reduce((m, g, j) => g.load < groups[m].load ? j : m, 0); groups[i].items.push(p); groups[i].load += p.hours + 0.4; }
+    }
+    const next = groups.map((g, i) => g.items.length ? centroid(g.items) : cents[i]);
+    if (next.every((c, i) => km(c, cents[i]) < 0.01)) break;
+    cents = next;
+  }
+  groups = groups.filter(g => g.items.length);
+
+  // 4. Orden de los días: empieza por el grupo con el imprescindible
+  groups.sort((a, b) => Math.max(...b.items.map(s => s.score)) - Math.max(...a.items.map(s => s.score)));
+  // y luego encadena por cercanía
+  const ordered = [groups.shift()];
+  while (groups.length) {
+    const last = centroid(ordered[ordered.length - 1].items);
+    groups.sort((a, b) => km(last, centroid(a.items)) - km(last, centroid(b.items)));
+    ordered.push(groups.shift());
+  }
+
+  // 5. Orden dentro del día (vecino más próximo + mejora 2-opt) y horarios
+  return ordered.map(g => {
+    let route = nearestNeighbor(g.items);
+    route = twoOpt(route);
+    return schedule(route, pace.start);
+  });
+}
+function nearestNeighbor(items) {
+  if (items.length < 3) return items.slice();
+  const c = centroid(items);
+  let cur = items.reduce((m, p) => km(c, p) > km(c, m) ? p : m, items[0]);
+  const left = items.filter(p => p !== cur), out = [cur];
+  while (left.length) {
+    let bi = 0; left.forEach((p, i) => { if (km(cur, p) < km(cur, left[bi])) bi = i; });
+    cur = left.splice(bi, 1)[0]; out.push(cur);
+  }
+  return out;
+}
+function twoOpt(r) {
+  const len = a => a.reduce((s, p, i) => i ? s + km(a[i - 1], p) : 0, 0);
+  let best = r, improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 1; i < best.length - 1; i++) for (let j = i + 1; j < best.length; j++) {
+      const cand = [...best.slice(0, i), ...best.slice(i, j + 1).reverse(), ...best.slice(j + 1)];
+      if (len(cand) + 1e-9 < len(best)) { best = cand; improved = true; }
+    }
+  }
+  return best;
+}
+function schedule(route, start) {
+  let t = start, lunch = false; const out = []; let dist = 0;
+  route.forEach((s, i) => {
+    let leg = null;
+    if (i) { leg = travel(route[i - 1], s); t += leg.min / 60; dist += leg.d; }
+    if (!lunch && t >= 13.25) { out.push({ lunch: true, time: t, leg }); t += 1.15; lunch = true; leg = null; }
+    t = Math.ceil(t * 4) / 4; // redondea a cuartos de hora
+    out.push({ ...s, time: t, leg });
+    t += s.hours;
+  });
+  if (!lunch && t > 13.5) out.splice(Math.max(1, Math.floor(out.length / 2)), 0, { lunch: true, time: null });
+  return { items: out, end: t, dist };
+}
+const fmt = h => { if (h == null) return ""; const H = Math.floor(h), M = Math.round((h - H) * 60); return `${String(H).padStart(2, "0")}:${String(M).padStart(2, "0")}`; };
+
+/* ---------- Destinos de cualquier parte (OpenStreetMap) ---------- */
+async function geocode(q) {
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=es&addressdetails=1&q=${encodeURIComponent(q)}`;
+  const r = await fetch(url, { headers: { "Accept": "application/json" } });
+  if (!r.ok) throw new Error("No pudimos consultar el mapa ahora mismo.");
+  const [hit] = await r.json();
+  if (!hit) throw new Error(`No encontramos «${q}». Prueba con el nombre de una ciudad.`);
+  return hit;
+}
+async function fetchPOIs(hit) {
+  const lat = +hit.lat, lon = +hit.lon;
+  const [s, n, w, e] = hit.boundingbox.map(Number);
+  const diag = km({ lat: s, lon: w }, { lat: n, lon: e });
+  const radius = Math.round(Math.min(Math.max(diag * 500, 2500), 12000));
+  const A = `(around:${radius},${lat},${lon})`;
+  const q = `[out:json][timeout:25];(
+    nwr["tourism"~"^(attraction|museum|viewpoint|gallery|zoo|aquarium|theme_park)$"]["name"]${A};
+    nwr["historic"~"^(monument|castle|memorial|ruins|archaeological_site|palace|fort|city_gate)$"]["name"]["wikidata"]${A};
+    nwr["leisure"~"^(park|garden)$"]["name"]["wikidata"]${A};
+    nwr["amenity"="place_of_worship"]["name"]["wikidata"]${A};
+    nwr["amenity"="marketplace"]["name"]${A};
+    nwr["natural"~"^(beach|peak|volcano)$"]["name"]["wikidata"]${A};
+  );out center tags 400;`;
+  const servers = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
+  let data = null, lastErr;
+  for (const srv of servers) {
+    try {
+      const r = await fetch(srv, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+      if (r.ok) { data = await r.json(); break; }
+      lastErr = new Error("Servidor ocupado");
+    } catch (err) { lastErr = err; }
+  }
+  if (!data) throw lastErr || new Error("No pudimos obtener lugares de interés.");
+
+  const seen = new Set(), out = [];
+  for (const el of data.elements) {
+    const t = el.tags || {}; const name = t["name:es"] || t.name;
+    const plat = el.lat ?? el.center?.lat, plon = el.lon ?? el.center?.lon;
+    if (!name || plat == null) continue;
+    const key = norm(name); if (seen.has(key)) continue; seen.add(key);
+    let cat = "monumento", hours = 1;
+    if (t.tourism === "museum" || t.tourism === "gallery") { cat = "museo"; hours = 1.75; }
+    else if (t.tourism === "viewpoint" || t.natural === "peak") { cat = "mirador"; hours = 0.5; }
+    else if (t.leisure || t.tourism === "zoo" || t.natural) { cat = "naturaleza"; hours = 1.25; }
+    else if (t.amenity === "marketplace") { cat = "gastronomia"; hours = 1; }
+    else if (t.tourism === "theme_park" || t.tourism === "aquarium") { cat = "museo"; hours = 2.5; }
+    else if (t.amenity === "place_of_worship") { hours = 0.6; }
+    let score = 0;
+    if (t.wikidata) score += 3; if (t.wikipedia) score += 3; if (t["name:es"]) score += 1;
+    if (t.tourism === "attraction" || t.tourism === "museum") score += 2;
+    if (t.heritage) score += 2; if (t.tourism === "viewpoint") score += 1;
+    if (t.amenity === "marketplace" && !t.wikidata) score -= 1;
+    score -= km({ lat, lon }, { lat: plat, lon: plon }) / (radius / 1000) * 2; // centrado
+    const desc = t["description:es"] || t.description || describe(t, cat);
+    out.push({ name, lat: plat, lon: plon, cat, hours, desc, score });
+  }
+  out.sort((a, b) => b.score - a.score);
+  if (out.length < 3) throw new Error("Encontramos pocos lugares de interés en ese destino. Prueba con una ciudad cercana más grande.");
+  return out.slice(0, 40);
+}
+function describe(t, cat) {
+  const H = { castle: "Castillo", monument: "Monumento", memorial: "Memorial", ruins: "Ruinas históricas", archaeological_site: "Sitio arqueológico", palace: "Palacio", fort: "Fortaleza", city_gate: "Puerta histórica" };
+  if (t.historic && H[t.historic]) return H[t.historic] + " del patrimonio local.";
+  if (t.amenity === "place_of_worship") return "Templo histórico, visita respetando los horarios de culto.";
+  if (t.amenity === "marketplace") return "Mercado local para probar productos de la zona.";
+  return { museo: "Museo recomendado de la ciudad.", mirador: "Buenas vistas panorámicas.", naturaleza: "Espacio verde para descansar.", monumento: "Uno de los lugares más visitados.", gastronomia: "Comida local.", barrio: "Paseo por la zona." }[cat];
+}
+
+/* ---------- Interfaz ---------- */
+const interests = new Set();
+let map, layers = [];
+
+function initCards() {
+  const dl = $("#dest-list"), cards = $("#cards");
+  for (const d of Object.values(CURATED)) {
+    dl.insertAdjacentHTML("beforeend", `<option value="${esc(d.name)}">`);
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "card";
+    b.innerHTML = `<b>${esc(d.name)}</b><span>${esc(d.country)} · ${d.stops.length} lugares</span>`;
+    b.onclick = () => { $("#dest").value = d.name; run(); };
+    cards.append(b);
+  }
+}
+document.querySelectorAll("#interests .chip").forEach(c => c.onclick = () => {
+  const on = c.getAttribute("aria-pressed") !== "true";
+  c.setAttribute("aria-pressed", on); on ? interests.add(c.dataset.i) : interests.delete(c.dataset.i);
+});
+document.querySelectorAll("[data-try]").forEach(b => b.onclick = () => { $("#dest").value = b.dataset.try; run(); });
+$("#planner").addEventListener("submit", e => { e.preventDefault(); run(); });
+
+function setStatus(html, cls = "") { $("#main").innerHTML = `<div class="status ${cls}">${html}</div>`; }
+
+async function run() {
+  const q = $("#dest").value.trim(); if (!q) return $("#dest").focus();
+  const days = +$("#days").value, pace = $("#pace").value;
+  const params = new URLSearchParams({ destino: q, dias: days, ritmo: pace });
+  if (interests.size) params.set("intereses", [...interests].join(","));
+  history.replaceState(null, "", "?" + params);
+  $("#go").disabled = true;
+  try {
+    let key = norm(q); key = ALIASES[key] || key;
+    let dest = CURATED[key] || Object.values(CURATED).find(d => norm(d.name) === key || key.startsWith(norm(d.name)));
+    let title, subtitle, stops, live = false;
+    if (dest) {
+      title = dest.name; subtitle = dest.country;
+      stops = dest.stops.map(([name, lat, lon, cat, hours, desc]) => ({ name, lat, lon, cat, hours, desc }));
+    } else {
+      setStatus(`<div class="spinner"></div>Buscando los mejores lugares de ${esc(q)}…`);
+      const hit = await geocode(q);
+      const a = hit.address || {};
+      title = hit.name || q;
+      subtitle = [a.state, a.country].filter(Boolean).filter(x => x !== title).join(", ");
+      stops = await fetchPOIs(hit); live = true;
+    }
+    const daysPlan = plan(stops, days, pace, interests);
+    render({ title, subtitle, daysPlan, pace, live, requested: days });
+    $("#main").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (err) {
+    console.error(err);
+    const msg = err instanceof TypeError ? "No hay conexión con el servicio de mapas. Revisa tu internet o prueba un destino destacado." : err.message;
+    setStatus(esc(msg || "Algo salió mal. Inténtalo de nuevo."), "error");
+  } finally { $("#go").disabled = false; }
+}
+
+function render({ title, subtitle, daysPlan, pace, live, requested }) {
+  const total = daysPlan.reduce((s, d) => s + d.items.filter(x => !x.lunch).length, 0);
+  const totalKm = daysPlan.reduce((s, d) => s + d.dist, 0);
+  const short = daysPlan.length < requested;
+  $("#main").innerHTML = `
+    <section class="result">
+      <div class="summary">
+        <div>
+          <h2>${esc(title)} en ${daysPlan.length} ${daysPlan.length === 1 ? "día" : "días"}</h2>
+          <div class="meta">${subtitle ? esc(subtitle) + " · " : ""}${total} paradas · ${Math.round(totalKm)} km de recorrido · ritmo ${pace}</div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="share">Copiar enlace</button>
+          <button class="btn" onclick="print()">Imprimir</button>
+        </div>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-day="-1">Todo el viaje</button>
+        ${daysPlan.map((_, i) => `<button class="tab" role="tab" aria-selected="false" data-day="${i}"><span class="dot" style="background:${DAY_COLORS[i % 7]}"></span>Día ${i + 1}</button>`).join("")}
+      </div>
+      <div class="days" id="days-list">
+        ${daysPlan.map((d, i) => dayHTML(d, i)).join("")}
+        ${short ? `<p class="note">Hemos agrupado lo esencial en ${daysPlan.length} ${daysPlan.length === 1 ? "día" : "días"}; el resto del tiempo es tuyo para improvisar.</p>` : ""}
+        ${live ? `<p class="note">Ruta generada automáticamente con lugares de OpenStreetMap. Revisa horarios antes de ir.</p>` : ""}
+      </div>
+      <div class="map-wrap"><div id="map" aria-label="Mapa de la ruta"></div></div>
+    </section>`;
+
+  $("#share").onclick = async () => {
+    try { await navigator.clipboard.writeText(location.href); $("#share").textContent = "¡Enlace copiado!"; }
+    catch { prompt("Copia este enlace:", location.href); }
+  };
+  drawMap(daysPlan);
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => selectDay(+t.dataset.day, daysPlan));
+  document.querySelectorAll(".stop[data-lat]").forEach(li => li.onclick = () => {
+    if (map) map.setView([+li.dataset.lat, +li.dataset.lon], 16, { animate: true });
+    const m = markerAt(li.dataset.key); if (m) m.openPopup();
+    if (window.innerWidth <= 900) $("#map").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+}
+
+function dayHTML(d, i) {
+  const color = DAY_COLORS[i % 7];
+  const real = d.items.filter(x => !x.lunch);
+  let n = 0;
+  const gmaps = real.length > 1
+    ? `https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=${real[0].lat},${real[0].lon}&destination=${real.at(-1).lat},${real.at(-1).lon}` +
+      (real.length > 2 ? `&waypoints=${real.slice(1, -1).slice(0, 8).map(s => `${s.lat},${s.lon}`).join("|")}` : "")
+    : `https://www.google.com/maps/search/?api=1&query=${real[0].lat},${real[0].lon}`;
+  return `
+    <article class="day" data-day="${i}">
+      <div class="day-head">
+        <h3><span class="day-num" style="background:${color}">${i + 1}</span>
+          <span>Día ${i + 1}<small>${real.length} ${real.length === 1 ? "parada" : "paradas"} · ${fmt(real[0].time)}–${fmt(d.end)} · ${d.dist.toFixed(1)} km</small></span></h3>
+        <a href="${gmaps}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
+      </div>
+      <ol class="stops">
+        ${d.items.map(s => {
+          const leg = s.leg ? `<div class="leg">${s.leg.min} min ${s.leg.mode}</div>` : "";
+          if (s.lunch) return `<li class="stop lunch">${leg ? `<span></span>${leg}` : ""}<span class="time">${fmt(s.time)}</span><div><div class="stop-name">Pausa para comer</div><div class="stop-desc">Busca un restaurante local cerca de la siguiente parada.</div></div></li>`;
+          n++;
+          return `<li class="stop" data-lat="${s.lat}" data-lon="${s.lon}" data-key="${i}-${n}">
+            ${leg ? `<span></span>${leg}` : ""}
+            <span class="time">${fmt(s.time)}</span>
+            <div><div class="stop-name">${n}. ${esc(s.name)}</div>
+            <div class="stop-desc"><span class="tag">${CAT_LABEL[s.cat] || "Visita"}</span>${esc(s.desc || "")} <span style="white-space:nowrap">· ${durTxt(s.hours)}</span></div></div>
+          </li>`;
+        }).join("")}
+      </ol>
+    </article>`;
+}
+const durTxt = h => { const H = Math.floor(h), M = Math.round((h - H) * 60); return !H ? `${M} min` : M ? `${H} h ${M}` : `${H} h`; };
+
+let markers = {};
+function markerAt(key) { return markers[key]; }
+function drawMap(daysPlan) {
+  markers = {}; layers = [];
+  if (!window.L) { $("#map").innerHTML = `<div class="status">No se pudo cargar el mapa.</div>`; return; }
+  map = L.map("map", { scrollWheelZoom: false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+  const all = [];
+  daysPlan.forEach((d, i) => {
+    const color = DAY_COLORS[i % 7], group = L.featureGroup();
+    const pts = d.items.filter(x => !x.lunch);
+    L.polyline(pts.map(p => [p.lat, p.lon]), { color, weight: 4, opacity: .85, dashArray: "6 8" }).addTo(group);
+    pts.forEach((p, j) => {
+      const icon = L.divIcon({ className: "", html: `<div class="pin" style="background:${color}">${j + 1}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
+      const m = L.marker([p.lat, p.lon], { icon, title: p.name })
+        .bindPopup(`<b>Día ${i + 1} · ${j + 1}. ${esc(p.name)}</b><br>${fmt(p.time)} · ${durTxt(p.hours)}`).addTo(group);
+      markers[`${i}-${j + 1}`] = m; all.push([p.lat, p.lon]);
+    });
+    group.addTo(map); layers.push(group);
+  });
+  map.fitBounds(all, { padding: [30, 30] });
+  setTimeout(() => map.invalidateSize(), 50);
+}
+function selectDay(day, daysPlan) {
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", +t.dataset.day === day));
+  document.querySelectorAll(".day").forEach(el => el.style.display = day < 0 || +el.dataset.day === day ? "" : "none");
+  if (!map) return;
+  layers.forEach((g, i) => { if (day < 0 || i === day) g.addTo(map); else map.removeLayer(g); });
+  const b = day < 0 ? L.featureGroup(layers).getBounds() : layers[day].getBounds();
+  map.fitBounds(b, { padding: [30, 30] });
+}
+
+/* ---------- Arranque: lee el enlace compartido ---------- */
+initCards();
+(() => {
+  const p = new URLSearchParams(location.search);
+  if (!p.get("destino")) return;
+  $("#dest").value = p.get("destino");
+  if (p.get("dias")) $("#days").value = p.get("dias");
+  if (p.get("ritmo")) $("#pace").value = p.get("ritmo");
+  (p.get("intereses") || "").split(",").filter(Boolean).forEach(i => {
+    const c = document.querySelector(`.chip[data-i="${i}"]`); if (c) { c.setAttribute("aria-pressed", "true"); interests.add(i); }
+  });
+  run();
+})();
+</script>
+</body>
+</html>
