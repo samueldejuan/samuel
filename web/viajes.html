@@ -120,6 +120,7 @@
   .stepper button:hover { border-color: var(--terra); color: var(--terra); }
   .seg { display: inline-flex; background: var(--sand); border-radius: 999px; padding: 4px; gap: 2px; margin-top: 12px; flex-wrap: wrap; }
   .seg button { border: 0; background: transparent; border-radius: 999px; padding: 8px 16px; font-weight: 600; font-size: 14px; }
+  .seg button small { font-weight: 500; opacity: .7; font-size: 12px; margin-left: 2px; }
   .seg button[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow-s); color: var(--terra); }
 
   /* presupuesto */
@@ -360,9 +361,9 @@
           <div class="stepper"><label>Viajeros</label><div class="ctl"><button type="button" data-step="travelers" data-d="-1" aria-label="Menos viajeros">−</button><output id="travelers">2</output><button type="button" data-step="travelers" data-d="1" aria-label="Más viajeros">+</button></div></div>
         </div>
         <div class="seg" id="pace" role="group" aria-label="Ritmo">
-          <button type="button" data-k="relajado" aria-pressed="false">🧘 Relajado</button>
-          <button type="button" data-k="normal" aria-pressed="true">🙂 Normal</button>
-          <button type="button" data-k="intenso" aria-pressed="false">⚡ A tope</button>
+          <button type="button" data-k="relajado" aria-pressed="false">🧘 Relajado <small>3-4 planes/día</small></button>
+          <button type="button" data-k="normal" aria-pressed="true">🙂 Normal <small>5-6 planes/día</small></button>
+          <button type="button" data-k="intenso" aria-pressed="false">⚡ A tope <small>7+ planes/día</small></button>
         </div>
       </div>
     </div>
@@ -934,7 +935,8 @@ const EAT = [
 const ENTRY_TXT = [["Todas las entradas incluidas", "Museos y monumentos de pago incluidos"], ["Planes gratis primero", "Priorizamos sitios sin entrada y solo pagas los imprescindibles"], ["Ruta mochilera: casi todo gratis", "Paseos, miradores, parques y mercados sin entrada"]];
 const DAY_COLORS = ["#C65D3B", "#6E7F5A", "#3E7CA6", "#C9973A", "#A5577E", "#4F8F8A", "#8A6A4F", "#D07A55", "#5C6F9E", "#7F8F3F"];
 const GRADS = ["#F2B880,#C65D3B", "#F5C6D0,#A5577E", "#E8C98F,#6E7F5A", "#BFD6E6,#3E7CA6", "#F3D9A4,#C9973A", "#CFE0D0,#4F8F8A"];
-const PACE = { relajado: { hours: 6, start: 10, min: 4 }, normal: { hours: 8, start: 9.5, min: 5 }, intenso: { hours: 10, start: 9, min: 6 } };
+/* ritmo: horas de visitas al día, hora de salida, planes mínimos y cuánto se alarga o acorta cada visita */
+const PACE = { relajado: { hours: 5.5, start: 10, min: 3, f: 1.2 }, normal: { hours: 8, start: 9.5, min: 5, f: 1 }, intenso: { hours: 10.5, start: 8.5, min: 7, f: 0.75 } };
 
 /* ============================================================ utilidades */
 const $ = s => document.querySelector(s);
@@ -987,7 +989,7 @@ function plan(stops, o) {
     if (o.save && fee(s, 1) === 0) score += N * 0.35;      // modo ahorro: prioriza lo gratis
     if (o.save && s.hours >= 4) score -= N;                // y evita excursiones de pago
     if (o.save === 2 && fee(s, 1) > 0) score -= N * 2;     // modo mochilero: solo lo gratis (si hay suficiente)
-    return { ...s, score };
+    return { ...s, score, hours: Math.round(s.hours * pace.f * 4) / 4 || 0.25 };
   }).sort((a, b) => b.score - a.score);
 
   const budget = o.days * pace.hours, chosen = []; let used = 0;
