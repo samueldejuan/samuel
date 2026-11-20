@@ -1459,7 +1459,7 @@ function renderPosts() {
   });
   document.querySelectorAll(".pola").forEach(p => photoFor("city:" + p.dataset.city, CURATED[p.dataset.city].photo, 500).then(src => setPhoto(p.querySelector(".img"), src)));
   const cr = window.PHOTO_CREDITS || [];
-  if (cr.length) $("#credits").innerHTML = `<details><summary>Créditos de las fotos (Wikimedia Commons)</summary><p>${cr.map(([t, a, l]) => `${esc(t.replace(/^File:/, ""))}${a ? " — " + esc(a) : ""}${l ? " (" + esc(l) + ")" : ""}`).join(" · ")}</p></details>`;
+  if (cr.length) $("#credits").innerHTML = `<details><summary>Créditos de las fotos (Wikimedia Commons)</summary><p>${cr.map(([t]) => `<a href="https://commons.wikimedia.org/wiki/${encodeURI(t)}" target="_blank" rel="noopener">${esc(t.replace(/^File:/, "").replace(/_/g, " "))}</a>`).join(" · ")}<br>Cada foto pertenece a su autor y tiene su licencia libre, indicada en su página de Commons.</p></details>`;
 }
 
 /* ============================================================ arranque */
