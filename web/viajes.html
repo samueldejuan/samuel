@@ -49,7 +49,7 @@
   h1 { font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: clamp(32px, 6vw, 56px); line-height: 1.05; margin: 14px auto 12px; max-width: 760px; text-wrap: balance; }
   .lead { color: var(--muted); max-width: 560px; margin: 0 auto 28px; font-size: 18px; }
 
-  form.planner { max-width: 860px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 10px; display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; text-align: left; }
+  .planner { max-width: 860px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 10px; display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; text-align: left; }
   .field { display: flex; flex-direction: column; padding: 6px 12px; border-radius: 12px; min-width: 0; }
   .field:focus-within { background: var(--surface-2); }
   .field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
@@ -125,7 +125,7 @@
     #map { height: 52vh; min-height: 300px; }
   }
   @media (max-width: 720px) {
-    form.planner { grid-template-columns: 1fr 1fr; }
+    .planner { grid-template-columns: 1fr 1fr; }
     .field.dest { grid-column: 1 / -1; }
     .go { grid-column: 1 / -1; }
     .hero { padding-top: 36px; }
@@ -148,7 +148,7 @@
   <h1>Dinos a dónde vas. Nosotros te armamos la ruta.</h1>
   <p class="lead">Escribe un destino y en segundos tendrás un itinerario día a día, con horarios, trayectos y mapa.</p>
 
-  <form class="planner" id="planner" autocomplete="off">
+  <div class="planner" id="planner" role="search">
     <div class="field dest">
       <label for="dest">Destino</label>
       <input id="dest" name="destino" list="dest-list" placeholder="Ej. Roma, Tokio, Antigua Guatemala…" required>
@@ -168,8 +168,8 @@
         <option value="intenso">Intenso</option>
       </select>
     </div>
-    <button class="go" id="go" type="submit">Crear ruta</button>
-  </form>
+    <button class="go" id="go" type="button">Crear ruta</button>
+  </div>
 
   <div class="chips" id="interests" aria-label="Intereses">
     <button type="button" class="chip" data-i="monumento" aria-pressed="false">Historia y monumentos</button>
@@ -590,16 +590,17 @@ document.querySelectorAll("#interests .chip").forEach(c => c.onclick = () => {
   c.setAttribute("aria-pressed", on); on ? interests.add(c.dataset.i) : interests.delete(c.dataset.i);
 });
 document.querySelectorAll("[data-try]").forEach(b => b.onclick = () => { $("#dest").value = b.dataset.try; run(); });
-$("#planner").addEventListener("submit", e => { e.preventDefault(); run(); });
+$("#go").addEventListener("click", run);
+$("#dest").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); run(); } });
 
 function setStatus(html, cls = "") { $("#main").innerHTML = `<div class="status ${cls}">${html}</div>`; }
 
 async function run() {
-  const q = $("#dest").value.trim(); if (!q) return $("#dest").focus();
+  const q = $("#dest").value.trim(); if (!q) { $("#dest").focus(); $("#dest").placeholder = "Escribe primero un destino"; return; }
   const days = +$("#days").value, pace = $("#pace").value;
   const params = new URLSearchParams({ destino: q, dias: days, ritmo: pace });
   if (interests.size) params.set("intereses", [...interests].join(","));
-  history.replaceState(null, "", "?" + params);
+  try { history.replaceState(null, "", "?" + params); } catch {}
   $("#go").disabled = true;
   try {
     let key = norm(q); key = ALIASES[key] || key;
@@ -618,7 +619,7 @@ async function run() {
     }
     const daysPlan = plan(stops, days, pace, interests);
     render({ title, subtitle, daysPlan, pace, live, requested: days });
-    $("#main").scrollIntoView({ behavior: "smooth", block: "start" });
+    try { $("#main").scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
   } catch (err) {
     console.error(err);
     const msg = err instanceof TypeError ? "No hay conexión con el servicio de mapas. Revisa tu internet o prueba un destino destacado." : err.message;
