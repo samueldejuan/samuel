@@ -934,7 +934,7 @@ const EAT = [
 const ENTRY_TXT = [["Todas las entradas incluidas", "Museos y monumentos de pago incluidos"], ["Planes gratis primero", "Priorizamos sitios sin entrada y solo pagas los imprescindibles"], ["Ruta mochilera: casi todo gratis", "Paseos, miradores, parques y mercados sin entrada"]];
 const DAY_COLORS = ["#C65D3B", "#6E7F5A", "#3E7CA6", "#C9973A", "#A5577E", "#4F8F8A", "#8A6A4F", "#D07A55", "#5C6F9E", "#7F8F3F"];
 const GRADS = ["#F2B880,#C65D3B", "#F5C6D0,#A5577E", "#E8C98F,#6E7F5A", "#BFD6E6,#3E7CA6", "#F3D9A4,#C9973A", "#CFE0D0,#4F8F8A"];
-const PACE = { relajado: { hours: 5, start: 10 }, normal: { hours: 7, start: 9.5 }, intenso: { hours: 9, start: 9 } };
+const PACE = { relajado: { hours: 6, start: 10, min: 4 }, normal: { hours: 8, start: 9.5, min: 5 }, intenso: { hours: 10, start: 9, min: 6 } };
 
 /* ============================================================ utilidades */
 const $ = s => document.querySelector(s);
@@ -1025,6 +1025,24 @@ function plan(stops, o) {
     cents = next;
   }
   groups = groups.filter(g => g.items.length);
+  // mínimo de planes por día: se completa con sitios cercanos, en visitas más cortas
+  const taken = new Set(chosen), pool = scored.filter(s => !taken.has(s) && s.hours < 4);
+  const near = chosen.filter(s => s.hours < 4), cityCenter = centroid(near.length ? near : chosen);
+  for (const g of groups) {
+    const long = g.items.some(s => s.hours >= 4);
+    const want = long ? Math.max(3, pace.min - 2) : pace.min;
+    while (g.items.length < want && pool.length) {
+      const c = centroid(g.items.filter(s => s.hours < 4).length ? g.items.filter(s => s.hours < 4) : g.items);
+      const pick = ctr => { let bi = -1, bs = Infinity; pool.forEach((s, i) => { const sc = km(ctr, s) - s.score * 0.15; if (sc < bs) { bs = sc; bi = i; } }); return bi >= 0 && km(ctr, pool[bi]) <= 6 ? bi : -1; };
+      // en días de excursión, si no hay nada cerca, planes en la ciudad para la vuelta
+      let bi = pick(c);
+      if (bi < 0) bi = pick(cityCenter);
+      if (bi < 0) break;
+      const s = pool.splice(bi, 1)[0];
+      const short = { ...s, hours: Math.min(s.hours, s.cat === "museo" ? 1 : 0.75) };
+      g.items.push(short); g.load += short.hours + 0.3;
+    }
+  }
   // si a un día le falta contenido, tiempo libre por la zona para pasear y comprar
   for (const g of groups) if (g.load < pace.hours * 0.6) {
     const c = centroid(g.items), near = g.items.reduce((m, s) => km(c, s) < km(c, m) ? s : m, g.items[0]);
