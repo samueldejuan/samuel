@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rumbo · Planificador de viajes</title>
-<meta name="description" content="Escribe tu destino y obtén una ruta organizada día a día, con horarios y mapa.">
+<meta name="description" content="Escribe tu destino y obtén una ruta organizada día a día, con dónde comer, transporte, presupuesto y mapa.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -12,28 +12,39 @@
   :root {
     --bg: #F6F3EE;
     --surface: #FFFFFF;
-    --surface-2: #EFEAE2;
+    --surface-2: #F1ECE4;
     --text: #1C2430;
     --muted: #5E6878;
-    --line: #E2DBD0;
+    --line: #E4DCD0;
     --accent: #0E7C66;
     --accent-ink: #FFFFFF;
     --accent-soft: #DCEFEA;
-    --warm: #E2683C;
-    --shadow: 0 1px 2px rgba(28,36,48,.06), 0 8px 24px rgba(28,36,48,.08);
-    --radius: 16px;
+    --warm: #D9572B;
+    --warm-soft: #FCE6DC;
+    --gold: #B7861A;
+    --shadow: 0 1px 2px rgba(28,36,48,.06), 0 10px 30px rgba(28,36,48,.10);
+    --radius: 18px;
+    /* ilustración */
+    --sky-top: #8FD3F4; --sky-bottom: #FDEBD3; --sun: #FFC857; --cloud: #FFFFFF;
+    --hill-far: #A7D3C4; --city: #6FA8A0; --hill-near: #4E9C86; --sea: #2D8CB4; --sea-2: #59B3D6; --trail: #FFFFFF;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #11161D; --surface: #19202A; --surface-2: #222B37; --text: #ECEFF3;
+      --bg: #10151C; --surface: #18202A; --surface-2: #212A36; --text: #ECEFF3;
       --muted: #9AA5B4; --line: #2C3644; --accent: #3CC4A4; --accent-ink: #0B1712;
-      --accent-soft: #173A33; --warm: #F08A5D; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+      --accent-soft: #173A33; --warm: #F08A5D; --warm-soft: #3A2419; --gold: #E2B24A;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.4);
+      --sky-top: #0E1B33; --sky-bottom: #2B3A5C; --sun: #F4EBC8; --cloud: #4A5A7A;
+      --hill-far: #233A4A; --city: #1B2E3B; --hill-near: #152532; --sea: #0F3550; --sea-2: #1C4C6B; --trail: #F4EBC8;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #11161D; --surface: #19202A; --surface-2: #222B37; --text: #ECEFF3;
+    --bg: #10151C; --surface: #18202A; --surface-2: #212A36; --text: #ECEFF3;
     --muted: #9AA5B4; --line: #2C3644; --accent: #3CC4A4; --accent-ink: #0B1712;
-    --accent-soft: #173A33; --warm: #F08A5D; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    --accent-soft: #173A33; --warm: #F08A5D; --warm-soft: #3A2419; --gold: #E2B24A;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.4);
+    --sky-top: #0E1B33; --sky-bottom: #2B3A5C; --sun: #F4EBC8; --cloud: #4A5A7A;
+    --hill-far: #233A4A; --city: #1B2E3B; --hill-near: #152532; --sea: #0F3550; --sea-2: #1C4C6B; --trail: #F4EBC8;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
@@ -41,50 +52,96 @@
   a { color: var(--accent); }
   button, input, select { font: inherit; color: inherit; }
 
-  /* Cabecera */
-  .hero { padding: 56px 16px 40px; text-align: center; background:
-      radial-gradient(1200px 400px at 50% -10%, var(--accent-soft), transparent 70%); }
-  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .02em; color: var(--accent); text-transform: uppercase; font-size: 13px; }
-  .brand svg { width: 20px; height: 20px; }
-  h1 { font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: clamp(32px, 6vw, 56px); line-height: 1.05; margin: 14px auto 12px; max-width: 760px; text-wrap: balance; }
-  .lead { color: var(--muted); max-width: 560px; margin: 0 auto 28px; font-size: 18px; }
+  /* ---------- Portada con ilustración ---------- */
+  .hero { position: relative; overflow: hidden; padding: 48px 16px 80px; text-align: center; isolation: isolate; }
+  .scene { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+  .hero-inner { max-width: 960px; margin: 0 auto; }
+  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 13px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent); padding: 6px 14px; border-radius: 999px; backdrop-filter: blur(6px); }
+  .brand svg { width: 18px; height: 18px; color: var(--accent); }
+  h1 { font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: clamp(32px, 6vw, 58px); line-height: 1.04; margin: 16px auto 10px; max-width: 780px; text-wrap: balance; }
+  .lead { max-width: 580px; margin: 0 auto 26px; font-size: 18px; color: color-mix(in srgb, var(--text) 82%, transparent); }
 
-  .planner { max-width: 860px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 10px; display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; text-align: left; }
-  .field { display: flex; flex-direction: column; padding: 6px 12px; border-radius: 12px; min-width: 0; }
-  .field:focus-within { background: var(--surface-2); }
-  .field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .field input, .field select { border: 0; background: transparent; outline: none; padding: 2px 0; font-size: 17px; font-weight: 500; min-width: 0; width: 100%; }
+  .planner { background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: 12px; text-align: left; }
+  .row { display: grid; grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .field { display: flex; flex-direction: column; padding: 8px 14px; border-radius: 12px; min-width: 0; background: var(--surface-2); }
+  .field:focus-within { outline: 2px solid var(--accent); }
+  .field label, .group-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .field input, .field select { border: 0; background: transparent; outline: none; padding: 2px 0; font-size: 17px; font-weight: 600; min-width: 0; width: 100%; }
   .field select { cursor: pointer; }
-  .go { border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 700; border-radius: 12px; padding: 0 24px; cursor: pointer; font-size: 16px; min-height: 52px; }
-  .go:hover { filter: brightness(1.06); }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; padding: 16px 6px 6px; }
+  .group { min-width: 0; }
+  .group.wide { grid-column: 1 / -1; }
+  .group-title { display: block; margin-bottom: 8px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opt-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px 12px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .opt-btn svg { width: 16px; height: 16px; flex: none; }
+  .opt-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .level { flex-direction: column; align-items: flex-start; gap: 0; text-align: left; }
+  .level small { font-weight: 500; font-size: 12px; opacity: .85; white-space: nowrap; }
+  .money { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .money input { width: 110px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 6px 10px; font-weight: 600; color: var(--text); }
+  .money input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 13px; font-size: 14px; cursor: pointer; user-select: none; }
+  .chip[aria-pressed="true"] { background: var(--warm); border-color: var(--warm); color: #fff; }
+  .chip.int[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .go { display: block; width: 100%; margin-top: 14px; border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 700; border-radius: 14px; padding: 15px 24px; cursor: pointer; font-size: 17px; }
+  .go:hover { filter: brightness(1.07); }
   .go:disabled { opacity: .6; cursor: wait; }
 
-  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 18px auto 0; max-width: 860px; }
-  .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer; user-select: none; }
-  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .hint { color: var(--muted); font-size: 14px; margin-top: 16px; }
-  .hint button { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0 2px; font-weight: 600; }
-
-  /* Resultados */
+  /* ---------- Destinos destacados ---------- */
   main { max-width: 1240px; margin: 0 auto; padding: 0 16px 64px; }
-  .status { text-align: center; color: var(--muted); padding: 24px 0; }
+  .ideas { margin-top: 36px; }
+  .ideas h2 { font-family: Fraunces, Georgia, serif; font-size: 28px; margin: 0 0 4px; }
+  .ideas p { color: var(--muted); margin: 0 0 16px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .card { position: relative; border: 0; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 3; cursor: pointer; text-align: left; padding: 0; color: #fff; box-shadow: var(--shadow); background: var(--g, linear-gradient(135deg, #0E7C66, #2D8CB4)); background-size: cover; background-position: center; transition: transform .2s; }
+  .card:hover { transform: translateY(-3px); }
+  .card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,.72)); }
+  .card .txt { position: absolute; left: 14px; right: 14px; bottom: 12px; z-index: 1; }
+  .card b { display: block; font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 1.1; }
+  .card span { font-size: 13px; opacity: .9; }
+
+  /* ---------- Resultado ---------- */
+  .status { text-align: center; color: var(--muted); padding: 40px 0; }
   .status.error { color: var(--warm); }
-  .spinner { width: 28px; height: 28px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+  .spinner { width: 30px; height: 30px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .result { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
-  .summary { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; padding: 8px 0 4px; }
-  .summary h2 { font-family: Fraunces, Georgia, serif; font-size: clamp(26px, 4vw, 36px); margin: 0; line-height: 1.1; }
-  .summary .meta { color: var(--muted); margin-top: 4px; }
+  .banner { position: relative; margin-top: 28px; border-radius: 22px; overflow: hidden; min-height: 260px; display: flex; align-items: flex-end; color: #fff; background: linear-gradient(135deg, #0E7C66, #2D8CB4 60%, #E2683C); background-size: cover; background-position: center; box-shadow: var(--shadow); }
+  .banner::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.05) 20%, rgba(0,0,0,.7)); }
+  .banner-body { position: relative; padding: 24px 26px; width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 14px; }
+  .banner h2 { font-family: Fraunces, Georgia, serif; font-size: clamp(30px, 5vw, 48px); margin: 0; line-height: 1.05; }
+  .banner .meta { opacity: .92; margin-top: 6px; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
   .btn:hover { border-color: var(--accent); }
+  .banner .btn { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.4); color: #fff; backdrop-filter: blur(6px); }
 
-  .tabs { grid-column: 1 / -1; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+  .budget { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
+  .budget h3 { margin: 0 0 10px; font-size: 18px; }
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tier { border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; cursor: pointer; background: var(--surface); text-align: left; }
+  .tier[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); outline: 1px solid var(--accent); }
+  .tier .name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .tier .val { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tier .rng { font-size: 12px; color: var(--muted); }
+  .verdict { margin-top: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; }
+  .verdict.ok { background: var(--accent-soft); }
+  .verdict.ko { background: var(--warm-soft); }
+  table.breakdown { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .breakdown td { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .breakdown td:last-child { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .breakdown tr.total td { border-bottom: 0; font-size: 16px; font-weight: 700; padding-top: 10px; }
+  .fine { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+  .tabs { display: flex; gap: 6px; overflow-x: auto; padding: 18px 0 6px; }
   .tab { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
   .tab .dot { width: 10px; height: 10px; border-radius: 50%; }
   .tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
 
+  .result { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; margin-top: 8px; }
   .days { display: flex; flex-direction: column; gap: 18px; }
   .day { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
   .day-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
@@ -93,47 +150,51 @@
   .day-head small { color: var(--muted); font-weight: 500; font-size: 13px; display: block; }
   .day-head a { font-size: 13px; font-weight: 600; white-space: nowrap; }
   ol.stops { list-style: none; margin: 0; padding: 8px 18px 14px; }
-  .stop { display: grid; grid-template-columns: 54px 1fr; gap: 12px; padding: 10px 0; cursor: pointer; }
+  .stop { display: grid; grid-template-columns: 54px 1fr; gap: 0 12px; padding: 10px 0; cursor: pointer; }
   .stop:hover .stop-name { color: var(--accent); }
   .time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; padding-top: 2px; }
   .stop-name { font-weight: 600; }
   .stop-desc { color: var(--muted); font-size: 14px; margin-top: 2px; }
   .tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 1px 7px; margin-right: 6px; vertical-align: 1px; }
-  .leg { grid-column: 2; color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 6px; padding: 2px 0; }
-  .leg::before { content: ""; width: 2px; height: 14px; background: var(--line); margin-left: -22px; margin-right: 14px; }
-  .stop.lunch .stop-name { color: var(--warm); }
+  .leg { grid-column: 2; color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 6px; padding: 0 0 8px; }
+  .leg svg { width: 15px; height: 15px; }
+  .meal { background: var(--warm-soft); border-radius: 12px; padding: 10px 12px; margin: 4px -6px; }
+  .meal .stop-name { color: var(--warm); }
+  .meal .tag { color: var(--warm); background: var(--surface); }
+  .meal a { font-size: 13px; font-weight: 600; color: var(--warm); }
+  .price { color: var(--gold); font-weight: 700; letter-spacing: .05em; }
+  .day-foot { border-top: 1px dashed var(--line); padding: 10px 18px; font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 
   .map-wrap { position: sticky; top: 16px; }
   #map { height: calc(100vh - 32px); min-height: 420px; max-height: 780px; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow); background: var(--surface-2); }
   .pin { width: 26px; height: 26px; border-radius: 50%; color: #fff; display: grid; place-items: center; font: 700 12px/1 Inter, sans-serif; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
-  .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
-
-  .ideas { max-width: 860px; margin: 36px auto 0; text-align: left; }
-  .ideas h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; text-align: center; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-  .card { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; cursor: pointer; text-align: left; }
-  .card:hover { border-color: var(--accent); }
-  .card b { display: block; }
-  .card span { color: var(--muted); font-size: 13px; }
+  .pin.food { background: #fff !important; border-width: 3px; font-size: 13px; }
+  .note { color: var(--muted); font-size: 13px; margin: 0; }
 
   footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
 
   @media (max-width: 900px) {
     .result { grid-template-columns: 1fr; }
-    .map-wrap { position: relative; top: 0; order: 1; grid-column: 1 / -1; }
-    .days { order: 2; }
+    .map-wrap { position: relative; top: 0; }
     #map { height: 52vh; min-height: 300px; }
+    .budget { grid-template-columns: 1fr; }
   }
   @media (max-width: 720px) {
-    .planner { grid-template-columns: 1fr 1fr; }
+    .row { grid-template-columns: 1fr 1fr 1fr; }
     .field.dest { grid-column: 1 / -1; }
-    .go { grid-column: 1 / -1; }
-    .hero { padding-top: 36px; }
+    .opts { grid-template-columns: 1fr; }
+    .hero { padding-top: 28px; }
+    .tiers .val { font-size: 18px; }
+  }
+  @media (max-width: 420px) {
+    .levels, .tiers { grid-template-columns: 1fr; }
   }
   @media print {
-    .hero, .tabs, .actions, .map-wrap, footer { display: none !important; }
+    .hero, .tabs, .actions, .map-wrap, footer, .ideas { display: none !important; }
     .result { display: block; }
-    .day { box-shadow: none; break-inside: avoid; margin-bottom: 12px; }
+    .day, .budget { box-shadow: none; break-inside: avoid; margin-bottom: 12px; }
+    .banner { min-height: 0; color: var(--text); background: none !important; }
+    .banner::before { display: none; }
     body { background: #fff; }
   }
 </style>
@@ -141,71 +202,137 @@
 <body>
 
 <header class="hero">
-  <div class="brand">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></svg>
-    Rumbo · Viajes organizados
-  </div>
-  <h1>Dinos a dónde vas. Nosotros te armamos la ruta.</h1>
-  <p class="lead">Escribe un destino y en segundos tendrás un itinerario día a día, con horarios, trayectos y mapa.</p>
+  <!-- Ilustración de fondo -->
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--sky-top)"/><stop offset="1" style="stop-color: var(--sky-bottom)"/>
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="900" fill="url(#sky)"/>
+    <circle cx="1180" cy="170" r="78" fill="var(--sun)" opacity=".9"/>
+    <circle cx="1180" cy="170" r="118" fill="var(--sun)" opacity=".18"/>
+    <g fill="var(--cloud)" opacity=".85">
+      <ellipse cx="220" cy="150" rx="90" ry="26"/><ellipse cx="270" cy="132" rx="56" ry="30"/><ellipse cx="180" cy="138" rx="40" ry="22"/>
+      <ellipse cx="980" cy="90" rx="70" ry="20"/><ellipse cx="1020" cy="76" rx="44" ry="24"/>
+      <ellipse cx="640" cy="230" rx="60" ry="16"/><ellipse cx="672" cy="218" rx="34" ry="18"/>
+    </g>
+    <!-- avión y estela -->
+    <path d="M 60 470 C 340 300, 620 380, 860 220 S 1180 120, 1290 70" fill="none" stroke="var(--trail)" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round" opacity=".9"/>
+    <g transform="translate(1290 70) rotate(-24)">
+      <path d="M-26 0 L22 -3 Q30 0 22 3 Z M-2 -2 L-12 -22 L-4 -22 L10 -2 Z M-2 2 L-12 22 L-4 22 L10 2 Z M-22 -1 L-28 -10 L-23 -10 L-16 -1 Z M-22 1 L-28 10 L-23 10 L-16 1 Z" fill="var(--text)" opacity=".85"/>
+    </g>
+    <!-- montañas lejanas -->
+    <path d="M0 640 L120 560 L210 610 L330 500 L460 600 L560 540 L700 620 L820 530 L960 610 L1080 520 L1200 590 L1320 540 L1440 600 L1440 900 L0 900 Z" fill="var(--hill-far)"/>
+    <!-- siluetas de ciudad -->
+    <g fill="var(--city)">
+      <!-- torre de hierro -->
+      <path d="M232 700 L262 560 L268 470 L272 470 L278 560 L308 700 L292 700 C285 670 255 670 248 700 Z"/>
+      <rect x="252" y="600" width="36" height="6"/><rect x="262" y="540" width="16" height="5"/>
+      <!-- torre del reloj -->
+      <rect x="380" y="560" width="34" height="140"/><path d="M376 560 L397 500 L418 560 Z"/><circle cx="397" cy="585" r="9" fill="var(--hill-far)"/>
+      <rect x="414" y="620" width="70" height="80"/>
+      <!-- cúpula -->
+      <rect x="520" y="630" width="110" height="70"/><path d="M535 630 Q575 560 615 630 Z"/><rect x="572" y="555" width="6" height="18"/>
+      <!-- anfiteatro -->
+      <path d="M840 700 L840 620 Q920 596 1000 620 L1000 700 Z"/>
+      <g fill="var(--hill-far)"><rect x="852" y="640" width="12" height="20" rx="6"/><rect x="876" y="636" width="12" height="20" rx="6"/><rect x="900" y="634" width="12" height="20" rx="6"/><rect x="924" y="634" width="12" height="20" rx="6"/><rect x="948" y="636" width="12" height="20" rx="6"/><rect x="972" y="640" width="12" height="20" rx="6"/></g>
+      <!-- pagoda -->
+      <path d="M1180 700 L1180 650 L1160 650 L1230 620 L1300 650 L1280 650 L1280 700 Z"/>
+      <path d="M1192 622 L1172 622 L1230 592 L1288 622 L1268 622 L1268 640 L1192 640 Z"/>
+      <path d="M1200 594 L1186 594 L1230 566 L1274 594 L1260 594 L1260 610 L1200 610 Z"/>
+      <rect x="1228" y="540" width="4" height="28"/>
+      <!-- rascacielos -->
+      <rect x="680" y="590" width="40" height="110"/><rect x="726" y="540" width="32" height="160"/><path d="M736 540 L742 500 L748 540 Z"/><rect x="764" y="610" width="44" height="90"/>
+    </g>
+    <!-- colinas cercanas -->
+    <path d="M0 720 C 200 660, 380 700, 560 690 S 900 660, 1100 690 S 1340 680, 1440 660 L1440 900 L0 900 Z" fill="var(--hill-near)"/>
+    <!-- palmera -->
+    <g fill="var(--hill-near)" transform="translate(1360 700)">
+      <path d="M-4 0 Q 6 -70 -2 -130 L 4 -130 Q 14 -70 6 0 Z"/>
+      <path d="M2 -130 Q -40 -150 -70 -118 Q -36 -136 2 -126 Z"/><path d="M2 -130 Q 44 -152 76 -120 Q 40 -138 2 -126 Z"/>
+      <path d="M2 -132 Q -20 -170 -54 -170 Q -20 -158 0 -128 Z"/><path d="M2 -132 Q 26 -172 60 -168 Q 24 -158 4 -128 Z"/>
+    </g>
+    <!-- mar -->
+    <path d="M0 790 C 120 770, 240 800, 360 785 S 600 770, 720 788 S 960 800, 1080 784 S 1320 772, 1440 788 L1440 900 L0 900 Z" fill="var(--sea)"/>
+    <path d="M0 830 C 160 815, 280 840, 420 826 S 700 812, 860 830 S 1160 842, 1440 822 L1440 900 L0 900 Z" fill="var(--sea-2)" opacity=".6"/>
+  </svg>
 
-  <div class="planner" id="planner" role="search">
-    <div class="field dest">
-      <label for="dest">Destino</label>
-      <input id="dest" name="destino" list="dest-list" placeholder="Ej. Roma, Tokio, Antigua Guatemala…" required>
-      <datalist id="dest-list"></datalist>
+  <div class="hero-inner">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></svg>
+      Rumbo · Viajes organizados
     </div>
-    <div class="field">
-      <label for="days">Días</label>
-      <select id="days" name="dias">
-        <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="pace">Ritmo</label>
-      <select id="pace" name="ritmo">
-        <option value="relajado">Relajado</option>
-        <option value="normal" selected>Normal</option>
-        <option value="intenso">Intenso</option>
-      </select>
-    </div>
-    <button class="go" id="go" type="button">Crear ruta</button>
-  </div>
+    <h1>Dinos a dónde vas. Nosotros te armamos el viaje.</h1>
+    <p class="lead">Ruta día a día, dónde comer según tus gustos, cómo moverte y cuánto te va a costar.</p>
 
-  <div class="chips" id="interests" aria-label="Intereses">
-    <button type="button" class="chip" data-i="monumento" aria-pressed="false">Historia y monumentos</button>
-    <button type="button" class="chip" data-i="museo" aria-pressed="false">Museos y arte</button>
-    <button type="button" class="chip" data-i="naturaleza" aria-pressed="false">Parques y naturaleza</button>
-    <button type="button" class="chip" data-i="gastronomia" aria-pressed="false">Gastronomía</button>
-    <button type="button" class="chip" data-i="mirador" aria-pressed="false">Miradores</button>
-    <button type="button" class="chip" data-i="barrio" aria-pressed="false">Barrios y compras</button>
+    <div class="planner" id="planner" role="search">
+      <div class="row">
+        <div class="field dest">
+          <label for="dest">Destino</label>
+          <input id="dest" list="dest-list" placeholder="Ej. Roma, Tokio, Antigua Guatemala…">
+          <datalist id="dest-list"></datalist>
+        </div>
+        <div class="field">
+          <label for="days">Días</label>
+          <select id="days"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
+        </div>
+        <div class="field">
+          <label for="travelers">Viajeros</label>
+          <select id="travelers"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select>
+        </div>
+        <div class="field">
+          <label for="pace">Ritmo</label>
+          <select id="pace"><option value="relajado">Relajado</option><option value="normal" selected>Normal</option><option value="intenso">Intenso</option></select>
+        </div>
+      </div>
+
+      <div class="opts">
+        <div class="group" role="group" aria-labelledby="t-transport">
+          <span class="group-title" id="t-transport">¿Cómo te quieres mover?</span>
+          <div class="seg" id="transport"></div>
+        </div>
+        <div class="group" role="group" aria-labelledby="t-budget">
+          <span class="group-title" id="t-budget">Presupuesto <span id="budget-for" style="text-transform:none;letter-spacing:0;font-weight:500"></span></span>
+          <div class="levels" id="levels"></div>
+          <label class="money">Mi presupuesto total:
+            <input id="money" type="number" min="0" step="10" inputmode="numeric" placeholder="Ej. 400"> €
+          </label>
+        </div>
+        <div class="group wide" role="group" aria-labelledby="t-food">
+          <span class="group-title" id="t-food">¿Qué te gusta comer? <span style="text-transform:none;letter-spacing:0;font-weight:500">(elige todas las que quieras)</span></span>
+          <div class="seg" id="food"></div>
+        </div>
+        <div class="group wide" role="group" aria-labelledby="t-int">
+          <span class="group-title" id="t-int">¿Qué te interesa ver?</span>
+          <div class="seg" id="interests"></div>
+        </div>
+      </div>
+      <button class="go" id="go" type="button">Crear mi ruta</button>
+    </div>
   </div>
-  <p class="hint">Funciona con cualquier ciudad del mundo. ¿Sin ideas? Prueba <button type="button" data-try="Roma">Roma</button>, <button type="button" data-try="Tokio">Tokio</button> o <button type="button" data-try="Antigua Guatemala">Antigua Guatemala</button>.</p>
 </header>
 
-<main id="main">
-  <section class="ideas" id="ideas">
-    <h4>Destinos destacados</h4>
-    <div class="cards" id="cards"></div>
-  </section>
-</main>
+<main id="main"></main>
 
 <footer>
-  Mapas © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
-  Los horarios son orientativos: consulta aperturas y entradas antes de ir.
+  Mapas © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · Fotos de Wikipedia.
+  Precios y horarios orientativos, sin vuelos: consúltalos antes de reservar.
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ============================================================
-   Destinos destacados (ruta curada).
-   Cada parada: [nombre, lat, lon, categoría, horas, descripción]
-   El orden indica prioridad: los primeros son imprescindibles.
+   DATOS
+   Paradas:      [nombre, lat, lon, categoría, horas, descripción]
+   Restaurantes: [nombre, lat, lon, "tipos", precio 1-3, descripción]
+   cost = índice de precios (1 = España)
    ============================================================ */
 const CURATED = {
-  madrid: { name: "Madrid", country: "España", stops: [
+  madrid: { name: "Madrid", country: "España", cost: 1, photo: ["Gran Vía (Madrid)", "Madrid"], stops: [
     ["Museo del Prado", 40.4138, -3.6921, "museo", 2.5, "Velázquez, Goya y El Bosco en una de las pinacotecas más importantes del mundo."],
     ["Palacio Real", 40.4180, -3.7143, "monumento", 1.5, "La residencia oficial de la Corona, con más de 3.000 salas."],
-    ["Plaza Mayor", 40.4155, -3.7074, "monumento", 0.5, "La plaza porticada del Madrid de los Austrias."],
+    ["Plaza Mayor", 40.4155, -3.7074, "barrio", 0.5, "La plaza porticada del Madrid de los Austrias."],
     ["Parque del Retiro", 40.4153, -3.6845, "naturaleza", 1.5, "Paseo en barca por el estanque y visita al Palacio de Cristal."],
     ["Puerta del Sol", 40.4169, -3.7035, "barrio", 0.5, "El kilómetro cero de España y el reloj de las campanadas."],
     ["Mercado de San Miguel", 40.4154, -3.7090, "gastronomia", 1, "Tapas, vermú y producto fresco bajo una estructura de hierro."],
@@ -214,13 +341,25 @@ const CURATED = {
     ["Gran Vía", 40.4200, -3.7058, "barrio", 1, "Teatros, tiendas y arquitectura de principios del siglo XX."],
     ["Catedral de la Almudena", 40.4157, -3.7146, "monumento", 0.5, "Frente al Palacio Real, con vistas a la Casa de Campo."],
     ["Palacio de Cibeles", 40.4189, -3.6921, "mirador", 0.75, "Mirador en lo alto del antiguo Palacio de Comunicaciones."],
-    ["Puerta de Alcalá", 40.4200, -3.6887, "monumento", 0.25, "Puerta neoclásica, símbolo de la ciudad."],
+    ["Puerta de Alcalá", 40.4200, -3.6887, "barrio", 0.25, "Puerta neoclásica, símbolo de la ciudad."],
     ["Museo Thyssen-Bornemisza", 40.4161, -3.6949, "museo", 2, "Del gótico al pop art en una sola colección."],
     ["Barrio de las Letras", 40.4140, -3.6985, "barrio", 1, "Calles de Cervantes y Lope de Vega, llenas de bares."],
     ["La Latina y Cava Baja", 40.4110, -3.7110, "gastronomia", 1.5, "La ruta de tapas más castiza de Madrid."],
-    ["Estadio Santiago Bernabéu", 40.4531, -3.6883, "barrio", 1.5, "Tour por el estadio y el museo del Real Madrid."]
+    ["Estadio Santiago Bernabéu", 40.4531, -3.6883, "museo", 1.5, "Tour por el estadio y el museo del Real Madrid."]
+  ], food: [
+    ["Sobrino de Botín", 40.4141, -3.7080, "local carne", 3, "El restaurante más antiguo del mundo: cochinillo y cordero asado."],
+    ["Casa Paco", 40.4136, -3.7083, "carne local", 2, "Taberna clásica de solomillo a la piedra."],
+    ["Casa Lucio", 40.4123, -3.7086, "local tapas", 2, "Famosa por sus huevos rotos."],
+    ["Casa Revuelta", 40.4148, -3.7084, "tapas marisco", 1, "Tapas de bacalao rebozado junto a la Plaza Mayor."],
+    ["El Brillante", 40.4087, -3.6940, "callejera local", 1, "El bocadillo de calamares más famoso, junto a Atocha."],
+    ["Bodega de la Ardosa", 40.4268, -3.7020, "tapas local", 1, "Tortilla de patata legendaria en Malasaña."],
+    ["Ramen Kagura", 40.4185, -3.7078, "japonesa", 1, "Ramen casero cerca de Ópera."],
+    ["Kabuki Wellington", 40.4233, -3.6843, "japonesa", 3, "Alta cocina japonesa con estrella Michelin."],
+    ["Fratelli Figurato", 40.4290, -3.7030, "italiana", 1, "Pizza napolitana en Malasaña."],
+    ["Punto MX", 40.4271, -3.6779, "mexicana", 3, "Cocina mexicana de autor."],
+    ["Vega", 40.4228, -3.7062, "vegetariana", 2, "Cocina vegana creativa en la calle de la Luna."]
   ]},
-  barcelona: { name: "Barcelona", country: "España", stops: [
+  barcelona: { name: "Barcelona", country: "España", cost: 1.08, photo: ["Templo Expiatorio de la Sagrada Familia", "Barcelona"], stops: [
     ["Sagrada Família", 41.4036, 2.1744, "monumento", 2, "La obra maestra inacabada de Gaudí. Reserva la entrada con antelación."],
     ["Park Güell", 41.4145, 2.1527, "naturaleza", 1.5, "Mosaicos, columnas y vistas de la ciudad desde la colina."],
     ["Casa Batlló", 41.3916, 2.1649, "monumento", 1.25, "La casa de los huesos, joya modernista del Paseo de Gracia."],
@@ -236,8 +375,18 @@ const CURATED = {
     ["Palau de la Música Catalana", 41.3875, 2.1753, "monumento", 0.75, "Sala de conciertos modernista Patrimonio de la Humanidad."],
     ["Parc de la Ciutadella", 41.3880, 2.1870, "naturaleza", 1, "Arco de Triunfo, cascada monumental y lago."],
     ["Bunkers del Carmel", 41.4192, 2.1617, "mirador", 1, "La vista de 360º más espectacular de Barcelona."]
+  ], food: [
+    ["Cervecería Catalana", 41.3929, 2.1619, "tapas local", 2, "Montaditos y tapas siempre llenos de gente."],
+    ["Bar del Pla", 41.3854, 2.1793, "tapas local", 2, "Tapas creativas en El Born."],
+    ["La Paradeta", 41.3848, 2.1830, "marisco", 2, "Eliges el pescado en la vitrina y te lo cocinan al momento."],
+    ["7 Portes", 41.3823, 2.1834, "marisco local", 3, "Paellas desde 1836 frente al puerto."],
+    ["Can Solé", 41.3797, 2.1897, "marisco local", 3, "Arroces clásicos de la Barceloneta."],
+    ["El Nacional", 41.3907, 2.1689, "carne marisco tapas", 2, "Antigua fábrica con brasería, marisquería y tapas."],
+    ["Koy Shunka", 41.3863, 2.1747, "japonesa", 3, "Barra japonesa con estrella Michelin."],
+    ["Teresa Carles", 41.3846, 2.1680, "vegetariana", 2, "Cocina vegetariana mediterránea."],
+    ["Bo de B", 41.3816, 2.1816, "callejera", 1, "Bocadillos mediterráneos enormes y baratos."]
   ]},
-  paris: { name: "París", country: "Francia", stops: [
+  paris: { name: "París", country: "Francia", cost: 1.35, photo: ["Torre Eiffel", "París"], stops: [
     ["Torre Eiffel", 48.8584, 2.2945, "mirador", 2, "Sube al segundo piso o a la cima para ver todo París."],
     ["Museo del Louvre", 48.8606, 2.3376, "museo", 3, "La Gioconda, la Victoria de Samotracia y miles de obras más."],
     ["Notre-Dame", 48.8530, 2.3499, "monumento", 1, "La catedral gótica restaurada en la Île de la Cité."],
@@ -252,32 +401,54 @@ const CURATED = {
     ["Ópera Garnier", 48.8720, 2.3316, "monumento", 1, "El palacio de la ópera, todo oro y terciopelo."],
     ["Jardín de las Tullerías", 48.8635, 2.3275, "naturaleza", 0.75, "Entre el Louvre y la plaza de la Concordia."],
     ["Panteón", 48.8462, 2.3464, "monumento", 0.75, "Mausoleo de Voltaire, Victor Hugo y Marie Curie."],
-    ["Trocadéro", 48.8616, 2.2893, "mirador", 0.5, "La foto clásica de la Torre Eiffel."]
+    ["Trocadéro", 48.8616, 2.2893, "naturaleza", 0.5, "La foto clásica de la Torre Eiffel."]
+  ], food: [
+    ["Bouillon Chartier", 48.8720, 2.3446, "local", 1, "Cocina francesa clásica a precios de 1896."],
+    ["Bouillon Pigalle", 48.8822, 2.3378, "local", 1, "Platos tradicionales baratos al pie de Montmartre."],
+    ["Le Relais de l'Entrecôte", 48.8536, 2.3346, "carne", 2, "Solo sirven una cosa: entrecot con su salsa secreta y patatas."],
+    ["Le Comptoir du Relais", 48.8519, 2.3388, "local", 2, "Bistró de Saint-Germain."],
+    ["Café de Flore", 48.8541, 2.3326, "local", 3, "El café literario más famoso de París."],
+    ["L'As du Fallafel", 48.8573, 2.3590, "callejera vegetariana", 1, "El falafel más famoso de Le Marais."],
+    ["Breizh Café", 48.8613, 2.3624, "local callejera", 2, "Crepes y galettes bretonas."],
+    ["Kunitoraya", 48.8659, 2.3369, "japonesa", 2, "Udon casero en el barrio japonés de la rue Sainte-Anne."],
+    ["Pink Mamma", 48.8813, 2.3364, "italiana", 2, "Trattoria de cuatro plantas en Pigalle."],
+    ["Le Train Bleu", 48.8447, 2.3734, "local", 3, "Comedor belle époque en la estación de Lyon."]
   ]},
-  roma: { name: "Roma", country: "Italia", stops: [
+  roma: { name: "Roma", country: "Italia", cost: 1.12, photo: ["Coliseo", "Roma"], stops: [
     ["Coliseo", 41.8902, 12.4922, "monumento", 2, "El anfiteatro más grande del Imperio romano."],
     ["Foro Romano y Palatino", 41.8925, 12.4853, "monumento", 2, "El corazón político de la Roma antigua."],
     ["Museos Vaticanos y Capilla Sixtina", 41.9065, 12.4536, "museo", 3, "Los frescos de Miguel Ángel. Mejor a primera hora."],
     ["Basílica de San Pedro", 41.9022, 12.4539, "monumento", 1.5, "Sube a la cúpula para ver la plaza desde arriba."],
-    ["Fontana di Trevi", 41.9009, 12.4833, "monumento", 0.5, "Lanza una moneda para asegurar tu regreso."],
+    ["Fontana di Trevi", 41.9009, 12.4833, "barrio", 0.5, "Lanza una moneda para asegurar tu regreso."],
     ["Panteón", 41.8986, 12.4769, "monumento", 0.75, "Templo de casi 2.000 años con su óculo abierto al cielo."],
     ["Piazza Navona", 41.8992, 12.4731, "barrio", 0.75, "La fuente de los Cuatro Ríos de Bernini."],
-    ["Trastevere", 41.8897, 12.4700, "gastronomia", 1.5, "Cena de cacio e pepe entre calles empedradas."],
+    ["Trastevere", 41.8897, 12.4700, "gastronomia", 1.5, "Paseo entre calles empedradas y trattorias."],
     ["Plaza de España", 41.9057, 12.4823, "barrio", 0.5, "La escalinata y la via Condotti."],
     ["Castillo de Sant'Angelo", 41.9031, 12.4663, "mirador", 1.25, "Mausoleo de Adriano con terraza sobre el Tíber."],
     ["Villa Borghese y Galería Borghese", 41.9142, 12.4922, "museo", 2, "Esculturas de Bernini y un gran parque."],
     ["Altar de la Patria", 41.8946, 12.4831, "mirador", 0.75, "Ascensor panorámico sobre la Roma antigua."],
     ["Campo de' Fiori", 41.8956, 12.4722, "gastronomia", 0.5, "Mercado por la mañana, ambiente por la noche."],
-    ["Boca de la Verdad", 41.8881, 12.4814, "monumento", 0.25, "La leyenda dice que muerde a los mentirosos."],
-    ["Gianicolo", 41.8919, 12.4610, "mirador", 0.5, "Panorámica de cúpulas al atardecer."]
+    ["Boca de la Verdad", 41.8881, 12.4814, "barrio", 0.25, "La leyenda dice que muerde a los mentirosos."],
+    ["Gianicolo", 41.8919, 12.4610, "naturaleza", 0.5, "Panorámica de cúpulas al atardecer."]
+  ], food: [
+    ["Da Enzo al 29", 41.8880, 12.4776, "italiana local", 2, "Cacio e pepe y carbonara en una trattoria diminuta."],
+    ["Armando al Pantheon", 41.8989, 12.4772, "italiana local", 2, "Cocina romana de familia junto al Panteón."],
+    ["Roscioli Salumeria", 41.8939, 12.4740, "italiana local", 3, "Charcutería, quesos y la carbonara más famosa."],
+    ["Pizzeria da Baffetto", 41.8992, 12.4695, "italiana", 1, "Pizza romana fina y crujiente."],
+    ["Bonci Pizzarium", 41.9065, 12.4479, "italiana callejera", 1, "Pizza al corte cerca del Vaticano."],
+    ["Trapizzino", 41.8885, 12.4688, "callejera italiana", 1, "Bolsillos de pizza rellenos de guisos romanos."],
+    ["Dar Filettaro", 41.8946, 12.4740, "marisco callejera", 1, "Filetes de bacalao frito desde hace 70 años."],
+    ["Checchino dal 1887", 41.8775, 12.4757, "carne local", 3, "Templo de la cocina de casquería romana en Testaccio."],
+    ["Antico Arco", 41.8875, 12.4645, "italiana", 3, "Cocina creativa en lo alto del Gianicolo."],
+    ["Hasekura", 41.8955, 12.4900, "japonesa", 3, "Japonés de referencia en el barrio de Monti."]
   ]},
-  londres: { name: "Londres", country: "Reino Unido", stops: [
+  londres: { name: "Londres", country: "Reino Unido", cost: 1.5, photo: ["Palacio de Westminster", "Londres"], stops: [
     ["Big Ben y Parlamento", 51.5007, -0.1246, "monumento", 0.75, "El reloj más famoso del mundo a orillas del Támesis."],
     ["Museo Británico", 51.5194, -0.1270, "museo", 2.5, "La piedra de Rosetta y las momias egipcias. Entrada gratuita."],
     ["Torre de Londres", 51.5081, -0.0759, "monumento", 2, "Las joyas de la Corona y los famosos cuervos."],
     ["Abadía de Westminster", 51.4993, -0.1273, "monumento", 1.5, "Coronaciones reales desde 1066."],
     ["Tower Bridge", 51.5055, -0.0754, "mirador", 0.5, "Pasarela de cristal a 42 metros sobre el río."],
-    ["Palacio de Buckingham", 51.5014, -0.1419, "monumento", 0.75, "El cambio de guardia, a las 11:00 en días alternos."],
+    ["Palacio de Buckingham", 51.5014, -0.1419, "barrio", 0.75, "El cambio de guardia, a las 11:00 en días alternos."],
     ["London Eye", 51.5033, -0.1196, "mirador", 1, "La noria con vistas de toda la ciudad."],
     ["Trafalgar Square y National Gallery", 51.5080, -0.1281, "museo", 2, "Van Gogh, Turner y Velázquez gratis."],
     ["Covent Garden", 51.5117, -0.1240, "barrio", 1, "Artistas callejeros y mercado cubierto."],
@@ -287,49 +458,85 @@ const CURATED = {
     ["Hyde Park", 51.5073, -0.1657, "naturaleza", 1.5, "Speakers' Corner y el lago Serpentine."],
     ["Museo de Historia Natural", 51.4967, -0.1764, "museo", 2, "Dinosaurios bajo una catedral victoriana."],
     ["Camden Market", 51.5413, -0.1463, "barrio", 1.5, "Puestos vintage y comida de todo el mundo."]
+  ], food: [
+    ["Dishoom Covent Garden", 51.5124, -0.1269, "vegetariana callejera", 2, "Cocina de los cafés de Bombay."],
+    ["Flat Iron Covent Garden", 51.5121, -0.1243, "carne", 1, "Steak de calidad a precio muy razonable."],
+    ["Hawksmoor Seven Dials", 51.5136, -0.1257, "carne", 3, "Los mejores steaks de Londres."],
+    ["Rules", 51.5106, -0.1232, "local carne", 3, "El restaurante más antiguo de Londres: caza y pasteles de carne."],
+    ["Poppies Fish & Chips", 51.5205, -0.0730, "marisco local", 1, "Fish and chips clásico en Spitalfields."],
+    ["The George Inn", 51.5040, -0.0896, "local", 1, "Pub con galería del siglo XVII."],
+    ["Padella", 51.5052, -0.0905, "italiana", 1, "Pasta fresca hecha a mano junto a Borough Market."],
+    ["Sticks'n'Sushi Covent Garden", 51.5113, -0.1225, "japonesa", 2, "Sushi y brochetas yakitori."],
+    ["Kanada-Ya", 51.5155, -0.1276, "japonesa", 1, "Ramen tonkotsu de Fukuoka."],
+    ["Wahaca Covent Garden", 51.5110, -0.1238, "mexicana callejera", 1, "Comida callejera mexicana."],
+    ["The Churchill Arms", 51.5069, -0.1946, "local", 1, "Pub cubierto de flores en Kensington."]
   ]},
-  lisboa: { name: "Lisboa", country: "Portugal", stops: [
+  lisboa: { name: "Lisboa", country: "Portugal", cost: 0.88, photo: ["Torre de Belém", "Lisboa"], stops: [
     ["Barrio de Alfama", 38.7114, -9.1300, "barrio", 1.5, "Callejuelas, tranvía 28 y fado al anochecer."],
     ["Torre de Belém", 38.6916, -9.2160, "monumento", 0.75, "Fortaleza manuelina a la orilla del Tajo."],
     ["Monasterio de los Jerónimos", 38.6979, -9.2068, "monumento", 1.5, "Claustro de piedra labrada, Patrimonio de la Humanidad."],
     ["Castillo de San Jorge", 38.7139, -9.1335, "mirador", 1.25, "Murallas moriscas con la mejor vista de Lisboa."],
-    ["Plaza del Comercio", 38.7075, -9.1364, "monumento", 0.5, "La gran plaza abierta al río."],
+    ["Plaza del Comercio", 38.7075, -9.1364, "barrio", 0.5, "La gran plaza abierta al río."],
     ["Pastéis de Belém", 38.6975, -9.2032, "gastronomia", 0.5, "Los pasteles de nata originales desde 1837."],
     ["Barrio Alto y Chiado", 38.7110, -9.1440, "barrio", 1.5, "Cafés históricos de día y vida nocturna de noche."],
-    ["Mirador de Santa Luzia", 38.7118, -9.1302, "mirador", 0.25, "Azulejos y buganvillas sobre los tejados de Alfama."],
+    ["Mirador de Santa Luzia", 38.7118, -9.1302, "naturaleza", 0.25, "Azulejos y buganvillas sobre los tejados de Alfama."],
     ["Elevador de Santa Justa", 38.7121, -9.1394, "mirador", 0.5, "Ascensor neogótico de hierro en la Baixa."],
     ["Catedral de Lisboa", 38.7097, -9.1334, "monumento", 0.5, "La Sé, la iglesia más antigua de la ciudad."],
-    ["Padrão dos Descobrimentos", 38.6936, -9.2057, "monumento", 0.5, "Monumento a los navegantes portugueses."],
+    ["Padrão dos Descobrimentos", 38.6936, -9.2057, "barrio", 0.5, "Monumento a los navegantes portugueses."],
     ["Time Out Market", 38.7069, -9.1459, "gastronomia", 1, "Los mejores chefs de Lisboa bajo un mismo techo."],
-    ["Mirador de São Pedro de Alcântara", 38.7155, -9.1446, "mirador", 0.25, "Jardín-mirador frente al castillo."],
+    ["Mirador de São Pedro de Alcântara", 38.7155, -9.1446, "naturaleza", 0.25, "Jardín-mirador frente al castillo."],
     ["LX Factory", 38.7034, -9.1784, "barrio", 1, "Antigua fábrica convertida en espacio creativo."],
     ["Oceanario de Lisboa", 38.7635, -9.0937, "museo", 2, "Uno de los acuarios más grandes de Europa."]
+  ], food: [
+    ["Cervejaria Ramiro", 38.7214, -9.1356, "marisco", 2, "Marisco a la plancha y el famoso prego de postre."],
+    ["Taberna da Rua das Flores", 38.7096, -9.1434, "local tapas", 2, "Petiscos portugueses en una taberna pequeña."],
+    ["O Trevo", 38.7108, -9.1430, "callejera carne", 1, "Bifanas (bocadillo de cerdo) en el Chiado."],
+    ["Zé da Mouraria", 38.7155, -9.1360, "local", 1, "Raciones enormes de comida casera."],
+    ["Taberna Sal Grosso", 38.7126, -9.1268, "local tapas", 2, "Cocina portuguesa con vistas en Alfama."],
+    ["A Cevicheria", 38.7143, -9.1484, "marisco", 2, "Ceviches bajo un pulpo gigante en Príncipe Real."],
+    ["Sala de Corte", 38.7069, -9.1468, "carne", 3, "Carnes maduradas a la brasa en Cais do Sodré."],
+    ["Belcanto", 38.7095, -9.1417, "local", 3, "Dos estrellas Michelin del chef José Avillez."],
+    ["Enoteca de Belém", 38.6972, -9.2016, "local", 2, "Vinos portugueses y cocina de temporada."],
+    ["Pão Pão Queijo Queijo", 38.6975, -9.2025, "callejera vegetariana", 1, "Sándwiches y falafel baratos en Belém."]
   ]},
-  "nueva york": { name: "Nueva York", country: "Estados Unidos", stops: [
+  "nueva york": { name: "Nueva York", country: "Estados Unidos", cost: 1.65, photo: ["Puente de Brooklyn", "Nueva York"], stops: [
     ["Central Park", 40.7829, -73.9654, "naturaleza", 2, "Bethesda Terrace, Strawberry Fields y el lago."],
     ["Estatua de la Libertad", 40.6892, -74.0445, "monumento", 3, "Ferri desde Battery Park con parada en Ellis Island."],
     ["Times Square", 40.7580, -73.9855, "barrio", 0.75, "Pantallas gigantes y teatros de Broadway."],
     ["Empire State Building", 40.7484, -73.9857, "mirador", 1.25, "El rascacielos más icónico, mirador en la planta 86."],
-    ["Puente de Brooklyn", 40.7061, -73.9969, "mirador", 1, "Crúzalo a pie hacia Manhattan."],
+    ["Puente de Brooklyn", 40.7061, -73.9969, "naturaleza", 1, "Crúzalo a pie hacia Manhattan."],
     ["Museo Metropolitano (MET)", 40.7794, -73.9632, "museo", 3, "Cinco mil años de arte en la Quinta Avenida."],
     ["Memorial y Museo del 11S", 40.7115, -74.0134, "museo", 1.5, "Las dos fuentes en la huella de las Torres Gemelas."],
     ["High Line", 40.7480, -74.0048, "naturaleza", 1, "Parque elevado sobre una antigua vía de tren."],
     ["Rockefeller Center", 40.7587, -73.9787, "mirador", 1, "Top of the Rock, con el Empire State de frente."],
-    ["Grand Central Terminal", 40.7527, -73.9772, "monumento", 0.5, "El vestíbulo con su techo de constelaciones."],
+    ["Grand Central Terminal", 40.7527, -73.9772, "barrio", 0.5, "El vestíbulo con su techo de constelaciones."],
     ["DUMBO", 40.7033, -73.9881, "barrio", 1, "La foto del puente de Manhattan entre ladrillos."],
-    ["Chelsea Market", 40.7424, -74.0060, "gastronomia", 1, "Langosta, tacos y donuts en una antigua fábrica."],
+    ["Chelsea Market", 40.7424, -74.0060, "gastronomia", 1, "Mercado gastronómico en una antigua fábrica."],
     ["MoMA", 40.7614, -73.9776, "museo", 2, "La noche estrellada de Van Gogh y mucho más."],
     ["Wall Street", 40.7060, -74.0090, "barrio", 0.5, "La Bolsa y el toro de bronce."],
     ["Greenwich Village", 40.7336, -74.0027, "barrio", 1.5, "Washington Square, jazz y brownstones."],
     ["Chinatown y Little Italy", 40.7170, -73.9970, "gastronomia", 1.5, "Dim sum y cannoli a dos calles de distancia."]
+  ], food: [
+    ["Katz's Delicatessen", 40.7223, -73.9874, "carne callejera", 2, "El sándwich de pastrami más famoso del mundo."],
+    ["Joe's Pizza", 40.7305, -74.0021, "italiana callejera", 1, "La porción de pizza neoyorquina por excelencia."],
+    ["Juliana's", 40.7027, -73.9934, "italiana", 2, "Pizza de horno de carbón bajo el puente de Brooklyn."],
+    ["Los Tacos No. 1", 40.7424, -74.0062, "mexicana callejera", 1, "Tacos de adobada en Chelsea Market."],
+    ["Shake Shack Madison Square", 40.7414, -73.9882, "carne callejera", 1, "Hamburguesas en el parque donde nació la cadena."],
+    ["Keens Steakhouse", 40.7509, -73.9878, "carne", 3, "Steakhouse de 1885 con miles de pipas en el techo."],
+    ["Peter Luger", 40.7099, -73.9625, "carne", 3, "El steakhouse legendario de Brooklyn."],
+    ["Grand Central Oyster Bar", 40.7525, -73.9772, "marisco", 2, "Ostras bajo las bóvedas de la estación."],
+    ["Russ & Daughters", 40.7225, -73.9883, "marisco local", 2, "Bagels con salmón ahumado desde 1914."],
+    ["Joe's Shanghai", 40.7157, -73.9978, "callejera", 1, "Dumplings de sopa en Chinatown."],
+    ["Sushi Nakazawa", 40.7318, -74.0047, "japonesa", 3, "Menú omakase de sushi en el West Village."],
+    ["Le Bernardin", 40.7615, -73.9818, "marisco", 3, "Tres estrellas Michelin dedicadas al pescado."]
   ]},
-  tokio: { name: "Tokio", country: "Japón", stops: [
+  tokio: { name: "Tokio", country: "Japón", cost: 1.15, photo: ["Sensō-ji", "Tokio"], stops: [
     ["Templo Senso-ji (Asakusa)", 35.7148, 139.7967, "monumento", 1.5, "El templo más antiguo de Tokio y la calle Nakamise."],
     ["Cruce de Shibuya", 35.6595, 139.7005, "barrio", 0.75, "El paso de peatones más concurrido del mundo."],
     ["Santuario Meiji", 35.6764, 139.6993, "monumento", 1, "Santuario sintoísta en medio de un bosque."],
     ["Tokyo Skytree", 35.7101, 139.8107, "mirador", 1.25, "La torre más alta de Japón, con el Fuji en días claros."],
     ["Harajuku y Takeshita-dori", 35.6716, 139.7031, "barrio", 1, "Moda, crepes y cultura kawaii."],
-    ["Mercado exterior de Tsukiji", 35.6655, 139.7707, "gastronomia", 1, "Sushi y tamagoyaki para desayunar."],
+    ["Mercado exterior de Tsukiji", 35.6655, 139.7707, "gastronomia", 1, "Puestos de pescado, tortilla japonesa y cuchillos."],
     ["Shinjuku Gyoen", 35.6852, 139.7100, "naturaleza", 1.5, "Jardín japonés, inglés y francés en uno."],
     ["Akihabara", 35.6984, 139.7731, "barrio", 1.5, "Electrónica, anime y cafés temáticos."],
     ["Parque Ueno", 35.7156, 139.7745, "naturaleza", 1.5, "Cerezos, estanques y museos."],
@@ -339,9 +546,24 @@ const CURATED = {
     ["Ginza", 35.6717, 139.7650, "barrio", 1.5, "Grandes almacenes y arquitectura de vanguardia."],
     ["Museo Nacional de Tokio", 35.7188, 139.7765, "museo", 2, "La mayor colección de arte japonés."],
     ["Odaiba y teamLab", 35.6260, 139.7840, "museo", 2.5, "Arte digital inmersivo en la bahía."]
+  ], food: [
+    ["Sushizanmai Tsukiji", 35.6654, 139.7706, "japonesa marisco", 2, "Sushi fresco junto al antiguo mercado, abierto casi siempre."],
+    ["Uobei Shibuya", 35.6600, 139.6979, "japonesa", 1, "Sushi que llega en tren hasta tu mesa, muy barato."],
+    ["Sushi Kyubey Ginza", 35.6686, 139.7610, "japonesa marisco", 3, "Uno de los sushi bar más prestigiosos de Tokio."],
+    ["Ichiran Shibuya", 35.6610, 139.7010, "japonesa callejera", 1, "Ramen tonkotsu en cabinas individuales."],
+    ["Gonpachi Nishi-Azabu", 35.6595, 139.7243, "japonesa", 2, "Izakaya de madera que inspiró una película de Tarantino."],
+    ["Tonkatsu Maisen Aoyama", 35.6681, 139.7108, "carne japonesa", 2, "Chuleta de cerdo empanada en una antigua casa de baños."],
+    ["Yoroniku", 35.6628, 139.7178, "carne", 3, "Yakiniku de wagyu de primerísima calidad."],
+    ["Asakusa Imahan", 35.7121, 139.7943, "carne japonesa", 3, "Sukiyaki de ternera desde 1895."],
+    ["Daikokuya Tempura", 35.7123, 139.7955, "marisco japonesa", 2, "Tempura de langostinos en Asakusa."],
+    ["Tsunahachi Shinjuku", 35.6912, 139.7029, "marisco japonesa", 2, "Tempura clásica desde 1923."],
+    ["Ameya-Yokocho", 35.7106, 139.7747, "callejera", 1, "Mercado callejero con brochetas y fruta junto a Ueno."],
+    ["Kanda Matsuya", 35.6966, 139.7690, "japonesa vegetariana", 1, "Soba artesanal desde 1884."],
+    ["Savoy Azabu-Juban", 35.6560, 139.7360, "italiana", 2, "Pizza napolitana de las mejores de Asia."],
+    ["Ain Soph Ginza", 35.6713, 139.7680, "vegetariana", 2, "Cocina vegana creativa."]
   ]},
-  "ciudad de mexico": { name: "Ciudad de México", country: "México", stops: [
-    ["Zócalo", 19.4326, -99.1332, "monumento", 0.5, "Una de las plazas más grandes del mundo."],
+  "ciudad de mexico": { name: "Ciudad de México", country: "México", cost: 0.58, photo: ["Palacio de Bellas Artes (Ciudad de México)", "Ciudad de México"], stops: [
+    ["Zócalo", 19.4326, -99.1332, "barrio", 0.5, "Una de las plazas más grandes del mundo."],
     ["Museo Nacional de Antropología", 19.4260, -99.1863, "museo", 3, "La Piedra del Sol y las grandes culturas mesoamericanas."],
     ["Templo Mayor", 19.4351, -99.1314, "monumento", 1.5, "Las ruinas del corazón de Tenochtitlan."],
     ["Palacio de Bellas Artes", 19.4352, -99.1412, "museo", 1, "Murales de Rivera y Orozco bajo una cúpula art déco."],
@@ -350,14 +572,29 @@ const CURATED = {
     ["Bosque y Castillo de Chapultepec", 19.4204, -99.1819, "mirador", 2, "El único castillo real de América, con vista al Paseo de la Reforma."],
     ["Catedral Metropolitana", 19.4344, -99.1332, "monumento", 0.75, "La catedral más grande de América."],
     ["Palacio Nacional", 19.4320, -99.1312, "monumento", 1, "Los murales de Diego Rivera sobre la historia de México."],
-    ["Roma y Condesa", 19.4150, -99.1650, "gastronomia", 2, "Tacos, cafés y edificios art déco."],
+    ["Roma y Condesa", 19.4150, -99.1650, "barrio", 2, "Cafés, parques y edificios art déco."],
     ["Torre Latinoamericana", 19.4339, -99.1406, "mirador", 0.75, "Mirador en el piso 44 sobre el Centro Histórico."],
     ["Xochimilco", 19.2570, -99.1030, "naturaleza", 3, "Paseo en trajinera por los canales con mariachis."],
     ["Teotihuacán (excursión)", 19.6925, -98.8438, "monumento", 5, "Las pirámides del Sol y la Luna, a una hora de la ciudad."],
     ["Mercado de San Juan", 19.4314, -99.1446, "gastronomia", 1, "Quesos, frutas exóticas e insectos para probar."],
-    ["Ángel de la Independencia", 19.4270, -99.1677, "monumento", 0.25, "El símbolo del Paseo de la Reforma."]
+    ["Ángel de la Independencia", 19.4270, -99.1677, "barrio", 0.25, "El símbolo del Paseo de la Reforma."]
+  ], food: [
+    ["El Cardenal", 19.4352, -99.1365, "mexicana local", 2, "Cocina mexicana tradicional y chocolate con conchas."],
+    ["Café de Tacuba", 19.4365, -99.1394, "mexicana local", 2, "Enchiladas en un salón colonial desde 1912."],
+    ["Taquería Los Cocuyos", 19.4318, -99.1394, "mexicana callejera carne", 1, "Tacos de suadero y campechanos hasta la madrugada."],
+    ["El Huequito", 19.4327, -99.1420, "mexicana callejera", 1, "Tacos al pastor desde 1959."],
+    ["El Tizoncito", 19.4129, -99.1714, "mexicana callejera", 1, "Dicen que aquí se inventaron los tacos al pastor."],
+    ["Contramar", 19.4187, -99.1660, "marisco mexicana", 3, "Tostadas de atún y pescado a la talla en la Roma."],
+    ["Rosetta", 19.4196, -99.1622, "italiana", 3, "Cocina italo-mexicana en una casona de la Roma."],
+    ["Por Siempre Vegana Taquería", 19.4180, -99.1610, "vegetariana mexicana callejera", 1, "Tacos veganos de puesto callejero."],
+    ["Rokai", 19.4290, -99.1690, "japonesa", 3, "Barra de sushi omakase en la Cuauhtémoc."],
+    ["Sonora Grill Prime", 19.4320, -99.1940, "carne", 3, "Cortes de carne a la brasa en Polanco."],
+    ["Pujol", 19.4327, -99.1960, "mexicana", 3, "El restaurante más famoso de México: mole madre."],
+    ["Los Danzantes Coyoacán", 19.3496, -99.1619, "mexicana", 2, "Cocina oaxaqueña y mezcal frente a la plaza."],
+    ["Tostadas Coyoacán", 19.3497, -99.1626, "mexicana marisco callejera", 1, "Tostadas de ceviche en el mercado de Coyoacán."],
+    ["La Gruta", 19.6956, -98.8402, "mexicana local", 2, "Comer dentro de una cueva junto a las pirámides."]
   ]},
-  "antigua guatemala": { name: "Antigua Guatemala", country: "Guatemala", stops: [
+  "antigua guatemala": { name: "Antigua Guatemala", country: "Guatemala", cost: 0.5, photo: ["Arco de Santa Catalina", "Antigua Guatemala"], stops: [
     ["Arco de Santa Catalina", 14.5600, -90.7340, "monumento", 0.5, "La postal de Antigua con el Volcán de Agua al fondo."],
     ["Parque Central", 14.5573, -90.7339, "barrio", 0.5, "La plaza mayor con la fuente de las Sirenas."],
     ["Cerro de la Cruz", 14.5660, -90.7310, "mirador", 1, "La mejor vista de la ciudad y los volcanes."],
@@ -372,53 +609,105 @@ const CURATED = {
     ["Tanque La Unión", 14.5570, -90.7300, "barrio", 0.25, "Antiguas pilas públicas bajo las palmeras."],
     ["ChocoMuseo", 14.5585, -90.7350, "gastronomia", 1, "Taller para hacer tu propio chocolate maya."],
     ["Volcán Pacaya (excursión)", 14.3810, -90.6010, "naturaleza", 5, "Caminata a un volcán activo y malvaviscos en la lava."]
+  ], food: [
+    ["Comedores del Mercado", 14.5592, -90.7402, "local callejera", 1, "Pepián, tamales y atol en los comedores populares."],
+    ["La Fonda de la Calle Real", 14.5582, -90.7346, "local carne", 2, "Cocina guatemalteca: pepián y caldo real."],
+    ["Café Condesa", 14.5571, -90.7341, "local", 2, "Desayunos y almuerzos en un patio colonial del Parque Central."],
+    ["Frida's", 14.5610, -90.7345, "mexicana", 2, "Cocina mexicana junto al Arco de Santa Catalina."],
+    ["Hector's Bistro", 14.5612, -90.7361, "local carne", 2, "Bistró pequeño frente a La Merced."],
+    ["Por Qué No?", 14.5577, -90.7303, "local", 2, "Restaurante diminuto y lleno de encanto."],
+    ["Caffé Mediterráneo", 14.5562, -90.7349, "italiana", 2, "Pasta casera en el centro."],
+    ["Rainbow Café", 14.5555, -90.7364, "vegetariana", 1, "Cocina vegetariana y librería de viajeros."],
+    ["Mesón Panza Verde", 14.5520, -90.7368, "local", 3, "Alta cocina en un hotel boutique."],
+    ["Restaurante Casa Santo Domingo", 14.5586, -90.7292, "local", 3, "Comedor elegante entre ruinas del convento."]
   ]}
 };
-const ALIASES = { "paris": "paris", "rome": "roma", "london": "londres", "lisbon": "lisboa", "new york": "nueva york", "nyc": "nueva york", "tokyo": "tokio", "cdmx": "ciudad de mexico", "mexico": "ciudad de mexico", "df": "ciudad de mexico", "antigua": "antigua guatemala" };
+const ALIASES = { "rome": "roma", "london": "londres", "lisbon": "lisboa", "new york": "nueva york", "nyc": "nueva york", "tokyo": "tokio", "cdmx": "ciudad de mexico", "mexico": "ciudad de mexico", "df": "ciudad de mexico", "antigua": "antigua guatemala" };
 
-const CAT_LABEL = { monumento: "Monumento", museo: "Museo", naturaleza: "Naturaleza", gastronomia: "Gastronomía", mirador: "Mirador", barrio: "Barrio" };
+/* Índice de precios por país, para destinos buscados en vivo */
+const COUNTRY_COST = { es: 1, pt: .88, fr: 1.3, it: 1.1, gb: 1.45, ie: 1.35, de: 1.15, nl: 1.3, be: 1.2, ch: 1.8, at: 1.15, gr: .9, hr: .9, cz: .8, pl: .7, hu: .7, ro: .65, se: 1.3, no: 1.6, dk: 1.45, fi: 1.3, is: 1.7,
+  us: 1.55, ca: 1.3, mx: .6, gt: .5, sv: .55, hn: .55, ni: .5, cr: .8, pa: .75, co: .55, pe: .55, ec: .55, bo: .45, ar: .55, cl: .75, uy: .85, br: .65, cu: .6, do: .7,
+  jp: 1.15, cn: .8, kr: 1.05, th: .55, vn: .45, id: .5, ph: .5, my: .55, in: .4, sg: 1.5, ae: 1.4, tr: .6, ma: .5, eg: .45, za: .65, au: 1.4, nz: 1.35 };
+
+const CAT_LABEL = { monumento: "Monumento", museo: "Museo", naturaleza: "Naturaleza", gastronomia: "Gastronomía", mirador: "Mirador", barrio: "Paseo" };
+const FEES = { monumento: 12, museo: 15, mirador: 10, naturaleza: 0, barrio: 0, gastronomia: 0 }; // entrada media en España, €
+const FOOD = { local: "Comida típica", japonesa: "Sushi y japonesa", carne: "Carne y parrilla", italiana: "Italiana y pizza", marisco: "Pescado y marisco", tapas: "Tapas", mexicana: "Mexicana", vegetariana: "Vegetariana", callejera: "Comida callejera" };
+const INTERESTS = { monumento: "Historia y monumentos", museo: "Museos y arte", naturaleza: "Parques y naturaleza", gastronomia: "Mercados", mirador: "Miradores", barrio: "Barrios y paseos" };
+
+const ICONS = {
+  pie: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m9 20 3-6 3 3v4M7 12l3-4 4 1 2 4M10 8l-1 5"/></svg>',
+  publico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21l2-4M16 21l-2-4"/><circle cx="9" cy="14" r=".5"/><circle cx="15" cy="14" r=".5"/></svg>',
+  bici: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M15 6h2l1.5 11M5.5 17 9 9h7M12 17 9 9"/></svg>',
+  coche: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h14l2 5v5h-2"/><path d="M3 12h18"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg>'
+};
+const TRANSPORT = {
+  publico: { label: "Transporte público", gm: "transit", daily: 8 },
+  pie:     { label: "A pie", gm: "walking", daily: 0 },
+  bici:    { label: "Bicicleta", gm: "bicycling", daily: 14 },
+  coche:   { label: "Coche o taxi", gm: "driving", daily: 45 }
+};
+const LEVELS = {
+  bajo:  { label: "Coste bajo",  hotel: 28,  food: 24,  price: 1, hotelTxt: "albergue u hostal" },
+  medio: { label: "Coste medio", hotel: 65,  food: 50,  price: 2, hotelTxt: "hotel de 3 estrellas" },
+  alto:  { label: "Coste alto",  hotel: 160, food: 110, price: 3, hotelTxt: "hotel de 4-5 estrellas" }
+};
 const DAY_COLORS = ["#0E7C66", "#E2683C", "#3B6FD6", "#B0408F", "#C99A06", "#5B5FC7", "#2E9BB5"];
 const PACE = { relajado: { hours: 5, start: 10 }, normal: { hours: 7, start: 9.5 }, intenso: { hours: 9, start: 9 } };
 
+/* ============================================================ utilidades */
 const $ = s => document.querySelector(s);
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[,.]/g, " ").replace(/\s+/g, " ").trim();
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = h => { if (h == null) return ""; const H = Math.floor(h), M = Math.round((h - H) * 60); return `${String(H).padStart(2, "0")}:${String(M).padStart(2, "0")}`; };
+const durTxt = h => { const H = Math.floor(h), M = Math.round((h - H) * 60); return !H ? `${M} min` : M ? `${H} h ${M}` : `${H} h`; };
+const money = n => n.toLocaleString("es-ES", { maximumFractionDigits: 0 }) + " €";
+const roundNice = n => n < 1000 ? Math.round(n / 10) * 10 : Math.round(n / 50) * 50;
+const priceTxt = p => "€".repeat(p);
 
-/* ---------- Geometría ---------- */
 function km(a, b) {
-  const R = 6371, toR = Math.PI / 180;
-  const dLat = (b.lat - a.lat) * toR, dLon = (b.lon - a.lon) * toR;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * toR) * Math.cos(b.lat * toR) * Math.sin(dLon / 2) ** 2;
+  const R = 6371, r = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
-function travel(a, b) {
-  const d = km(a, b) * 1.3; // factor de calles
-  if (d <= 2) return { mode: "a pie", min: Math.max(5, Math.round(d / 4.5 * 60)), d };
-  if (d <= 40) return { mode: "en transporte", min: Math.round(10 + d / 22 * 60), d };
-  return { mode: "en coche o tour", min: Math.round(15 + d / 55 * 60), d };
-}
-function centroid(pts) {
-  return { lat: pts.reduce((s, p) => s + p.lat, 0) / pts.length, lon: pts.reduce((s, p) => s + p.lon, 0) / pts.length };
-}
+const centroid = pts => ({ lat: pts.reduce((s, p) => s + p.lat, 0) / pts.length, lon: pts.reduce((s, p) => s + p.lon, 0) / pts.length });
+const distTxt = k => k < 1 ? `${Math.round(k * 1000 / 10) * 10} m` : `${k.toFixed(1).replace(".", ",")} km`;
 
-/* ---------- Planificador ---------- */
-function plan(stops, days, paceKey, interests) {
-  const pace = PACE[paceKey];
-  // 1. Puntuar: prioridad original + intereses
-  const scored = stops.map((s, i) => ({ ...s, score: (stops.length - i) + (interests.has(s.cat) ? stops.length * 0.6 : 0) }))
-                      .sort((a, b) => b.score - a.score);
-  // 2. Elegir paradas que caben en el presupuesto total de horas
-  const budget = days * pace.hours;
-  const chosen = []; let used = 0;
+/* Tiempo de trayecto según el medio elegido */
+function travel(a, b, mode) {
+  const d = km(a, b) * 1.3; // las calles no van en línea recta
+  const transit = () => d > 40 ? { mode: "publico", txt: "en tren o autobús", min: Math.round(15 + d / 55 * 60) }
+                                 : { mode: "publico", txt: "en metro o autobús", min: Math.round(8 + d / 20 * 60) };
+  let r;
+  if (mode === "pie") r = d <= 6 ? { mode: "pie", txt: "a pie", min: Math.round(d / 4.5 * 60) } : { ...transit(), txt: transit().txt + " (tramo largo)" };
+  else if (mode === "bici") r = d <= 15 ? { mode: "bici", txt: "en bici", min: Math.round(3 + d / 14 * 60) } : transit();
+  else if (mode === "coche") r = { mode: "coche", txt: "en coche o taxi", min: Math.round(6 + d / (d > 20 ? 65 : 22) * 60) };
+  else r = d <= 1.2 ? { mode: "pie", txt: "a pie", min: Math.round(d / 4.5 * 60) } : transit();
+  r.min = Math.max(4, r.min); r.d = d;
+  return r;
+}
+const fee = (s, idx, lvl) => Math.round((s.hours >= 4 ? 35 : FEES[s.cat] || 0) * idx * (lvl === "alto" ? 1.3 : 1));
+
+/* ============================================================ planificador */
+function plan(stops, o) {
+  const pace = PACE[o.pace], N = stops.length;
+  const scored = stops.map((s, i) => {
+    let score = N - i;
+    if (o.interests.has(s.cat)) score += N * 0.6;
+    if (o.level === "bajo" && fee(s, 1, "bajo") === 0) score += N * 0.2; // con poco presupuesto, prioriza lo gratis
+    return { ...s, score };
+  }).sort((a, b) => b.score - a.score);
+
+  const budget = o.days * pace.hours, chosen = []; let used = 0;
   for (const s of scored) {
-    const cost = s.hours + 0.4; // + trayecto medio
-    if (s.hours >= 4 && days < 3) continue; // excursiones largas solo en viajes largos
+    const cost = s.hours + 0.4;
+    if (s.hours >= 4 && o.days < 3) continue; // excursiones largas solo en viajes de 3+ días
     if (used + cost <= budget * 1.05) { chosen.push(s); used += cost; }
   }
   if (!chosen.length) chosen.push(scored[0]);
-  const k = Math.min(days, chosen.length);
+  const k = Math.min(o.days, chosen.length);
 
-  // 3. Agrupar por cercanía (k-means con capacidad por día)
+  // agrupar por cercanía con capacidad de horas por día
   let cents = [chosen[0]];
   while (cents.length < k) {
     let best = null, bd = -1;
@@ -430,38 +719,34 @@ function plan(stops, days, paceKey, interests) {
   let groups = [];
   for (let it = 0; it < 12; it++) {
     groups = cents.map(() => ({ items: [], load: 0 }));
-    // asignar primero a los que tienen más clara su opción
     const order = chosen.map(p => {
-      const ds = cents.map(c => km(c, p)); const sorted = [...ds].sort((a, b) => a - b);
-      return { p, ds, regret: (sorted[1] ?? sorted[0]) - sorted[0] };
+      const ds = cents.map(c => km(c, p)), srt = [...ds].sort((a, b) => a - b);
+      return { p, ds, regret: (srt[1] ?? srt[0]) - srt[0] };
     }).sort((a, b) => b.regret - a.regret);
     for (const { p, ds } of order) {
       const pref = ds.map((d, i) => [d, i]).sort((a, b) => a[0] - b[0]);
-      let placed = false;
-      for (const [, i] of pref) if (groups[i].load + p.hours + 0.4 <= cap) { groups[i].items.push(p); groups[i].load += p.hours + 0.4; placed = true; break; }
-      if (!placed) { const i = groups.reduce((m, g, j) => g.load < groups[m].load ? j : m, 0); groups[i].items.push(p); groups[i].load += p.hours + 0.4; }
+      let gi = pref.find(([, i]) => groups[i].load + p.hours + 0.4 <= cap)?.[1];
+      if (gi == null) gi = groups.reduce((m, g, j) => g.load < groups[m].load ? j : m, 0);
+      groups[gi].items.push(p); groups[gi].load += p.hours + 0.4;
     }
     const next = groups.map((g, i) => g.items.length ? centroid(g.items) : cents[i]);
     if (next.every((c, i) => km(c, cents[i]) < 0.01)) break;
     cents = next;
   }
   groups = groups.filter(g => g.items.length);
-
-  // 4. Orden de los días: empieza por el grupo con el imprescindible
   groups.sort((a, b) => Math.max(...b.items.map(s => s.score)) - Math.max(...a.items.map(s => s.score)));
-  // y luego encadena por cercanía
   const ordered = [groups.shift()];
   while (groups.length) {
-    const last = centroid(ordered[ordered.length - 1].items);
+    const last = centroid(ordered.at(-1).items);
     groups.sort((a, b) => km(last, centroid(a.items)) - km(last, centroid(b.items)));
     ordered.push(groups.shift());
   }
 
-  // 5. Orden dentro del día (vecino más próximo + mejora 2-opt) y horarios
+  const usedFood = new Set();
   return ordered.map(g => {
-    let route = nearestNeighbor(g.items);
-    route = twoOpt(route);
-    return schedule(route, pace.start);
+    const day = schedule(twoOpt(nearestNeighbor(g.items)), pace.start, o.transport);
+    for (const it of day.items) if (it.meal) it.place = pickRestaurant(it.near, o, usedFood);
+    return day;
   });
 }
 function nearestNeighbor(items) {
@@ -487,22 +772,66 @@ function twoOpt(r) {
   }
   return best;
 }
-function schedule(route, start) {
-  let t = start, lunch = false; const out = []; let dist = 0;
+function schedule(route, start, mode) {
+  let t = start, lunch = false, dist = 0, moveMin = 0; const out = [];
   route.forEach((s, i) => {
     let leg = null;
-    if (i) { leg = travel(route[i - 1], s); t += leg.min / 60; dist += leg.d; }
-    if (!lunch && t >= 13.25) { out.push({ lunch: true, time: t, leg }); t += 1.15; lunch = true; leg = null; }
-    t = Math.ceil(t * 4) / 4; // redondea a cuartos de hora
+    if (i) { leg = travel(route[i - 1], s, mode); t += leg.min / 60; dist += leg.d; moveMin += leg.min; }
+    if (!lunch && t >= 13.25 && i) { out.push({ meal: "comida", time: Math.ceil(t * 4) / 4, leg, near: route[i - 1] }); t = Math.ceil(t * 4) / 4 + 1.25; lunch = true; leg = null; }
+    t = Math.ceil(t * 4) / 4;
     out.push({ ...s, time: t, leg });
     t += s.hours;
   });
-  if (!lunch && t > 13.5) out.splice(Math.max(1, Math.floor(out.length / 2)), 0, { lunch: true, time: null });
-  return { items: out, end: t, dist };
+  if (!lunch) { // el día termina antes de comer: comida al final, junto a la última visita
+    const near = out.at(-1), time = Math.max(13.5, Math.ceil((t + 0.25) * 4) / 4);
+    out.push({ meal: "comida", time, near, leg: null });
+    t = time + 1.25;
+  }
+  const last = out.filter(x => !x.meal).at(-1);
+  out.push({ meal: "cena", time: Math.max(20.5, Math.ceil((t + 0.75) * 4) / 4), near: last });
+  return { items: out, end: t, dist, moveMin };
 }
-const fmt = h => { if (h == null) return ""; const H = Math.floor(h), M = Math.round((h - H) * 60); return `${String(H).padStart(2, "0")}:${String(M).padStart(2, "0")}`; };
 
-/* ---------- Destinos de cualquier parte (OpenStreetMap) ---------- */
+/* Elige restaurante: cerca, de tu gusto y de tu nivel de precio */
+function pickRestaurant(near, o, used) {
+  const list = o.foodList || [];
+  if (!list.length || !near) return null;
+  const want = o.food, lvlPrice = LEVELS[o.level].price;
+  let best = null;
+  for (const r of list) {
+    const d = km(near, r), match = !want.size || r.tags.some(t => want.has(t));
+    let score = Math.min(d, 15) * (o.transport === "pie" ? 1.6 : 0.8);
+    if (!match) score += 4;
+    score += Math.abs(r.price - lvlPrice) * 2.5;
+    if (used.has(r.name)) score += 20;
+    if (!best || score < best.score) best = { ...r, score, dist: d, match };
+  }
+  if (best) used.add(best.name);
+  return best;
+}
+
+/* Coste estimado del viaje */
+function estimate(daysPlan, o, idx, lvl) {
+  const L = LEVELS[lvl], T = TRANSPORT[o.transport], n = o.travelers;
+  const nights = Math.max(o.days - 1, 0);
+  const rooms = Math.ceil(n / 2);
+  const hotel = L.hotel * 2 * idx * nights * rooms * (n === 1 ? 0.75 : 1); // habitación compartida
+  const food = L.food * idx * o.days * n;
+  const entries = daysPlan.reduce((s, d) => s + d.items.filter(x => !x.meal).reduce((a, x) => a + fee(x, idx, lvl), 0), 0) * n;
+  const transport = T.daily * idx * o.days * (o.transport === "coche" ? Math.ceil(n / 4) : n);
+  const sub = hotel + food + entries + transport;
+  return { hotel, food, entries, transport, extra: sub * 0.08, total: sub * 1.08, nights };
+}
+function allTiers(stops, o, idx) {
+  const t = {};
+  for (const lvl of Object.keys(LEVELS)) t[lvl] = estimate(plan(stops, { ...o, level: lvl }), o, idx, lvl).total;
+  const b1 = roundNice((t.bajo + t.medio) / 2), b2 = roundNice((t.medio + t.alto) / 2);
+  return { totals: t, ranges: { bajo: [0, b1], medio: [b1, b2], alto: [b2, null] } };
+}
+const rangeTxt = ([a, b]) => b == null ? `más de ${money(a)}` : a === 0 ? `hasta ${money(b)}` : `${money(a)} – ${money(b)}`;
+function levelForMoney(m, ranges) { return m < ranges.bajo[1] ? "bajo" : m < ranges.medio[1] ? "medio" : "alto"; }
+
+/* ============================================================ datos en vivo (OpenStreetMap + Wikipedia) */
 async function geocode(q) {
   const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=es&addressdetails=1&q=${encodeURIComponent(q)}`;
   const r = await fetch(url, { headers: { "Accept": "application/json" } });
@@ -511,52 +840,50 @@ async function geocode(q) {
   if (!hit) throw new Error(`No encontramos «${q}». Prueba con el nombre de una ciudad.`);
   return hit;
 }
-async function fetchPOIs(hit) {
-  const lat = +hit.lat, lon = +hit.lon;
+async function overpass(q) {
+  for (const srv of ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"]) {
+    try {
+      const r = await fetch(srv, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+      if (r.ok) return await r.json();
+    } catch {}
+  }
+  throw new Error("No pudimos obtener lugares de interés ahora mismo. Inténtalo en un minuto.");
+}
+function area(hit) {
   const [s, n, w, e] = hit.boundingbox.map(Number);
   const diag = km({ lat: s, lon: w }, { lat: n, lon: e });
-  const radius = Math.round(Math.min(Math.max(diag * 500, 2500), 12000));
-  const A = `(around:${radius},${lat},${lon})`;
-  const q = `[out:json][timeout:25];(
+  return { lat: +hit.lat, lon: +hit.lon, radius: Math.round(Math.min(Math.max(diag * 500, 2500), 12000)) };
+}
+async function fetchPOIs(hit) {
+  const { lat, lon, radius } = area(hit), A = `(around:${radius},${lat},${lon})`;
+  const data = await overpass(`[out:json][timeout:25];(
     nwr["tourism"~"^(attraction|museum|viewpoint|gallery|zoo|aquarium|theme_park)$"]["name"]${A};
     nwr["historic"~"^(monument|castle|memorial|ruins|archaeological_site|palace|fort|city_gate)$"]["name"]["wikidata"]${A};
     nwr["leisure"~"^(park|garden)$"]["name"]["wikidata"]${A};
     nwr["amenity"="place_of_worship"]["name"]["wikidata"]${A};
     nwr["amenity"="marketplace"]["name"]${A};
     nwr["natural"~"^(beach|peak|volcano)$"]["name"]["wikidata"]${A};
-  );out center tags 400;`;
-  const servers = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
-  let data = null, lastErr;
-  for (const srv of servers) {
-    try {
-      const r = await fetch(srv, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
-      if (r.ok) { data = await r.json(); break; }
-      lastErr = new Error("Servidor ocupado");
-    } catch (err) { lastErr = err; }
-  }
-  if (!data) throw lastErr || new Error("No pudimos obtener lugares de interés.");
-
+  );out center tags 400;`);
   const seen = new Set(), out = [];
   for (const el of data.elements) {
-    const t = el.tags || {}; const name = t["name:es"] || t.name;
+    const t = el.tags || {}, name = t["name:es"] || t.name;
     const plat = el.lat ?? el.center?.lat, plon = el.lon ?? el.center?.lon;
-    if (!name || plat == null) continue;
-    const key = norm(name); if (seen.has(key)) continue; seen.add(key);
+    if (!name || plat == null || seen.has(norm(name))) continue;
+    seen.add(norm(name));
     let cat = "monumento", hours = 1;
     if (t.tourism === "museum" || t.tourism === "gallery") { cat = "museo"; hours = 1.75; }
     else if (t.tourism === "viewpoint" || t.natural === "peak") { cat = "mirador"; hours = 0.5; }
     else if (t.leisure || t.tourism === "zoo" || t.natural) { cat = "naturaleza"; hours = 1.25; }
     else if (t.amenity === "marketplace") { cat = "gastronomia"; hours = 1; }
     else if (t.tourism === "theme_park" || t.tourism === "aquarium") { cat = "museo"; hours = 2.5; }
-    else if (t.amenity === "place_of_worship") { hours = 0.6; }
+    else if (t.amenity === "place_of_worship") { cat = "barrio"; hours = 0.6; }
     let score = 0;
     if (t.wikidata) score += 3; if (t.wikipedia) score += 3; if (t["name:es"]) score += 1;
     if (t.tourism === "attraction" || t.tourism === "museum") score += 2;
-    if (t.heritage) score += 2; if (t.tourism === "viewpoint") score += 1;
+    if (t.heritage) score += 2;
     if (t.amenity === "marketplace" && !t.wikidata) score -= 1;
-    score -= km({ lat, lon }, { lat: plat, lon: plon }) / (radius / 1000) * 2; // centrado
-    const desc = t["description:es"] || t.description || describe(t, cat);
-    out.push({ name, lat: plat, lon: plon, cat, hours, desc, score });
+    score -= km({ lat, lon }, { lat: plat, lon: plon }) / (radius / 1000) * 2;
+    out.push({ name, lat: plat, lon: plon, cat, hours, desc: t["description:es"] || describe(t, cat), score });
   }
   out.sort((a, b) => b.score - a.score);
   if (out.length < 3) throw new Error("Encontramos pocos lugares de interés en ese destino. Prueba con una ciudad cercana más grande.");
@@ -565,60 +892,137 @@ async function fetchPOIs(hit) {
 function describe(t, cat) {
   const H = { castle: "Castillo", monument: "Monumento", memorial: "Memorial", ruins: "Ruinas históricas", archaeological_site: "Sitio arqueológico", palace: "Palacio", fort: "Fortaleza", city_gate: "Puerta histórica" };
   if (t.historic && H[t.historic]) return H[t.historic] + " del patrimonio local.";
-  if (t.amenity === "place_of_worship") return "Templo histórico, visita respetando los horarios de culto.";
+  if (t.amenity === "place_of_worship") return "Templo histórico; visítalo respetando los horarios de culto.";
   if (t.amenity === "marketplace") return "Mercado local para probar productos de la zona.";
   return { museo: "Museo recomendado de la ciudad.", mirador: "Buenas vistas panorámicas.", naturaleza: "Espacio verde para descansar.", monumento: "Uno de los lugares más visitados.", gastronomia: "Comida local.", barrio: "Paseo por la zona." }[cat];
 }
-
-/* ---------- Interfaz ---------- */
-const interests = new Set();
-let map, layers = [];
-
-function initCards() {
-  const dl = $("#dest-list"), cards = $("#cards");
-  for (const d of Object.values(CURATED)) {
-    dl.insertAdjacentHTML("beforeend", `<option value="${esc(d.name)}">`);
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "card";
-    b.innerHTML = `<b>${esc(d.name)}</b><span>${esc(d.country)} · ${d.stops.length} lugares</span>`;
-    b.onclick = () => { $("#dest").value = d.name; run(); };
-    cards.append(b);
+const CUISINE_MAP = [
+  [/sushi|japanese|ramen|udon|soba|tempura|izakaya/, "japonesa"], [/steak|grill|barbecue|bbq|argentin|brazilian|asado|churrasc|burger|kebab|meat/, "carne"],
+  [/italian|pizza|pasta/, "italiana"], [/seafood|fish|oyster|ceviche/, "marisco"], [/tapas|spanish/, "tapas"], [/mexican|tacos|burrito/, "mexicana"],
+  [/vegetarian|vegan/, "vegetariana"], [/sandwich|kebab|street|hot_dog|crepe|falafel|empanada/, "callejera"], [/regional|local|traditional/, "local"]
+];
+async function fetchFood(hit) {
+  const { lat, lon, radius } = area(hit), A = `(around:${Math.min(radius, 8000)},${lat},${lon})`;
+  const cc = (hit.address?.country_code || "").toLowerCase();
+  const data = await overpass(`[out:json][timeout:25];(nwr["amenity"="restaurant"]["name"]["cuisine"]${A};nwr["amenity"="restaurant"]["name"]["diet:vegan"="yes"]${A};);out center tags 350;`);
+  const LOCAL_CUISINE = { es: "spanish", it: "italian", fr: "french", mx: "mexican", jp: "japanese", pt: "portuguese", gr: "greek", tr: "turkish", gt: "guatemalan", pe: "peruvian", ar: "argentinian" }[cc];
+  const out = [], seen = new Set();
+  for (const el of data.elements) {
+    const t = el.tags || {}, plat = el.lat ?? el.center?.lat, plon = el.lon ?? el.center?.lon;
+    if (plat == null || seen.has(t.name)) continue; seen.add(t.name);
+    const c = (t.cuisine || "").toLowerCase(), tags = [];
+    for (const [re, tag] of CUISINE_MAP) if (re.test(c) && !tags.includes(tag)) tags.push(tag);
+    if (t["diet:vegan"] === "yes" || t["diet:vegetarian"] === "yes" || t["diet:vegetarian"] === "only") tags.push("vegetariana");
+    if (LOCAL_CUISINE && c.includes(LOCAL_CUISINE)) tags.push("local");
+    if (!tags.length) tags.push("local");
+    const nice = c.split(/[;,]/)[0].replace(/_/g, " ");
+    out.push({ name: t.name, lat: plat, lon: plon, tags, price: t.wikidata || t.michelin ? 3 : 2, desc: nice ? `Cocina ${nice}.` : "Restaurante de la zona." });
   }
+  return out;
 }
-document.querySelectorAll("#interests .chip").forEach(c => c.onclick = () => {
-  const on = c.getAttribute("aria-pressed") !== "true";
-  c.setAttribute("aria-pressed", on); on ? interests.add(c.dataset.i) : interests.delete(c.dataset.i);
-});
-document.querySelectorAll("[data-try]").forEach(b => b.onclick = () => { $("#dest").value = b.dataset.try; run(); });
-$("#go").addEventListener("click", run);
-$("#dest").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); run(); } });
+async function wikiPhoto(titles, width = 1280) {
+  for (const t of titles) {
+    try {
+      const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 5000);
+      const r = await fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g, "_"))}`, { signal: ctl.signal });
+      clearTimeout(timer);
+      if (!r.ok) continue;
+      const j = await r.json(); const src = j.thumbnail?.source;
+      if (src) return src.replace(/\/\d+px-/, `/${width}px-`);
+    } catch {}
+  }
+  return null;
+}
+
+/* ============================================================ interfaz */
+const state = { transport: "publico", level: "medio", food: new Set(), interests: new Set() };
+let map, layers = [], markers = {}, lastTiers = null;
+
+function buildControls() {
+  $("#transport").innerHTML = Object.entries(TRANSPORT).map(([k, t]) =>
+    `<button type="button" class="opt-btn" data-k="${k}" aria-pressed="${k === state.transport}">${ICONS[k]}${t.label}</button>`).join("");
+  $("#levels").innerHTML = Object.entries(LEVELS).map(([k, l]) =>
+    `<button type="button" class="opt-btn level" data-k="${k}" aria-pressed="${k === state.level}">${l.label.replace("Coste ", "").replace(/^./, c => c.toUpperCase())}<small data-range="${k}">${{ bajo: "€", medio: "€€", alto: "€€€" }[k]}</small></button>`).join("");
+  $("#food").innerHTML = Object.entries(FOOD).map(([k, l]) => `<button type="button" class="chip" data-k="${k}" aria-pressed="false">${l}</button>`).join("");
+  $("#interests").innerHTML = Object.entries(INTERESTS).map(([k, l]) => `<button type="button" class="chip int" data-k="${k}" aria-pressed="false">${l}</button>`).join("");
+
+  $("#transport").onclick = e => { const b = e.target.closest("button"); if (!b) return; state.transport = b.dataset.k; syncPressed("#transport", state.transport); updateHints(); };
+  $("#levels").onclick = e => { const b = e.target.closest("button"); if (!b) return; state.level = b.dataset.k; $("#money").value = ""; syncPressed("#levels", state.level); };
+  $("#food").onclick = e => toggleChip(e, state.food);
+  $("#interests").onclick = e => toggleChip(e, state.interests);
+  $("#money").oninput = () => { const m = +$("#money").value; if (m > 0 && lastTiers) { state.level = levelForMoney(m, lastTiers.ranges); syncPressed("#levels", state.level); } };
+  ["#dest", "#days", "#travelers", "#pace"].forEach(s => $(s).addEventListener("change", () => updateHints()));
+  $("#dest").addEventListener("input", () => updateHints());
+  $("#go").addEventListener("click", run);
+  $("#dest").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); run(); } });
+}
+function syncPressed(sel, k) { document.querySelectorAll(`${sel} button`).forEach(b => b.setAttribute("aria-pressed", b.dataset.k === k)); }
+function toggleChip(e, set) {
+  const b = e.target.closest("button"); if (!b) return;
+  const on = b.getAttribute("aria-pressed") !== "true";
+  b.setAttribute("aria-pressed", on); on ? set.add(b.dataset.k) : set.delete(b.dataset.k);
+}
+function options() {
+  return { days: +$("#days").value, travelers: +$("#travelers").value, pace: $("#pace").value, transport: state.transport,
+           level: state.level, food: state.food, interests: state.interests };
+}
+function findCurated(q) {
+  let key = norm(q); key = ALIASES[key] || key;
+  return CURATED[key] || Object.values(CURATED).find(d => norm(d.name) === key || (key.length > 3 && key.startsWith(norm(d.name))));
+}
+const curatedStops = d => d.stops.map(([name, lat, lon, cat, hours, desc]) => ({ name, lat, lon, cat, hours, desc }));
+const curatedFood = d => d.food.map(([name, lat, lon, tags, price, desc]) => ({ name, lat, lon, tags: tags.split(" "), price, desc }));
+
+/* Muestra los rangos de precio en los botones en cuanto se conoce el destino */
+function updateHints(tiers) {
+  const d = findCurated($("#dest").value.trim());
+  const o = options();
+  if (!tiers && d) tiers = allTiers(curatedStops(d), { ...o, foodList: curatedFood(d) }, d.cost);
+  lastTiers = tiers || null;
+  for (const k of Object.keys(LEVELS)) $(`[data-range="${k}"]`).textContent = tiers ? rangeTxt(tiers.ranges[k]) : { bajo: "€", medio: "€€", alto: "€€€" }[k];
+  $("#budget-for").textContent = tiers ? `· ${o.travelers} ${o.travelers === 1 ? "persona" : "personas"}, ${o.days} ${o.days === 1 ? "día" : "días"}, sin vuelos` : "";
+  const m = +$("#money").value;
+  if (m > 0 && tiers) { state.level = levelForMoney(m, tiers.ranges); syncPressed("#levels", state.level); }
+}
 
 function setStatus(html, cls = "") { $("#main").innerHTML = `<div class="status ${cls}">${html}</div>`; }
 
 async function run() {
-  const q = $("#dest").value.trim(); if (!q) { $("#dest").focus(); $("#dest").placeholder = "Escribe primero un destino"; return; }
-  const days = +$("#days").value, pace = $("#pace").value;
-  const params = new URLSearchParams({ destino: q, dias: days, ritmo: pace });
-  if (interests.size) params.set("intereses", [...interests].join(","));
+  const q = $("#dest").value.trim();
+  if (!q) { $("#dest").focus(); $("#dest").placeholder = "Escribe primero un destino"; return; }
+  const o = options();
+  const params = new URLSearchParams({ destino: q, dias: o.days, viajeros: o.travelers, ritmo: o.pace, transporte: o.transport, nivel: o.level });
+  if ($("#money").value) params.set("presupuesto", $("#money").value);
+  if (o.food.size) params.set("comida", [...o.food].join(","));
+  if (o.interests.size) params.set("intereses", [...o.interests].join(","));
   try { history.replaceState(null, "", "?" + params); } catch {}
   $("#go").disabled = true;
   try {
-    let key = norm(q); key = ALIASES[key] || key;
-    let dest = CURATED[key] || Object.values(CURATED).find(d => norm(d.name) === key || key.startsWith(norm(d.name)));
-    let title, subtitle, stops, live = false;
+    const dest = findCurated(q);
+    let title, subtitle, stops, foodList, idx, photoTitles, live = false;
     if (dest) {
-      title = dest.name; subtitle = dest.country;
-      stops = dest.stops.map(([name, lat, lon, cat, hours, desc]) => ({ name, lat, lon, cat, hours, desc }));
+      title = dest.name; subtitle = dest.country; idx = dest.cost; photoTitles = dest.photo;
+      stops = curatedStops(dest); foodList = curatedFood(dest);
     } else {
-      setStatus(`<div class="spinner"></div>Buscando los mejores lugares de ${esc(q)}…`);
+      setStatus(`<div class="spinner"></div>Buscando los mejores lugares y restaurantes de ${esc(q)}…`);
       const hit = await geocode(q);
       const a = hit.address || {};
       title = hit.name || q;
       subtitle = [a.state, a.country].filter(Boolean).filter(x => x !== title).join(", ");
-      stops = await fetchPOIs(hit); live = true;
+      idx = COUNTRY_COST[(a.country_code || "").toLowerCase()] ?? 1;
+      photoTitles = [title];
+      [stops, foodList] = await Promise.all([fetchPOIs(hit), fetchFood(hit).catch(() => [])]);
+      live = true;
     }
-    const daysPlan = plan(stops, days, pace, interests);
-    render({ title, subtitle, daysPlan, pace, live, requested: days });
+    const full = { ...o, foodList };
+    const tiers = allTiers(stops, full, idx);
+    const m = +$("#money").value;
+    if (m > 0) { full.level = state.level = levelForMoney(m, tiers.ranges); }
+    updateHints(tiers); syncPressed("#levels", full.level);
+    const daysPlan = plan(stops, full);
+    const est = estimate(daysPlan, full, idx, full.level);
+    render({ title, subtitle, daysPlan, o: full, live, idx, est, tiers, budget: m > 0 ? m : null });
+    wikiPhoto(photoTitles).then(src => { const b = $(".banner"); if (src && b) b.style.backgroundImage = `url("${src}")`; });
     try { $("#main").scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
   } catch (err) {
     console.error(err);
@@ -627,123 +1031,213 @@ async function run() {
   } finally { $("#go").disabled = false; }
 }
 
-function render({ title, subtitle, daysPlan, pace, live, requested }) {
-  const total = daysPlan.reduce((s, d) => s + d.items.filter(x => !x.lunch).length, 0);
-  const totalKm = daysPlan.reduce((s, d) => s + d.dist, 0);
-  const short = daysPlan.length < requested;
+function render({ title, subtitle, daysPlan, o, live, idx, est, tiers, budget }) {
+  const total = daysPlan.reduce((s, d) => s + d.items.filter(x => !x.meal).length, 0);
+  const L = LEVELS[o.level], T = TRANSPORT[o.transport];
+  const perPerson = est.total / o.travelers;
+  let verdict = "";
+  if (budget) {
+    const diff = budget - est.total;
+    verdict = diff >= 0
+      ? `<div class="verdict ok"><b>Te alcanza.</b> Con ${money(budget)} encaja el <b>${L.label.toLowerCase()}</b> y te sobran unos ${money(roundNice(diff))}.</div>`
+      : `<div class="verdict ko"><b>Vas justo:</b> con ${money(budget)} te faltarían unos ${money(roundNice(-diff))} para este plan. Prueba con menos días, moverte a pie o elegir alojamiento compartido.</div>`;
+  }
   $("#main").innerHTML = `
-    <section class="result">
-      <div class="summary">
+    <section class="banner">
+      <div class="banner-body">
         <div>
-          <h2>${esc(title)} en ${daysPlan.length} ${daysPlan.length === 1 ? "día" : "días"}</h2>
-          <div class="meta">${subtitle ? esc(subtitle) + " · " : ""}${total} paradas · ${Math.round(totalKm)} km de recorrido · ritmo ${pace}</div>
+          <h2>${esc(title)} en ${o.days} ${o.days === 1 ? "día" : "días"}</h2>
+          <div class="meta">${subtitle ? esc(subtitle) + " · " : ""}${total} visitas · ${T.label.toLowerCase()} · ${o.travelers} ${o.travelers === 1 ? "viajero" : "viajeros"} · ritmo ${o.pace}</div>
         </div>
         <div class="actions">
           <button class="btn" id="share">Copiar enlace</button>
-          <button class="btn" onclick="print()">Imprimir</button>
+          <button class="btn" id="print">Imprimir</button>
         </div>
       </div>
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" aria-selected="true" data-day="-1">Todo el viaje</button>
-        ${daysPlan.map((_, i) => `<button class="tab" role="tab" aria-selected="false" data-day="${i}"><span class="dot" style="background:${DAY_COLORS[i % 7]}"></span>Día ${i + 1}</button>`).join("")}
+    </section>
+
+    <section class="budget">
+      <div>
+        <h3>¿Cuánto cuesta?</h3>
+        <div class="tiers" id="tiers">
+          ${Object.entries(LEVELS).map(([k, l]) => `
+            <button type="button" class="tier" data-k="${k}" aria-pressed="${k === o.level}">
+              <div class="name">${l.label}</div>
+              <div class="val">≈ ${money(roundNice(tiers.totals[k]))}</div>
+              <div class="rng">${rangeTxt(tiers.ranges[k])}</div>
+            </button>`).join("")}
+        </div>
+        ${verdict}
+        <p class="fine">Total para ${o.travelers} ${o.travelers === 1 ? "persona" : "personas"} durante ${o.days} ${o.days === 1 ? "día" : "días"}, sin vuelos. Toca otro nivel para recalcular la ruta y los restaurantes.</p>
       </div>
-      <div class="days" id="days-list">
-        ${daysPlan.map((d, i) => dayHTML(d, i)).join("")}
-        ${short ? `<p class="note">Hemos agrupado lo esencial en ${daysPlan.length} ${daysPlan.length === 1 ? "día" : "días"}; el resto del tiempo es tuyo para improvisar.</p>` : ""}
-        ${live ? `<p class="note">Ruta generada automáticamente con lugares de OpenStreetMap. Revisa horarios antes de ir.</p>` : ""}
+      <div>
+        <h3>Desglose · ${L.label.toLowerCase()}</h3>
+        <table class="breakdown">
+          <tr><td>Alojamiento (${est.nights} ${est.nights === 1 ? "noche" : "noches"}, ${L.hotelTxt})</td><td>${money(roundNice(est.hotel))}</td></tr>
+          <tr><td>Comidas y cenas (${{ 1: "económico", 2: "precio medio", 3: "restaurantes top" }[L.price]})</td><td>${money(roundNice(est.food))}</td></tr>
+          <tr><td>Entradas a museos y monumentos</td><td>${money(roundNice(est.entries))}</td></tr>
+          <tr><td>Transporte (${T.label.toLowerCase()})</td><td>${money(roundNice(est.transport))}</td></tr>
+          <tr><td>Imprevistos (8 %)</td><td>${money(roundNice(est.extra))}</td></tr>
+          <tr class="total"><td>Total estimado</td><td>${money(roundNice(est.total))}</td></tr>
+        </table>
+        <p class="fine">≈ ${money(roundNice(perPerson))} por persona. Precios orientativos ajustados al coste de vida del destino.</p>
+      </div>
+    </section>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-day="-1">Todo el viaje</button>
+      ${daysPlan.map((_, i) => `<button class="tab" role="tab" aria-selected="false" data-day="${i}"><span class="dot" style="background:${DAY_COLORS[i % 7]}"></span>Día ${i + 1}</button>`).join("")}
+    </div>
+    <section class="result">
+      <div class="days">
+        ${daysPlan.map((d, i) => dayHTML(d, i, o, idx)).join("")}
+        ${daysPlan.length < o.days ? `<p class="note">Hemos agrupado lo esencial en ${daysPlan.length} ${daysPlan.length === 1 ? "día" : "días"}; el resto del tiempo es tuyo para improvisar.</p>` : ""}
+        ${live ? `<p class="note">Ruta generada automáticamente con lugares y restaurantes de OpenStreetMap. Revisa horarios antes de ir.</p>` : ""}
       </div>
       <div class="map-wrap"><div id="map" aria-label="Mapa de la ruta"></div></div>
     </section>`;
 
   $("#share").onclick = async () => {
     try { await navigator.clipboard.writeText(location.href); $("#share").textContent = "¡Enlace copiado!"; }
-    catch { prompt("Copia este enlace:", location.href); }
+    catch { $("#share").textContent = "Copia la dirección del navegador"; }
+  };
+  $("#print").onclick = () => { try { print(); } catch {} };
+  $("#tiers").onclick = e => {
+    const b = e.target.closest(".tier"); if (!b) return;
+    state.level = b.dataset.k; $("#money").value = ""; syncPressed("#levels", state.level); run();
   };
   drawMap(daysPlan);
-  document.querySelectorAll(".tab").forEach(t => t.onclick = () => selectDay(+t.dataset.day, daysPlan));
-  document.querySelectorAll(".stop[data-lat]").forEach(li => li.onclick = () => {
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => selectDay(+t.dataset.day));
+  document.querySelectorAll("[data-key]").forEach(li => li.onclick = e => {
+    if (e.target.closest("a")) return;
     if (map) map.setView([+li.dataset.lat, +li.dataset.lon], 16, { animate: true });
-    const m = markerAt(li.dataset.key); if (m) m.openPopup();
-    if (window.innerWidth <= 900) $("#map").scrollIntoView({ behavior: "smooth", block: "center" });
+    markers[li.dataset.key]?.openPopup();
+    if (window.innerWidth <= 900) try { $("#map").scrollIntoView({ behavior: "smooth", block: "center" }); } catch {}
   });
 }
 
-function dayHTML(d, i) {
+function legHTML(leg) {
+  return leg ? `<span></span><div class="leg">${ICONS[leg.mode]}${leg.min} min ${leg.txt}</div>` : "";
+}
+function mealHTML(s, i, o, key) {
+  const r = s.place, label = s.meal === "cena" ? "Cena" : "Comida";
+  const when = fmt(s.time);
+  if (!r) return `<li class="stop meal">${legHTML(s.leg)}<span class="time">${when}</span><div><div class="stop-name">${label}</div><div class="stop-desc">Busca un restaurante local cerca de ${esc(s.near?.name || "aquí")}.</div></div></li>`;
+  const gm = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.name + " " + ($("#dest").value || ""))}`;
+  const kinds = r.tags.filter(t => FOOD[t]).map(t => FOOD[t]).slice(0, 2).join(" · ");
+  const miss = o.food.size && !r.match ? `<div class="stop-desc">No encontramos ${[...o.food].map(f => FOOD[f].toLowerCase()).join(" ni ")} cerca, así que te proponemos lo mejor de la zona.</div>` : "";
+  return `<li class="stop meal" data-key="${key}" data-lat="${r.lat}" data-lon="${r.lon}">
+    ${legHTML(s.leg)}
+    <span class="time">${when}</span>
+    <div>
+      <div class="stop-name">${label} en ${esc(r.name)} <span class="price">${priceTxt(r.price)}</span></div>
+      <div class="stop-desc"><span class="tag">${esc(kinds || "Restaurante")}</span>${esc(r.desc)} · a ${distTxt(r.dist)} de ${esc(s.near.name)}</div>
+      ${miss}
+      <a href="${gm}" target="_blank" rel="noopener">Ver en Google Maps ↗</a>
+    </div>
+  </li>`;
+}
+function dayHTML(d, i, o, idx) {
   const color = DAY_COLORS[i % 7];
-  const real = d.items.filter(x => !x.lunch);
-  let n = 0;
-  const gmaps = real.length > 1
-    ? `https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=${real[0].lat},${real[0].lon}&destination=${real.at(-1).lat},${real.at(-1).lon}` +
+  const real = d.items.filter(x => !x.meal);
+  const T = TRANSPORT[o.transport];
+  const route = real.length > 1
+    ? `https://www.google.com/maps/dir/?api=1&travelmode=${T.gm}&origin=${real[0].lat},${real[0].lon}&destination=${real.at(-1).lat},${real.at(-1).lon}` +
       (real.length > 2 ? `&waypoints=${real.slice(1, -1).slice(0, 8).map(s => `${s.lat},${s.lon}`).join("|")}` : "")
     : `https://www.google.com/maps/search/?api=1&query=${real[0].lat},${real[0].lon}`;
+  const entries = real.reduce((s, x) => s + fee(x, idx, o.level), 0);
+  const dayCost = entries + (LEVELS[o.level].food + T.daily) * idx;
+  let n = 0;
   return `
     <article class="day" data-day="${i}">
       <div class="day-head">
         <h3><span class="day-num" style="background:${color}">${i + 1}</span>
-          <span>Día ${i + 1}<small>${real.length} ${real.length === 1 ? "parada" : "paradas"} · ${fmt(real[0].time)}–${fmt(d.end)} · ${d.dist.toFixed(1)} km</small></span></h3>
-        <a href="${gmaps}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
+          <span>Día ${i + 1}<small>${real.length} ${real.length === 1 ? "visita" : "visitas"} · ${fmt(real[0].time)}–${fmt(d.end)} · ${d.dist.toFixed(1).replace(".", ",")} km</small></span></h3>
+        <a href="${route}" target="_blank" rel="noopener">Ruta en Google Maps ↗</a>
       </div>
       <ol class="stops">
-        ${d.items.map(s => {
-          const leg = s.leg ? `<div class="leg">${s.leg.min} min ${s.leg.mode}</div>` : "";
-          if (s.lunch) return `<li class="stop lunch">${leg ? `<span></span>${leg}` : ""}<span class="time">${fmt(s.time)}</span><div><div class="stop-name">Pausa para comer</div><div class="stop-desc">Busca un restaurante local cerca de la siguiente parada.</div></div></li>`;
+        ${d.items.map((s, j) => {
+          if (s.meal) return mealHTML(s, i, o, `${i}-f${j}`);
           n++;
+          const f = fee(s, idx, o.level);
           return `<li class="stop" data-lat="${s.lat}" data-lon="${s.lon}" data-key="${i}-${n}">
-            ${leg ? `<span></span>${leg}` : ""}
+            ${legHTML(s.leg)}
             <span class="time">${fmt(s.time)}</span>
             <div><div class="stop-name">${n}. ${esc(s.name)}</div>
-            <div class="stop-desc"><span class="tag">${CAT_LABEL[s.cat] || "Visita"}</span>${esc(s.desc || "")} <span style="white-space:nowrap">· ${durTxt(s.hours)}</span></div></div>
+            <div class="stop-desc"><span class="tag">${CAT_LABEL[s.cat] || "Visita"}</span>${esc(s.desc || "")} <span style="white-space:nowrap">· ${durTxt(s.hours)} · ${f ? "entrada ≈ " + money(f) : "gratis"}</span></div></div>
           </li>`;
         }).join("")}
       </ol>
+      <div class="day-foot"><span>${ICONS[o.transport].replace("<svg", '<svg style="width:14px;height:14px;vertical-align:-2px"')} ${Math.round(d.moveMin)} min de trayectos</span><span>Gasto del día ≈ ${money(roundNice(dayCost))} por persona (sin alojamiento)</span></div>
     </article>`;
 }
-const durTxt = h => { const H = Math.floor(h), M = Math.round((h - H) * 60); return !H ? `${M} min` : M ? `${H} h ${M}` : `${H} h`; };
 
-let markers = {};
-function markerAt(key) { return markers[key]; }
 function drawMap(daysPlan) {
   markers = {}; layers = [];
-  if (!window.L) { $("#map").innerHTML = `<div class="status">No se pudo cargar el mapa.</div>`; return; }
+  if (!window.L) { $("#map").innerHTML = `<div class="status">No se pudo cargar el mapa. Abre la página en tu navegador con conexión a internet.</div>`; return; }
   map = L.map("map", { scrollWheelZoom: false });
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
   const all = [];
   daysPlan.forEach((d, i) => {
     const color = DAY_COLORS[i % 7], group = L.featureGroup();
-    const pts = d.items.filter(x => !x.lunch);
+    const pts = d.items.filter(x => !x.meal);
     L.polyline(pts.map(p => [p.lat, p.lon]), { color, weight: 4, opacity: .85, dashArray: "6 8" }).addTo(group);
     pts.forEach((p, j) => {
       const icon = L.divIcon({ className: "", html: `<div class="pin" style="background:${color}">${j + 1}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
-      const m = L.marker([p.lat, p.lon], { icon, title: p.name })
+      markers[`${i}-${j + 1}`] = L.marker([p.lat, p.lon], { icon, title: p.name })
         .bindPopup(`<b>Día ${i + 1} · ${j + 1}. ${esc(p.name)}</b><br>${fmt(p.time)} · ${durTxt(p.hours)}`).addTo(group);
-      markers[`${i}-${j + 1}`] = m; all.push([p.lat, p.lon]);
+      all.push([p.lat, p.lon]);
+    });
+    d.items.forEach((s, j) => {
+      if (!s.meal || !s.place) return;
+      const icon = L.divIcon({ className: "", html: `<div class="pin food" style="border-color:${color};color:${color}">${s.meal === "cena" ? "☾" : "🍴"}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
+      markers[`${i}-f${j}`] = L.marker([s.place.lat, s.place.lon], { icon, title: s.place.name })
+        .bindPopup(`<b>${s.meal === "cena" ? "Cena" : "Comida"} · ${esc(s.place.name)}</b><br>${fmt(s.time)} · ${priceTxt(s.place.price)}`).addTo(group);
     });
     group.addTo(map); layers.push(group);
   });
   map.fitBounds(all, { padding: [30, 30] });
   setTimeout(() => map.invalidateSize(), 50);
 }
-function selectDay(day, daysPlan) {
+function selectDay(day) {
   document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", +t.dataset.day === day));
   document.querySelectorAll(".day").forEach(el => el.style.display = day < 0 || +el.dataset.day === day ? "" : "none");
   if (!map) return;
   layers.forEach((g, i) => { if (day < 0 || i === day) g.addTo(map); else map.removeLayer(g); });
-  const b = day < 0 ? L.featureGroup(layers).getBounds() : layers[day].getBounds();
-  map.fitBounds(b, { padding: [30, 30] });
+  map.fitBounds((day < 0 ? L.featureGroup(layers) : layers[day]).getBounds(), { padding: [30, 30] });
 }
 
-/* ---------- Arranque: lee el enlace compartido ---------- */
-initCards();
+/* Destinos destacados con foto */
+function renderIdeas() {
+  const grads = ["#0E7C66,#2D8CB4", "#E2683C,#C99A06", "#3B6FD6,#5B5FC7", "#B0408F,#E2683C", "#2E9BB5,#0E7C66"];
+  $("#main").innerHTML = `<section class="ideas"><h2>Destinos destacados</h2><p>Rutas revisadas a mano, con restaurantes recomendados. O escribe cualquier otra ciudad del mundo.</p><div class="cards" id="cards"></div></section>`;
+  Object.values(CURATED).forEach((d, i) => {
+    $("#dest-list").insertAdjacentHTML("beforeend", `<option value="${esc(d.name)}">`);
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "card";
+    b.style.setProperty("--g", `linear-gradient(135deg, ${grads[i % grads.length]})`);
+    b.innerHTML = `<div class="txt"><b>${esc(d.name)}</b><span>${esc(d.country)} · ${d.stops.length} lugares · ${d.food.length} restaurantes</span></div>`;
+    b.onclick = () => { $("#dest").value = d.name; updateHints(); run(); };
+    $("#cards").append(b);
+    wikiPhoto(d.photo, 500).then(src => { if (src) b.style.backgroundImage = `url("${src}")`; });
+  });
+}
+
+/* ============================================================ arranque */
+buildControls();
+renderIdeas();
 (() => {
   const p = new URLSearchParams(location.search);
   if (!p.get("destino")) return;
   $("#dest").value = p.get("destino");
-  if (p.get("dias")) $("#days").value = p.get("dias");
-  if (p.get("ritmo")) $("#pace").value = p.get("ritmo");
-  (p.get("intereses") || "").split(",").filter(Boolean).forEach(i => {
-    const c = document.querySelector(`.chip[data-i="${i}"]`); if (c) { c.setAttribute("aria-pressed", "true"); interests.add(i); }
+  for (const [param, sel] of [["dias", "#days"], ["viajeros", "#travelers"], ["ritmo", "#pace"], ["presupuesto", "#money"]]) if (p.get(param)) $(sel).value = p.get(param);
+  if (TRANSPORT[p.get("transporte")]) { state.transport = p.get("transporte"); syncPressed("#transport", state.transport); }
+  if (LEVELS[p.get("nivel")]) { state.level = p.get("nivel"); syncPressed("#levels", state.level); }
+  const restore = (param, sel, set) => (p.get(param) || "").split(",").filter(Boolean).forEach(k => {
+    const c = document.querySelector(`${sel} [data-k="${k}"]`); if (c) { c.setAttribute("aria-pressed", "true"); set.add(k); }
   });
-  run();
+  restore("comida", "#food", state.food); restore("intereses", "#interests", state.interests);
+  updateHints(); run();
 })();
 </script>
 </body>
