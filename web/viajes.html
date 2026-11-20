@@ -205,6 +205,10 @@
   .pick .em { font-size: 24px; line-height: 1; }
   .pick b { display: block; font-size: 15px; }
   .pick small { color: var(--muted); font-size: 13px; }
+  .pick.stay { background: var(--olive-soft); cursor: pointer; }
+  .pick .eyebrow-s { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--olive); }
+  .pick .t-meta span { background: var(--surface); }
+  .stay-links { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 13px; font-weight: 700; }
   .verdict { border-radius: 16px; padding: 14px 16px; font-size: 15px; margin-top: 12px; }
   .verdict.ok { background: var(--olive-soft); }
   .verdict.ko { background: var(--terra-soft); }
@@ -250,12 +254,15 @@
   .map-wrap { position: sticky; top: 16px; }
   #map { height: calc(100vh - 32px); min-height: 440px; max-height: 800px; border-radius: var(--r); border: 1px solid var(--line); box-shadow: var(--shadow-s); background: var(--sand); }
   .pin { width: 28px; height: 28px; border-radius: 50%; color: #fff; display: grid; place-items: center; font: 700 12px/1 "DM Sans", sans-serif; border: 2.5px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.3); }
+  .pin.hotel { width: 34px; height: 34px; background: var(--ink) !important; font-size: 16px; }
   .pin.food { background: #fff !important; font-size: 14px; border-width: 3px; }
   .leaflet-popup-content { font-family: "DM Sans", sans-serif; }
   .note { color: var(--muted); font-size: 13px; margin: 0; }
 
   footer { margin-top: 80px; padding: 40px 16px 50px; text-align: center; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
   footer .logo { font-size: 36px; display: block; margin-bottom: 6px; }
+  footer details { max-width: 900px; margin: 18px auto 0; text-align: left; font-size: 11px; }
+  footer summary { cursor: pointer; text-align: center; font-size: 13px; }
   footer .hand { font-family: var(--hand); font-size: 24px; color: var(--terra); }
 
   @media (max-width: 980px) {
@@ -412,10 +419,12 @@
 <footer>
   <span class="logo">rumbo<span style="color:var(--terra)">.</span></span>
   <span class="hand">hecho para viajeros curiosos</span><br><br>
-  Mapas © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> y CARTO · Fotos de Wikipedia.<br>
+  Mapas © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> y CARTO · Fotos de Wikimedia Commons.<br>
   Precios y horarios orientativos, sin vuelos. Consúltalos antes de reservar.
+  <div id="credits"></div>
 </footer>
 
+<!--PHOTOS-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ============================================================
@@ -442,6 +451,11 @@ const CURATED = {
     ["Barrio de las Letras", 40.4140, -3.6985, "barrio", 1, "Calles de Cervantes y Lope de Vega, llenas de bares."],
     ["La Latina y Cava Baja", 40.4110, -3.7110, "gastronomia", 1.5, "La ruta de tapas más castiza de Madrid."],
     ["Estadio Santiago Bernabéu", 40.4531, -3.6883, "museo", 1.5, "Tour por el estadio y el museo del Real Madrid."]
+  ], hotels: [
+    ["The Hat Madrid", 40.4139, -3.7068, 0, "La Latina", "Albergue de diseño con azotea, a un paso de la Plaza Mayor."],
+    ["Hostal Persal", 40.4146, -3.7012, 1, "Barrio de las Letras", "Hostal sencillo y limpio en la plaza del Ángel."],
+    ["Hotel Europa", 40.4176, -3.7039, 2, "Puerta del Sol", "Hotel clásico en pleno centro, todo a pie."],
+    ["Only YOU Boutique Hotel", 40.4220, -3.6965, 3, "Chueca", "Palacete del siglo XIX con interiorismo de revista."]
   ], food: [
     ["Sobrino de Botín", 40.4141, -3.7080, "local carne", 3, "El restaurante más antiguo del mundo: cochinillo y cordero asado."],
     ["Casa Paco", 40.4136, -3.7083, "carne local", 2, "Taberna clásica de solomillo a la piedra."],
@@ -471,6 +485,11 @@ const CURATED = {
     ["Palau de la Música Catalana", 41.3875, 2.1753, "monumento", 0.75, "Sala de conciertos modernista Patrimonio de la Humanidad."],
     ["Parc de la Ciutadella", 41.3880, 2.1870, "naturaleza", 1, "Arco de Triunfo, cascada monumental y lago."],
     ["Bunkers del Carmel", 41.4192, 2.1617, "mirador", 1, "La vista de 360º más espectacular de Barcelona."]
+  ], hotels: [
+    ["Generator Barcelona", 41.3990, 2.1600, 0, "Gràcia", "Albergue con mucho ambiente cerca del Passeig de Gràcia."],
+    ["Hostal Grau", 41.3843, 2.1683, 1, "El Raval", "Hostal familiar con encanto junto a La Rambla."],
+    ["Hotel Gaudí", 41.3793, 2.1730, 2, "El Raval", "Frente al Palau Güell, con terraza y vistas."],
+    ["Hotel Neri", 41.3832, 2.1755, 3, "Barrio Gótico", "Palacio medieval convertido en hotel boutique."]
   ], food: [
     ["Cervecería Catalana", 41.3929, 2.1619, "tapas local", 2, "Montaditos y tapas siempre llenos de gente."],
     ["Bar del Pla", 41.3854, 2.1793, "tapas local", 2, "Tapas creativas en El Born."],
@@ -498,6 +517,11 @@ const CURATED = {
     ["Jardín de las Tullerías", 48.8635, 2.3275, "naturaleza", 0.75, "Entre el Louvre y la plaza de la Concordia."],
     ["Panteón", 48.8462, 2.3464, "monumento", 0.75, "Mausoleo de Voltaire, Victor Hugo y Marie Curie."],
     ["Trocadéro", 48.8616, 2.2893, "naturaleza", 0.5, "La foto clásica de la Torre Eiffel."]
+  ], hotels: [
+    ["Generator Paris", 48.8775, 2.3700, 0, "Canal Saint-Martin", "Albergue moderno con terraza y vistas al Sacré-Cœur."],
+    ["Hôtel Esmeralda", 48.8521, 2.3471, 1, "Barrio Latino", "Hotelito con vistas a Notre-Dame, sin lujos."],
+    ["Hôtel des Grands Hommes", 48.8466, 2.3446, 2, "Barrio Latino", "Frente al Panteón, con balcones parisinos."],
+    ["Le Pavillon de la Reine", 48.8556, 2.3660, 3, "Le Marais", "Escondido en la Place des Vosges, con jardín propio."]
   ], food: [
     ["Bouillon Chartier", 48.8720, 2.3446, "local", 1, "Cocina francesa clásica a precios de 1896."],
     ["Bouillon Pigalle", 48.8822, 2.3378, "local", 1, "Platos tradicionales baratos al pie de Montmartre."],
@@ -526,6 +550,11 @@ const CURATED = {
     ["Campo de' Fiori", 41.8956, 12.4722, "gastronomia", 0.5, "Mercado por la mañana, ambiente por la noche."],
     ["Boca de la Verdad", 41.8881, 12.4814, "barrio", 0.25, "La leyenda dice que muerde a los mentirosos."],
     ["Gianicolo", 41.8919, 12.4610, "naturaleza", 0.5, "Panorámica de cúpulas al atardecer."]
+  ], hotels: [
+    ["The Yellow", 41.9047, 12.5033, 0, "Termini", "El albergue con más vida de Roma, junto a la estación."],
+    ["Hotel Panda", 41.9063, 12.4796, 1, "Plaza de España", "Sencillo y económico junto a la escalinata."],
+    ["Hotel Smeraldo", 41.8946, 12.4744, 2, "Campo de' Fiori", "Terraza en la azotea en pleno centro histórico."],
+    ["Hotel Raphael", 41.9006, 12.4723, 3, "Piazza Navona", "Fachada cubierta de hiedra junto a Piazza Navona."]
   ], food: [
     ["Da Enzo al 29", 41.8880, 12.4776, "italiana local", 2, "Cacio e pepe y carbonara en una trattoria diminuta."],
     ["Armando al Pantheon", 41.8989, 12.4772, "italiana local", 2, "Cocina romana de familia junto al Panteón."],
@@ -554,6 +583,11 @@ const CURATED = {
     ["Hyde Park", 51.5073, -0.1657, "naturaleza", 1.5, "Speakers' Corner y el lago Serpentine."],
     ["Museo de Historia Natural", 51.4967, -0.1764, "museo", 2, "Dinosaurios bajo una catedral victoriana."],
     ["Camden Market", 51.5413, -0.1463, "barrio", 1.5, "Puestos vintage y comida de todo el mundo."]
+  ], hotels: [
+    ["Generator London", 51.5262, -0.1223, 0, "Bloomsbury", "Albergue grande y animado cerca del Museo Británico."],
+    ["The Z Hotel Soho", 51.5115, -0.1316, 1, "Soho", "Habitaciones pequeñas pero en el mejor sitio y a buen precio."],
+    ["The Hoxton Holborn", 51.5180, -0.1206, 2, "Holborn", "Hotel con estilo y vestíbulo lleno de vida."],
+    ["Covent Garden Hotel", 51.5141, -0.1269, 3, "Covent Garden", "Hotel boutique con interiores de diseño inglés."]
   ], food: [
     ["Dishoom Covent Garden", 51.5124, -0.1269, "vegetariana callejera", 2, "Cocina de los cafés de Bombay."],
     ["Flat Iron Covent Garden", 51.5121, -0.1243, "carne", 1, "Steak de calidad a precio muy razonable."],
@@ -583,6 +617,11 @@ const CURATED = {
     ["Mirador de São Pedro de Alcântara", 38.7155, -9.1446, "naturaleza", 0.25, "Jardín-mirador frente al castillo."],
     ["LX Factory", 38.7034, -9.1784, "barrio", 1, "Antigua fábrica convertida en espacio creativo."],
     ["Oceanario de Lisboa", 38.7635, -9.0937, "museo", 2, "Uno de los acuarios más grandes de Europa."]
+  ], hotels: [
+    ["Lisbon Lounge Hostel", 38.7113, -9.1373, 0, "Baixa", "Uno de los albergues mejor valorados de Europa."],
+    ["Lisbon Destination Hostel", 38.7146, -9.1410, 1, "Rossio", "Habitaciones privadas dentro de la estación del Rossio."],
+    ["Hotel Lisboa Tejo", 38.7139, -9.1365, 2, "Baixa", "Céntrico, con azulejos y un pozo antiguo en el vestíbulo."],
+    ["Memmo Alfama", 38.7110, -9.1305, 3, "Alfama", "Piscina en la terraza con vistas al Tajo."]
   ], food: [
     ["Cervejaria Ramiro", 38.7214, -9.1356, "marisco", 2, "Marisco a la plancha y el famoso prego de postre."],
     ["Taberna da Rua das Flores", 38.7096, -9.1434, "local tapas", 2, "Petiscos portugueses en una taberna pequeña."],
@@ -612,6 +651,11 @@ const CURATED = {
     ["Wall Street", 40.7060, -74.0090, "barrio", 0.5, "La Bolsa y el toro de bronce."],
     ["Greenwich Village", 40.7336, -74.0027, "barrio", 1.5, "Washington Square, jazz y brownstones."],
     ["Chinatown y Little Italy", 40.7170, -73.9970, "gastronomia", 1.5, "Dim sum y cannoli a dos calles de distancia."]
+  ], hotels: [
+    ["HI NYC Hostel", 40.7987, -73.9665, 0, "Upper West Side", "Albergue histórico junto a Central Park."],
+    ["Pod 51", 40.7556, -73.9688, 1, "Midtown East", "Habitaciones mini a buen precio en Manhattan."],
+    ["citizenM Times Square", 40.7618, -73.9846, 2, "Times Square", "Moderno, con bar en la azotea sobre Broadway."],
+    ["The Greenwich Hotel", 40.7197, -74.0098, 3, "Tribeca", "Hotel boutique con spa bajo un granero japonés."]
   ], food: [
     ["Katz's Delicatessen", 40.7223, -73.9874, "carne callejera", 2, "El sándwich de pastrami más famoso del mundo."],
     ["Joe's Pizza", 40.7305, -74.0021, "italiana callejera", 1, "La porción de pizza neoyorquina por excelencia."],
@@ -642,6 +686,11 @@ const CURATED = {
     ["Ginza", 35.6717, 139.7650, "barrio", 1.5, "Grandes almacenes y arquitectura de vanguardia."],
     ["Museo Nacional de Tokio", 35.7188, 139.7765, "museo", 2, "La mayor colección de arte japonés."],
     ["Odaiba y teamLab", 35.6260, 139.7840, "museo", 2.5, "Arte digital inmersivo en la bahía."]
+  ], hotels: [
+    ["Khaosan World Asakusa", 35.7110, 139.7960, 0, "Asakusa", "Albergue con habitaciones de estilo japonés junto al Senso-ji."],
+    ["Dormy Inn Akihabara", 35.6995, 139.7740, 1, "Akihabara", "Hotel práctico con baño termal japonés."],
+    ["Hotel Gracery Shinjuku", 35.6948, 139.7020, 2, "Shinjuku", "El hotel con un Godzilla gigante en la terraza."],
+    ["Hoshinoya Tokyo", 35.6873, 139.7647, 3, "Otemachi", "Ryokan de lujo con aguas termales en pleno centro."]
   ], food: [
     ["Sushizanmai Tsukiji", 35.6654, 139.7706, "japonesa marisco", 2, "Sushi fresco junto al antiguo mercado, abierto casi siempre."],
     ["Uobei Shibuya", 35.6600, 139.6979, "japonesa", 1, "Sushi que llega en tren hasta tu mesa, muy barato."],
@@ -674,6 +723,11 @@ const CURATED = {
     ["Teotihuacán (excursión)", 19.6925, -98.8438, "monumento", 5, "Las pirámides del Sol y la Luna, a una hora de la ciudad."],
     ["Mercado de San Juan", 19.4314, -99.1446, "gastronomia", 1, "Quesos, frutas exóticas e insectos para probar."],
     ["Ángel de la Independencia", 19.4270, -99.1677, "barrio", 0.25, "El símbolo del Paseo de la Reforma."]
+  ], hotels: [
+    ["Hostel Mundo Joven Catedral", 19.4350, -99.1325, 0, "Centro Histórico", "Terraza con vistas a la Catedral."],
+    ["Hotel Isabel", 19.4295, -99.1365, 1, "Centro Histórico", "Hotel antiguo y económico a pasos del Zócalo."],
+    ["Hotel Catedral", 19.4362, -99.1325, 2, "Centro Histórico", "Cómodo, con terraza junto al Templo Mayor."],
+    ["Condesa DF", 19.4127, -99.1726, 3, "Condesa", "Hotel boutique de diseño frente al parque España."]
   ], food: [
     ["El Cardenal", 19.4352, -99.1365, "mexicana local", 2, "Cocina mexicana tradicional y chocolate con conchas."],
     ["Café de Tacuba", 19.4365, -99.1394, "mexicana local", 2, "Enchiladas en un salón colonial desde 1912."],
@@ -705,6 +759,11 @@ const CURATED = {
     ["Tanque La Unión", 14.5570, -90.7300, "barrio", 0.25, "Antiguas pilas públicas bajo las palmeras."],
     ["ChocoMuseo", 14.5585, -90.7350, "gastronomia", 1, "Taller para hacer tu propio chocolate maya."],
     ["Volcán Pacaya (excursión)", 14.3810, -90.6010, "naturaleza", 5, "Caminata a un volcán activo y malvaviscos en la lava."]
+  ], hotels: [
+    ["Tropicana Hostel", 14.5566, -90.7372, 0, "Centro", "Albergue con piscina y vistas a los volcanes."],
+    ["Hotel Casa Rústica", 14.5593, -90.7360, 1, "Centro", "Patio colonial con jardín, muy bien de precio."],
+    ["Posada de Don Rodrigo", 14.5599, -90.7350, 2, "Junto al Arco", "Casona colonial con marimba en el patio."],
+    ["Hotel Museo Casa Santo Domingo", 14.5586, -90.7290, 3, "Santo Domingo", "Dormir entre las ruinas de un convento del siglo XVII."]
   ], food: [
     ["Comedores del Mercado", 14.5592, -90.7402, "local callejera", 1, "Pepián, tamales y atol en los comedores populares."],
     ["La Fonda de la Calle Real", 14.5582, -90.7346, "local carne", 2, "Cocina guatemalteca: pepián y caldo real."],
@@ -757,7 +816,7 @@ const TRANSPORT = {
 /* Niveles internos que el planificador combina para encajar en tu dinero */
 const HOTEL = [
   { price: 18,  em: "🎒", name: "Albergue en habitación compartida", short: "Albergue" },
-  { price: 28,  em: "🛏️", name: "Hostal o albergue con encanto", short: "Hostal" },
+  { price: 28,  em: "🛏️", name: "Hostal o pensión con encanto", short: "Hostal" },
   { price: 65,  em: "🏨", name: "Hotel 3★ céntrico", short: "Hotel 3★" },
   { price: 160, em: "✨", name: "Hotel boutique 4-5★", short: "Hotel boutique" }
 ];
@@ -1057,6 +1116,9 @@ function wikiPhoto(titles, width = 1280) {
   })());
   return photoCache.get(key);
 }
+const PH = () => window.PHOTOS || {};
+/* Foto: primero la que va dentro de la página; si no hay, se busca en Wikipedia */
+const photoFor = (key, titles, width) => PH()[key] ? Promise.resolve(PH()[key]) : wikiPhoto(titles, width);
 const setPhoto = (el, src) => { if (el && src) el.style.backgroundImage = `url("${src}")`; };
 
 /* ============================================================ interfaz */
@@ -1107,6 +1169,21 @@ function findCurated(q) {
   return CURATED[key] || Object.values(CURATED).find(d => norm(d.name) === key || (key.length > 3 && key.startsWith(norm(d.name))));
 }
 const curatedStops = d => d.stops.map(([name, lat, lon, cat, hours, desc]) => ({ name, lat, lon, cat, hours, desc }));
+const curatedHotels = d => (d.hotels || []).map(([name, lat, lon, level, zone, desc]) => ({ name, lat, lon, level, zone, desc }));
+/* Alojamiento: del nivel que permite tu dinero y lo más cerca posible del centro de tus planes */
+function pickHotel(hotels, daysPlan, level) {
+  const pts = daysPlan.flatMap(d => d.items.filter(x => !x.meal));
+  if (!hotels.length || !pts.length) return null;
+  // centro de gravedad de la ruta, sin contar excursiones lejanas
+  const c0 = centroid(pts), core = pts.filter(p => km(c0, p) < 15), c = centroid(core.length ? core : pts);
+  const avg = h => (core.length ? core : pts).reduce((a, p) => a + km(h, p), 0) / (core.length || pts.length);
+  let best = null;
+  for (const h of hotels) {
+    const score = avg(h) + Math.abs(h.level - level) * 4;
+    if (!best || score < best.score) best = { ...h, score, avg: avg(h), center: c };
+  }
+  return best;
+}
 const curatedFood = d => d.food.map(([name, lat, lon, tags, price, desc]) => ({ name, lat, lon, tags: tags.split(" "), price, desc }));
 
 /* Vista previa en vivo de lo que da tu dinero */
@@ -1139,10 +1216,10 @@ async function run() {
   $("#go").disabled = true;
   try {
     const dest = findCurated(q);
-    let title, subtitle, stops, foodList, idx, photoTitles, live = false;
+    let title, subtitle, stops, foodList, hotels = [], idx, photoTitles, live = false;
     if (dest) {
       title = dest.name; subtitle = dest.country; idx = dest.cost; photoTitles = dest.photo;
-      stops = curatedStops(dest); foodList = curatedFood(dest);
+      stops = curatedStops(dest); foodList = curatedFood(dest); hotels = curatedHotels(dest);
     } else {
       setStatus(`<span class="loader">✈︎</span><br>Buscando los mejores sitios y restaurantes de ${esc(q)}…`);
       try { $("#main").scrollIntoView({ behavior: "smooth", block: "center" }); } catch {}
@@ -1151,14 +1228,15 @@ async function run() {
       subtitle = [a.state, a.country].filter(Boolean).filter(x => x !== title).join(", ");
       idx = COUNTRY_COST[(a.country_code || "").toLowerCase()] ?? 1;
       photoTitles = [title];
-      [stops, foodList] = await Promise.all([fetchPOIs(hit), fetchFood(hit).catch(() => [])]);
+      [stops, foodList, hotels] = await Promise.all([fetchPOIs(hit), fetchFood(hit).catch(() => []), fetchHotels(hit).catch(() => [])]);
       live = true;
     }
     const full = { ...o, foodList };
     const b = solveBudget(stops, full, idx, state.money);
     const daysPlan = plan(stops, { ...full, save: b.save, foodPrice: Math.max(1, b.f) });
-    render({ title, subtitle, daysPlan, o: full, live, idx, b });
-    wikiPhoto(photoTitles).then(src => setPhoto($(".cover"), src));
+    const hotel = pickHotel(hotels, daysPlan, b.h);
+    render({ title, subtitle, daysPlan, o: full, live, idx, b, hotel });
+    photoFor(dest ? "city:" + Object.keys(CURATED).find(k => CURATED[k] === dest) : "", photoTitles).then(src => setPhoto($(".cover"), src));
     try { $("#main").scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
   } catch (err) {
     console.error(err);
@@ -1167,7 +1245,7 @@ async function run() {
   } finally { $("#go").disabled = false; }
 }
 
-function render({ title, subtitle, daysPlan, o, live, idx, b }) {
+function render({ title, subtitle, daysPlan, o, live, idx, b, hotel }) {
   const visits = daysPlan.reduce((s, d) => s + d.items.filter(x => !x.meal).length, 0);
   const B = state.money, P = b.parts;
   const segs = [["Alojamiento", P.hotel, "#C65D3B"], ["Comida", P.food, "#C9973A"], ["Entradas", P.entries, "#6E7F5A"], ["Transporte", P.transport, "#3E7CA6"], ["Imprevistos", P.extra, "#A5577E"]];
@@ -1204,7 +1282,7 @@ function render({ title, subtitle, daysPlan, o, live, idx, b }) {
       <div>
         <h3>Lo que <em>incluye</em></h3>
         <div class="picks">
-          <div class="pick"><span class="em">${HOTEL[b.h].em}</span><div><b>${HOTEL[b.h].name}</b><small>${b.nights ? `${plural(b.nights, "noche", "noches")} · ${plural(Math.ceil(o.travelers / 2), "habitación", "habitaciones")}` : "Viaje de un día, sin noche"}</small></div></div>
+          ${stayHTML(b, o, idx, hotel, title)}
           <div class="pick"><span class="em">${EAT[b.f].em}</span><div><b>${EAT[b.f].name}</b><small>Comida y cena recomendadas cada día · ${"€".repeat(Math.max(1, b.f))}</small></div></div>
           <div class="pick"><span class="em">🎟️</span><div><b>${ENTRY_TXT[b.save][0]}</b><small>${ENTRY_TXT[b.save][1]}</small></div></div>
           <div class="pick"><span class="em">${TRANSPORT[o.transport].em}</span><div><b>${TRANSPORT[o.transport].label}</b><small>${TRANSPORT[o.transport].daily ? `≈ ${money(TRANSPORT[o.transport].daily * idx)} por día` : "Sin gasto en transporte"}</small></div></div>
@@ -1229,7 +1307,7 @@ function render({ title, subtitle, daysPlan, o, live, idx, b }) {
 
   $("#share").onclick = async () => { try { await navigator.clipboard.writeText(location.href); $("#share").textContent = "¡Copiado!"; } catch { $("#share").textContent = "Copia la URL"; } };
   $("#print").onclick = () => { try { print(); } catch {} };
-  drawMap(daysPlan);
+  drawMap(daysPlan, hotel);
   document.querySelectorAll(".story").forEach(t => t.onclick = () => selectDay(+t.dataset.day));
   document.querySelectorAll("[data-key]").forEach(li => li.onclick = e => {
     if (e.target.closest("a")) return;
@@ -1239,13 +1317,39 @@ function render({ title, subtitle, daysPlan, o, live, idx, b }) {
   });
   daysPlan.forEach((d, i) => {
     const n = d.highlight.name;
-    wikiPhoto([d.highlight.wiki?.split(":").pop() || n, n.replace(/\s*\(.*\)/, "").replace(/ y .*/, "")], 960).then(src => {
+    photoFor(n, [d.highlight.wiki?.split(":").pop() || n, n.replace(/\s*\(.*\)/, "").replace(/ y .*/, "")], 960).then(src => {
       setPhoto(document.querySelector(`.day[data-day="${i}"] .day-cover`), src);
       const ph = document.querySelector(`[data-ph="${i}"]`); if (src && ph) { setPhoto(ph, src); ph.textContent = ""; }
     });
   });
 }
 
+function stayHTML(b, o, idx, hotel, city) {
+  const H = HOTEL[b.h], nights = b.nights, rooms = Math.ceil(o.travelers / 2);
+  const perNight = b.parts.hotel / Math.max(nights, 1) / rooms;
+  if (!nights) return `<div class="pick"><span class="em">☀️</span><div><b>Viaje de un día</b><small>No necesitas alojamiento</small></div></div>`;
+  if (!hotel) return `<div class="pick"><span class="em">${H.em}</span><div><b>${H.name}</b><small>${plural(nights, "noche", "noches")} · ≈ ${money(roundNice(perNight))} por habitación y noche</small></div></div>`;
+  const q = encodeURIComponent(`${hotel.name} ${city}`);
+  const booking = `https://www.booking.com/searchresults.es.html?ss=${q}&group_adults=${o.travelers}&no_rooms=${rooms}`;
+  const gm = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  const levelTxt = hotel.level === b.h ? H.name : HOTEL[hotel.level].name;
+  return `<div class="pick stay" data-key="hotel" data-lat="${hotel.lat}" data-lon="${hotel.lon}"><span class="em">${HOTEL[hotel.level].em}</span><div>
+      <small class="eyebrow-s">Dónde dormir · ${esc(hotel.zone || "cerca de tus planes")}</small>
+      <b>${esc(hotel.name)}</b>
+      <small>${esc(hotel.desc || levelTxt)}</small>
+      <div class="t-meta"><span>${levelTxt}</span><span>≈ ${money(roundNice(perNight))}/noche</span><span>📍 a ${distTxt(hotel.avg)} de media de tus planes</span></div>
+      <div class="stay-links"><a href="${booking}" target="_blank" rel="noopener">Ver precios en Booking ↗</a><a href="${gm}" target="_blank" rel="noopener">Ver en Maps ↗</a></div>
+    </div></div>`;
+}
+async function fetchHotels(hit) {
+  const { lat, lon, radius } = area(hit), A = `(around:${Math.min(radius, 6000)},${lat},${lon})`;
+  const data = await overpass(`[out:json][timeout:25];(nwr["tourism"~"^(hotel|hostel|guest_house)$"]["name"]${A};);out center tags 300;`);
+  return data.elements.map(el => {
+    const t = el.tags || {}, stars = parseInt(t.stars) || 0;
+    const level = t.tourism === "hostel" ? 0 : t.tourism === "guest_house" ? 1 : stars >= 4 ? 3 : stars && stars <= 2 ? 1 : 2;
+    return { name: t.name, lat: el.lat ?? el.center?.lat, lon: el.lon ?? el.center?.lon, level, zone: t["addr:suburb"] || t["addr:neighbourhood"] || "", desc: stars ? `${"★".repeat(stars)} · ${{ hotel: "Hotel", hostel: "Albergue", guest_house: "Casa de huéspedes" }[t.tourism]}` : "" };
+  }).filter(h => h.lat != null);
+}
 function legHTML(leg) { return leg ? `<span></span><div class="leg">${TRANSPORT[leg.mode].em} ${leg.min} min ${leg.txt}</div>` : ""; }
 function mealHTML(s, o, key) {
   const r = s.place, label = s.meal === "cena" ? "Cena" : "Comida";
@@ -1303,7 +1407,7 @@ function dayHTML(d, i, o, idx) {
     </article>`;
 }
 
-function drawMap(daysPlan) {
+function drawMap(daysPlan, hotel) {
   markers = {}; layers = [];
   if (!window.L) { $("#map").innerHTML = `<div class="status">No se pudo cargar el mapa. Abre la página en tu navegador con internet.</div>`; return; }
   map = L.map("map", { scrollWheelZoom: false });
@@ -1325,6 +1429,10 @@ function drawMap(daysPlan) {
     });
     group.addTo(map); layers.push(group);
   });
+  if (hotel) {
+    const icon = L.divIcon({ className: "", html: `<div class="pin hotel">🛏️</div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
+    markers.hotel = L.marker([hotel.lat, hotel.lon], { icon, title: hotel.name, zIndexOffset: 500 }).bindPopup(`<b>Tu alojamiento · ${esc(hotel.name)}</b><br>${esc(hotel.zone || "")}`).addTo(map);
+  }
   map.fitBounds(all, { padding: [30, 30] });
   setTimeout(() => map.invalidateSize(), 50);
 }
@@ -1347,9 +1455,11 @@ function renderPosts() {
     b.innerHTML = `<div class="top"><span>${esc(d.country)}</span><span>${d.stops.length} planes</span></div><div class="txt"><b>${esc(d.name)}</b><span class="hand">${vibes[key] || ""}</span></div>`;
     b.onclick = () => { $("#dest").value = d.name; updatePreview(); run(); };
     $("#posts").append(b);
-    wikiPhoto(d.photo, 500).then(src => setPhoto(b, src));
+    photoFor("city:" + key, d.photo, 500).then(src => setPhoto(b, src));
   });
-  document.querySelectorAll(".pola").forEach(p => wikiPhoto(CURATED[p.dataset.city].photo, 500).then(src => setPhoto(p.querySelector(".img"), src)));
+  document.querySelectorAll(".pola").forEach(p => photoFor("city:" + p.dataset.city, CURATED[p.dataset.city].photo, 500).then(src => setPhoto(p.querySelector(".img"), src)));
+  const cr = window.PHOTO_CREDITS || [];
+  if (cr.length) $("#credits").innerHTML = `<details><summary>Créditos de las fotos (Wikimedia Commons)</summary><p>${cr.map(([t, a, l]) => `${esc(t.replace(/^File:/, ""))}${a ? " — " + esc(a) : ""}${l ? " (" + esc(l) + ")" : ""}`).join(" · ")}</p></details>`;
 }
 
 /* ============================================================ arranque */
