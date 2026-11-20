@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Third Thursday Book Club</title>
+<meta name="description" content="Reserve a seat at the next meeting of the Third Thursday Book Club.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     EDIT THE EVENT HERE: everything visible about the next
+     meeting is also set in the EVENT object in the script below.
+     ============================================================ */
+  :root {
+    --paper: #F6F1E7;
+    --card: #FFFDF8;
+    --ink: #1E1A16;
+    --ink-soft: #5A5148;
+    --rule: #E2D8C7;
+    --accent: #9E3B2A;        /* oxblood */
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F3E1DA;
+    --green: #2E5A44;
+    --green-soft: #DDEBE2;
+    --focus: #C9772E;
+    --cover-a: #2B3A4A;
+    --cover-b: #9E3B2A;
+    --shadow: 0 1px 2px rgba(30,26,22,.06), 0 12px 32px rgba(30,26,22,.08);
+    --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans: 'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #17140F; --card: #221E18; --ink: #F1EAE0; --ink-soft: #B5AA9C;
+      --rule: #3A332A; --accent: #E0806B; --accent-ink: #1A0F0B; --accent-soft: #3A221C;
+      --green: #8CC6A6; --green-soft: #1E3328; --focus: #E9A15C;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #17140F; --card: #221E18; --ink: #F1EAE0; --ink-soft: #B5AA9C;
+    --rule: #3A332A; --accent: #E0806B; --accent-ink: #1A0F0B; --accent-soft: #3A221C;
+    --green: #8CC6A6; --green-soft: #1E3328; --focus: #E9A15C;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 17px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 720px) { .wrap { padding: 0 32px; } }
+
+  /* Header */
+  header { border-bottom: 1px solid var(--rule); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; }
+  .brand { font-family: var(--serif); font-weight: 600; font-size: 20px; letter-spacing: -.01em; text-decoration: none; }
+  .brand em { font-weight: 400; color: var(--accent); }
+  .bar nav { display: flex; gap: 20px; font-size: 15px; font-weight: 500; }
+  .bar nav a { text-decoration: none; color: var(--ink-soft); }
+  .bar nav a:hover { color: var(--ink); }
+  @media (max-width: 560px) { .bar nav { display: none; } }
+
+  /* Hero: the next event */
+  .hero { padding: 48px 0 56px; }
+  @media (min-width: 900px) { .hero { padding: 72px 0 80px; } }
+  .hero-grid { display: grid; gap: 40px; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: start; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent);
+  }
+  .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+  .date-line {
+    font-family: var(--serif); font-weight: 400; letter-spacing: -.02em;
+    font-size: clamp(44px, 8vw, 84px); line-height: .98; margin: 14px 0 10px;
+  }
+  .date-line span { display: block; }
+  .date-line .wd { font-family: var(--sans); font-size: 18px; font-weight: 600; letter-spacing: .01em; margin-bottom: 8px; }
+  .date-line .tm { font-style: italic; color: var(--ink-soft); font-size: .42em; margin-top: 12px; letter-spacing: -.01em; }
+
+  .book { display: grid; grid-template-columns: 96px 1fr; gap: 20px; align-items: center; margin: 32px 0 28px; }
+  .cover {
+    width: 96px; aspect-ratio: 2 / 3; border-radius: 3px 6px 6px 3px; position: relative;
+    background: linear-gradient(160deg, var(--cover-a) 0%, #1A2430 100%);
+    box-shadow: inset 6px 0 0 rgba(0,0,0,.25), 0 10px 22px rgba(30,26,22,.25);
+    color: #F1E6D2; padding: 12px 8px 10px 13px; display: flex; flex-direction: column; justify-content: space-between;
+    font-family: var(--serif); overflow: hidden;
+  }
+  .cover b { font-weight: 600; font-size: 9px; line-height: 1.15; letter-spacing: 0; overflow-wrap: break-word; hyphens: auto; text-transform: uppercase; }
+  .cover i { font-size: 10px; opacity: .8; }
+  .cover::after { content: ""; position: absolute; left: 14px; right: 10px; top: 52%; height: 2px; background: var(--cover-b); }
+  .book-meta small { display: block; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+  .book-meta h2 { font-family: var(--serif); font-weight: 600; font-size: 28px; line-height: 1.15; margin: 4px 0 2px; letter-spacing: -.01em; }
+  .book-meta p { margin: 0; color: var(--ink-soft); }
+
+  .facts { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .facts li { display: grid; grid-template-columns: 104px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .facts dt, .facts .k { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); padding-top: 2px; }
+  .facts .v { font-weight: 500; }
+  .facts .v small { display: block; color: var(--ink-soft); font-weight: 400; font-size: 15px; }
+
+  /* Reservation card */
+  .card {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 16px; box-shadow: var(--shadow);
+    padding: 24px;
+  }
+  @media (min-width: 900px) { .card { padding: 32px; position: sticky; top: 24px; } }
+  .card h3 { font-family: var(--serif); font-weight: 600; font-size: 28px; line-height: 1.1; margin: 0 0 6px; letter-spacing: -.01em; }
+  .card .sub { margin: 0 0 20px; color: var(--ink-soft); font-size: 15px; }
+
+  .seats { margin: 0 0 24px; }
+  .seats-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; margin-bottom: 8px; }
+  .seats-row strong { font-size: 17px; }
+  .seats-row strong.low { color: var(--accent); }
+  .meter { height: 8px; border-radius: 99px; background: var(--rule); overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--green); border-radius: 99px; transition: width .4s ease; }
+
+  form { display: grid; gap: 18px; }
+  legend { padding: 0; }
+  label, legend { display: block; font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .opt { font-weight: 400; color: var(--ink-soft); }
+  input[type="text"], input[type="email"], textarea {
+    width: 100%; font: inherit; color: var(--ink); background: var(--paper);
+    border: 1.5px solid var(--rule); border-radius: 10px; padding: 12px 14px;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 25%, transparent); }
+  input[aria-invalid="true"] { border-color: var(--accent); }
+  .err { color: var(--accent); font-size: 14px; margin-top: 6px; display: none; }
+  .err.show { display: block; }
+  fieldset { border: 0; margin: 0; padding: 0; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label {
+    margin: 0; text-align: center; font-weight: 500; cursor: pointer;
+    border: 1.5px solid var(--rule); border-radius: 10px; padding: 11px 8px; background: var(--paper);
+  }
+  .seg input:checked + label { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .seg input:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; font-weight: 400; margin: 0; cursor: pointer; }
+  .check input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--ink); flex: none; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font: inherit; font-weight: 700; font-size: 17px; text-decoration: none; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 15px 22px;
+    transition: transform .15s ease, filter .15s ease;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:active { transform: translateY(1px); }
+  .btn.block { width: 100%; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+  .fine { font-size: 13px; color: var(--ink-soft); margin: 0; text-align: center; }
+
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 28px; }
+  .hero-cta .note { font-size: 15px; color: var(--ink-soft); }
+  @media (min-width: 900px) { .hero-cta { display: none; } }
+
+  /* Confirmation */
+  .done { display: none; text-align: left; }
+  .done.show { display: block; }
+  .tick { width: 48px; height: 48px; border-radius: 50%; background: var(--green-soft); color: var(--green); display: grid; place-items: center; margin-bottom: 16px; }
+  .done h3 { margin-bottom: 8px; }
+  .done p { margin: 0 0 16px; color: var(--ink-soft); }
+  .done .ticket { border: 1.5px dashed var(--rule); border-radius: 12px; padding: 16px; margin: 0 0 20px; font-size: 15px; }
+  .done .ticket b { display: block; font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+  .done .actions { display: grid; gap: 10px; }
+
+  /* Sections */
+  section.band { padding: 64px 0; border-top: 1px solid var(--rule); }
+  .band h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4vw, 38px); letter-spacing: -.015em; line-height: 1.1; margin: 0 0 8px; }
+  .band .lede { margin: 0 0 36px; color: var(--ink-soft); max-width: 56ch; }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; counter-reset: s; }
+  @media (min-width: 760px) { .steps { grid-template-columns: repeat(3, 1fr); gap: 32px; } }
+  .steps li { counter-increment: s; }
+  .steps li::before {
+    content: counter(s); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+    border: 1.5px solid var(--ink); font-family: var(--serif); font-weight: 600; font-size: 18px; margin-bottom: 14px;
+  }
+  .steps h3 { font-size: 18px; margin: 0 0 6px; }
+  .steps p { margin: 0; color: var(--ink-soft); font-size: 16px; }
+
+  .shelf { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .shelf li { display: grid; grid-template-columns: 88px 1fr; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+  @media (min-width: 640px) { .shelf li { grid-template-columns: 140px 1fr auto; } }
+  .shelf .when { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+  .shelf .title { font-family: var(--serif); font-size: 21px; font-weight: 600; }
+  .shelf .title span { display: block; font-family: var(--sans); font-size: 15px; font-weight: 400; color: var(--ink-soft); }
+  .shelf .tag { grid-column: 2; font-size: 13px; color: var(--ink-soft); }
+  @media (min-width: 640px) { .shelf .tag { grid-column: auto; } }
+
+  .faq { display: grid; gap: 0; border-top: 1px solid var(--rule); max-width: 760px; }
+  .faq details { border-bottom: 1px solid var(--rule); }
+  .faq summary { cursor: pointer; list-style: none; padding: 18px 32px 18px 0; font-weight: 600; position: relative; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; position: absolute; right: 4px; top: 14px; font-size: 24px; font-weight: 400; color: var(--ink-soft); }
+  .faq details[open] summary::after { content: "–"; }
+  .faq details p { margin: 0 0 18px; color: var(--ink-soft); max-width: 62ch; }
+
+  footer { border-top: 1px solid var(--rule); padding: 28px 0 40px; font-size: 14px; color: var(--ink-soft); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#">Third Thursday <em>Book Club</em></a>
+    <nav aria-label="Page sections">
+      <a href="#how">How it works</a>
+      <a href="#shelf">Coming up</a>
+      <a href="#faq">Questions</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="next-title">
+    <div class="wrap hero-grid">
+
+      <!-- The next event -->
+      <div>
+        <div class="eyebrow" id="next-title">Next meeting</div>
+        <h1 class="date-line">
+          <span class="wd" data-f="weekday"></span>
+          <span class="dt" data-f="dateShort"></span>
+          <span class="tm" data-f="timeRange"></span>
+        </h1>
+
+        <div class="book">
+          <div class="cover" aria-hidden="true"><b data-f="bookTitle"></b><i data-f="bookAuthor"></i></div>
+          <div class="book-meta">
+            <small>We're reading</small>
+            <h2 data-f="bookTitle"></h2>
+            <p>by <span data-f="bookAuthor"></span> · <span data-f="bookPages"></span> pages</p>
+          </div>
+        </div>
+
+        <ul class="facts">
+          <li><span class="k">Where</span><span class="v"><span data-f="venue"></span><small data-f="address"></small></span></li>
+          <li><span class="k">Cost</span><span class="v">Free. Snacks and tea provided<small>Coffee from the café counter is extra</small></span></li>
+          <li><span class="k">Reserve by</span><span class="v"><span data-f="deadline"></span><small>Or until the <span data-f="capacity"></span> seats are gone</small></span></li>
+        </ul>
+
+        <div class="hero-cta">
+          <a class="btn" href="#reserve">Reserve a seat</a>
+          <span class="note"><strong data-f="seatsLeftText"></strong></span>
+        </div>
+      </div>
+
+      <!-- Reservation -->
+      <aside class="card" id="reserve" aria-labelledby="reserve-title">
+        <div id="form-view">
+          <h3 id="reserve-title">Reserve your seat</h3>
+          <p class="sub">Takes 30 seconds. We'll email a confirmation and a calendar invite.</p>
+
+          <div class="seats" aria-live="polite">
+            <div class="seats-row"><span>Seats left</span><strong id="seats-strong"></strong></div>
+            <div class="meter" role="presentation"><i id="meter"></i></div>
+          </div>
+
+          <form id="rsvp" novalidate>
+            <div>
+              <label for="name">Your name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required aria-describedby="name-err">
+              <div class="err" id="name-err">Please tell us your name.</div>
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby="email-err">
+              <div class="err" id="email-err">We need a valid email to send your confirmation.</div>
+            </div>
+            <fieldset>
+              <legend>How many seats?</legend>
+              <div class="seg">
+                <input type="radio" id="s1" name="seats" value="1" checked><label for="s1">Just me</label>
+                <input type="radio" id="s2" name="seats" value="2"><label for="s2">Me + 1 guest</label>
+              </div>
+            </fieldset>
+            <label class="check"><input type="checkbox" name="first" id="first"> This is my first meeting</label>
+            <button class="btn block" type="submit">Reserve my seat</button>
+            <p class="fine">Plans change? Cancel from your confirmation email so someone else can come.</p>
+          </form>
+        </div>
+
+        <div class="done" id="done-view" tabindex="-1">
+          <div class="tick" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </div>
+          <h3>You're in, <span id="done-name"></span>.</h3>
+          <p>A confirmation is on its way to <strong id="done-email"></strong>.</p>
+          <div class="ticket">
+            <b data-f="bookTitle"></b>
+            <span data-f="dateLong"></span> · <span data-f="timeRange"></span><br>
+            <span data-f="venue"></span> · <span id="done-seats"></span>
+          </div>
+          <div class="actions">
+            <a class="btn block" id="ics" download="book-club.ics">Add to my calendar</a>
+            <button class="btn ghost block" type="button" id="again">Reserve for someone else</button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+  <section class="band" id="how" aria-labelledby="how-title">
+    <div class="wrap">
+      <h2 id="how-title">How reserving works</h2>
+      <p class="lede">Seats are limited so everyone gets a word in. Here's all there is to it.</p>
+      <ol class="steps">
+        <li><h3>Save a seat</h3><p>Fill in the form above with your name and email. Bring a friend if you like, one guest per member.</p></li>
+        <li><h3>Check your inbox</h3><p>You'll get a confirmation with a calendar invite and the discussion questions about a week before.</p></li>
+        <li><h3>Read and come along</h3><p>Turn up a few minutes early to grab a seat. Didn't finish the book? Come anyway.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band" id="shelf" aria-labelledby="shelf-title">
+    <div class="wrap">
+      <h2 id="shelf-title">Coming up</h2>
+      <p class="lede">We meet the third Thursday of every month. Reservations for each meeting open the day after the previous one.</p>
+      <ul class="shelf">
+        <li><span class="when">Jan 21</span><span class="title">The Age of Innocence<span>Edith Wharton</span></span><span class="tag">Opens Dec 18</span></li>
+        <li><span class="when">Feb 18</span><span class="title">Their Eyes Were Watching God<span>Zora Neale Hurston</span></span><span class="tag">Opens Jan 22</span></li>
+        <li><span class="when">Mar 18</span><span class="title">The Remains of the Day<span>Kazuo Ishiguro</span></span><span class="tag">Opens Feb 19</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <h2 id="faq-title">Questions</h2>
+      <p class="lede">If it's not answered here, reply to any club email.</p>
+      <div class="faq">
+        <details><summary>Do I need to be a member?</summary><p>No. Anyone can reserve a seat. Reserving is what makes you a member, and there are no dues.</p></details>
+        <details><summary>What if I haven't finished the book?</summary><p>Come anyway. We don't police page counts, and the conversation often makes people want to finish.</p></details>
+        <details><summary>What if the meeting is full?</summary><p>The form closes when seats run out. Cancellations reopen seats, so check back the week of the meeting.</p></details>
+        <details><summary>Is the venue accessible?</summary><p>Yes. The back room is step-free with an accessible restroom on the same floor.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Third Thursday Book Club · Meets monthly</span>
+    <a href="#reserve">Reserve a seat ↑</a>
+  </div>
+</footer>
+
+<script>
+  // ---- Edit the next event here ------------------------------------
+  const EVENT = {
+    start: '2026-12-17T19:00:00',   // local time
+    end:   '2026-12-17T20:30:00',
+    deadline: '2026-12-15',
+    bookTitle: 'Frankenstein',
+    bookAuthor: 'Mary Shelley',
+    bookPages: 280,
+    venue: 'Fern & Folio Café, back room',
+    address: '214 Alder Street',
+    capacity: 20,
+    reserved: 11,                   // replace with a live count when a backend is connected
+  };
+  // ------------------------------------------------------------------
+
+  const start = new Date(EVENT.start), end = new Date(EVENT.end);
+  const fmt = (d, o) => d.toLocaleString('en-US', o);
+  const time = d => fmt(d, { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
+  const fields = {
+    weekday: fmt(start, { weekday: 'long' }),
+    dateShort: fmt(start, { month: 'long', day: 'numeric' }),
+    dateLong: fmt(start, { weekday: 'long', month: 'long', day: 'numeric' }),
+    timeRange: `${time(start)}–${time(end)}`,
+    deadline: fmt(new Date(EVENT.deadline + 'T12:00:00'), { weekday: 'long', month: 'long', day: 'numeric' }),
+    bookTitle: EVENT.bookTitle, bookAuthor: EVENT.bookAuthor, bookPages: EVENT.bookPages,
+    venue: EVENT.venue, address: EVENT.address, capacity: EVENT.capacity,
+  };
+  let reserved = EVENT.reserved;
+
+  function render() {
+    const left = Math.max(0, EVENT.capacity - reserved);
+    fields.seatsLeftText = left ? `${left} of ${EVENT.capacity} seats left` : 'This meeting is full';
+    document.querySelectorAll('[data-f]').forEach(el => { el.textContent = fields[el.dataset.f]; });
+    const strong = document.getElementById('seats-strong');
+    strong.textContent = left ? `${left} of ${EVENT.capacity}` : 'Full';
+    strong.classList.toggle('low', left <= 5);
+    document.getElementById('meter').style.width = (left / EVENT.capacity * 100) + '%';
+    document.getElementById('s2').disabled = left < 2;
+    const btn = document.querySelector('#rsvp button[type=submit]');
+    btn.disabled = left === 0;
+    btn.textContent = left ? 'Reserve my seat' : 'Meeting is full';
+  }
+  render();
+
+  const form = document.getElementById('rsvp');
+  const check = (input, ok) => {
+    input.setAttribute('aria-invalid', String(!ok));
+    document.getElementById(input.id + '-err').classList.toggle('show', !ok);
+    return ok;
+  };
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = form.name, email = form.email;
+    const okName = check(name, name.value.trim().length > 0);
+    const okEmail = check(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()));
+    if (!okName || !okEmail) { (okName ? email : name).focus(); return; }
+
+    // TODO: send { name, email, seats, first } to your sign-up backend here.
+    const seats = Number(form.seats.value);
+    reserved += seats;
+    render();
+
+    document.getElementById('done-name').textContent = name.value.trim().split(' ')[0];
+    document.getElementById('done-email').textContent = email.value.trim();
+    document.getElementById('done-seats').textContent = seats === 2 ? '2 seats' : '1 seat';
+    document.getElementById('ics').href = icsLink();
+    document.getElementById('form-view').hidden = true;
+    const done = document.getElementById('done-view');
+    done.classList.add('show');
+    done.focus();
+  });
+  ['name', 'email'].forEach(id => form[id].addEventListener('input', e => {
+    if (e.target.getAttribute('aria-invalid') === 'true') check(e.target, e.target.value.trim().length > 0);
+  }));
+
+  document.getElementById('again').addEventListener('click', () => {
+    form.reset();
+    document.getElementById('done-view').classList.remove('show');
+    document.getElementById('form-view').hidden = false;
+    form.name.focus();
+  });
+
+  function icsLink() {
+    const stamp = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Third Thursday Book Club//EN', 'BEGIN:VEVENT',
+      `UID:${stamp(start)}@book-club`, `DTSTAMP:${stamp(new Date())}`,
+      `DTSTART:${stamp(start)}`, `DTEND:${stamp(end)}`,
+      `SUMMARY:Book club: ${EVENT.bookTitle}`,
+      `LOCATION:${EVENT.venue}\\, ${EVENT.address}`,
+      `DESCRIPTION:We're discussing ${EVENT.bookTitle} by ${EVENT.bookAuthor}.`,
+      'END:VEVENT', 'END:VCALENDAR',
+    ].join('\r\n');
+    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+  }
+</script>
+</body>
+</html>
