@@ -23,6 +23,7 @@
     --olive-soft: #E7ECDD;
     --gold: #C9973A;
     --blob1: #F7CDAE; --blob2: #D3E0C4; --blob3: #D4E4F0;
+    --map-land: #F3EEE6; --map-park: #D6E4C3; --map-sand: #F1E3BE; --map-water: #A9CFE3; --map-road: #FFFFFF; --map-major: #F5D9A8; --map-motorway: #EDB97A; --map-path: #E2D6C6;
     --shadow-s: 0 1px 2px rgba(60,40,25,.06), 0 4px 14px rgba(60,40,25,.07);
     --shadow: 0 2px 4px rgba(60,40,25,.05), 0 18px 50px rgba(60,40,25,.13);
     --r: 24px;
@@ -34,6 +35,7 @@
       --bg: #16110E; --surface: #211A16; --sand: #2B221D; --ink: #F6EEE7; --muted: #B4A396; --line: #3A2E27;
       --terra: #E5865F; --terra-ink: #1E120C; --terra-soft: #3C251B; --olive: #AABB92; --olive-soft: #283022; --gold: #E2B55A;
       --blob1: #4A2A1C; --blob2: #26331F; --blob3: #1C2C3A;
+      --map-land: #221C18; --map-park: #24301F; --map-sand: #3A3122; --map-water: #1C3344; --map-road: #3A322C; --map-major: #5A4632; --map-motorway: #7A5636; --map-path: #2E2722;
       --shadow-s: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3); --shadow: 0 2px 4px rgba(0,0,0,.3), 0 18px 50px rgba(0,0,0,.5);
     }
   }
@@ -41,6 +43,7 @@
     --bg: #16110E; --surface: #211A16; --sand: #2B221D; --ink: #F6EEE7; --muted: #B4A396; --line: #3A2E27;
     --terra: #E5865F; --terra-ink: #1E120C; --terra-soft: #3C251B; --olive: #AABB92; --olive-soft: #283022; --gold: #E2B55A;
     --blob1: #4A2A1C; --blob2: #26331F; --blob3: #1C2C3A;
+    --map-land: #221C18; --map-park: #24301F; --map-sand: #3A3122; --map-water: #1C3344; --map-road: #3A322C; --map-major: #5A4632; --map-motorway: #7A5636; --map-path: #2E2722;
     --shadow-s: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3); --shadow: 0 2px 4px rgba(0,0,0,.3), 0 18px 50px rgba(0,0,0,.5);
   }
   * { box-sizing: border-box; }
@@ -171,6 +174,12 @@
   .post .top span { background: rgba(255,255,255,.22); backdrop-filter: blur(8px); padding: 5px 10px; border-radius: 99px; }
   .post .txt { position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 1; }
   .post b { display: block; font-family: var(--serif); font-size: 28px; font-weight: 500; line-height: 1; letter-spacing: -.01em; }
+  .world-filter { width: 100%; max-width: 520px; border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 12px 18px; font-size: 16px; margin-bottom: 22px; }
+  .world-filter:focus { outline: none; border-color: var(--terra); }
+  .world { columns: 3 260px; column-gap: 28px; }
+  .country { break-inside: avoid; margin-bottom: 18px; }
+  .country h4 { margin: 0 0 8px; font-family: var(--serif); font-weight: 600; font-size: 19px; }
+  .country .chip { padding: 5px 12px; font-size: 13.5px; }
   .post .hand { font-family: var(--hand); font-size: 22px; opacity: .95; }
 
   /* ---------- Resultado ---------- */
@@ -305,7 +314,7 @@
   <div class="wrap">
     <nav>
       <a class="logo" href="#">rumbo<span>.</span></a>
-      <div class="nav-links"><a href="#planner">Planear viaje</a><a href="#inspo">Inspiración</a></div>
+      <div class="nav-links"><a href="#planner">Planear viaje</a><a href="#inspo">Inspiración</a><a href="#mundo">Destinos</a></div>
     </nav>
     <div class="hero-grid">
       <div>
@@ -317,9 +326,9 @@
           <a class="pill ghost" href="#inspo">Ver destinos</a>
         </div>
         <div class="proof">
-          <div><b>10</b>destinos con ruta propia</div>
+          <div><b id="n-dest">10</b>destinos con ruta propia</div>
           <div><b>+100</b>restaurantes elegidos</div>
-          <div><b>∞</b>ciudades del mundo</div>
+          <div><b id="n-countries">∞</b>países</div>
         </div>
       </div>
       <div class="collage" aria-hidden="true">
@@ -414,6 +423,15 @@
     </div>
     <div class="posts" id="posts"></div>
   </section>
+
+  <section id="mundo" hidden>
+    <div class="section-title">
+      <h2>Todo el <em>mundo</em></h2>
+      <p id="mundo-count"></p>
+    </div>
+    <input id="mundo-filter" class="world-filter" type="search" placeholder="Filtra por ciudad o país… (ej. Brasil, Japón, playa)" aria-label="Filtrar destinos">
+    <div class="world" id="world"></div>
+  </section>
 </div>
 
 <footer>
@@ -424,6 +442,7 @@
   <div id="credits"></div>
 </footer>
 
+<!--CITIES--><script>window.CITY_INDEX = [{"name":"Arequipa","country":"Perú","cc":"pe","slug":"arequipa","n":5},{"name":"Bariloche","country":"Argentina","cc":"ar","slug":"bariloche","n":4},{"name":"Bogotá","country":"Colombia","cc":"co","slug":"bogota","n":8},{"name":"Buenos Aires","country":"Argentina","cc":"ar","slug":"buenos-aires","n":10},{"name":"Cancún","country":"México","cc":"mx","slug":"cancun","n":6},{"name":"Cartagena","country":"Colombia","cc":"co","slug":"cartagena","n":5},{"name":"Ciudad de Guatemala","country":"Guatemala","cc":"gt","slug":"ciudad-de-guatemala","n":6},{"name":"Ciudad de Panamá","country":"Panamá","cc":"pa","slug":"ciudad-de-panama","n":7},{"name":"Cusco","country":"Perú","cc":"pe","slug":"cusco","n":7},{"name":"Flores","country":"Guatemala","cc":"gt","slug":"flores","n":3},{"name":"Florianópolis","country":"Brasil","cc":"br","slug":"florianopolis","n":6},{"name":"Foz do Iguaçu","country":"Brasil","cc":"br","slug":"foz-do-iguacu","n":4},{"name":"Granada","country":"España","cc":"es","slug":"granada","n":7},{"name":"Guadalajara","country":"México","cc":"mx","slug":"guadalajara","n":6},{"name":"La Habana","country":"Cuba","cc":"cu","slug":"la-habana","n":8},{"name":"La Paz","country":"Bolivia","cc":"bo","slug":"la-paz","n":6},{"name":"Lago de Atitlán","country":"Guatemala","cc":"gt","slug":"lago-de-atitlan","n":4},{"name":"Lima","country":"Perú","cc":"pe","slug":"lima","n":7},{"name":"Medellín","country":"Colombia","cc":"co","slug":"medellin","n":6},{"name":"Mendoza","country":"Argentina","cc":"ar","slug":"mendoza","n":4},{"name":"Mérida","country":"México","cc":"mx","slug":"merida","n":6},{"name":"Monterrey","country":"México","cc":"mx","slug":"monterrey","n":6},{"name":"Montevideo","country":"Uruguay","cc":"uy","slug":"montevideo","n":6},{"name":"Oaxaca","country":"México","cc":"mx","slug":"oaxaca","n":7},{"name":"Playa del Carmen","country":"México","cc":"mx","slug":"playa-del-carmen","n":5},{"name":"Puerto Escondido","country":"México","cc":"mx","slug":"puerto-escondido","n":9},{"name":"Puerto Vallarta","country":"México","cc":"mx","slug":"puerto-vallarta","n":6},{"name":"Punta Cana","country":"República Dominicana","cc":"do","slug":"punta-cana","n":4},{"name":"Quito","country":"Ecuador","cc":"ec","slug":"quito","n":7},{"name":"Río de Janeiro","country":"Brasil","cc":"br","slug":"rio-de-janeiro","n":13},{"name":"Salvador de Bahía","country":"Brasil","cc":"br","slug":"salvador-de-bahia","n":7},{"name":"San José de Costa Rica","country":"Costa Rica","cc":"cr","slug":"san-jose-de-costa-rica","n":5},{"name":"San Juan","country":"Puerto Rico","cc":"us","slug":"san-juan","n":6},{"name":"San Miguel de Allende","country":"México","cc":"mx","slug":"san-miguel-de-allende","n":4},{"name":"San Salvador","country":"El Salvador","cc":"sv","slug":"san-salvador","n":5},{"name":"Santiago de Chile","country":"Chile","cc":"cl","slug":"santiago-de-chile","n":9},{"name":"Santo Domingo","country":"República Dominicana","cc":"do","slug":"santo-domingo","n":6},{"name":"Sevilla","country":"España","cc":"es","slug":"sevilla","n":9},{"name":"Ushuaia","country":"Argentina","cc":"ar","slug":"ushuaia","n":4},{"name":"Valparaíso","country":"Chile","cc":"cl","slug":"valparaiso","n":6}];</script><!--/CITIES-->
 <!--PHOTOS-->
 <script>/* Fotos de Wikimedia Commons, comprimidas e incluidas en la página para que se vean siempre */
 window.PHOTOS = {
@@ -1254,6 +1273,30 @@ function findCurated(q) {
   let key = norm(q); key = ALIASES[key] || key;
   return CURATED[key] || Object.values(CURATED).find(d => norm(d.name) === key || (key.length > 3 && key.startsWith(norm(d.name))));
 }
+/* Ciudades preparadas: índice incluido en la página y un archivo de datos por ciudad (ciudades/<slug>.json) */
+const CITY_INDEX = () => window.CITY_INDEX || [];
+const slugOf = s => norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function findIndexed(q) {
+  const t = norm(q).replace(/[^a-z0-9 ]+/g, " ").split(" ").filter(w => w.length > 1);
+  if (!t.length) return null;
+  const list = CITY_INDEX();
+  const nq = t.join(" ");
+  let best = null, bs = 0;
+  for (const c of list) {
+    const n = norm(c.name).replace(/[^a-z0-9 ]+/g, " "), all = n + " " + norm(c.country) + " " + (c.alias || "");
+    let sc = 0;
+    if (n === nq) sc = 100;
+    else if (t.every(w => all.includes(w))) sc = 50 + (n.startsWith(t[0]) ? 10 : 0) - n.length / 100;
+    else if (n.startsWith(nq) && nq.length > 2) sc = 40;
+    if (sc > bs) { bs = sc; best = c; }
+  }
+  return best;
+}
+const cityCache = new Map();
+function loadCity(slug) {
+  if (!cityCache.has(slug)) cityCache.set(slug, fetch(`ciudades/${slug}.json`).then(r => { if (!r.ok) throw new Error("sin datos"); return r.json(); }).catch(e => { cityCache.delete(slug); throw e; }));
+  return cityCache.get(slug);
+}
 const curatedStops = d => d.stops.map(([name, lat, lon, cat, hours, desc]) => ({ name, lat, lon, cat, hours, desc }));
 const curatedHotels = d => (d.hotels || []).map(([name, lat, lon, level, zone, desc]) => ({ name, lat, lon, level, zone, desc }));
 /* Alojamiento: del nivel que permite tu dinero y lo más cerca posible del centro de tus planes */
@@ -1271,16 +1314,26 @@ function pickHotel(hotels, daysPlan, level) {
   return best;
 }
 const curatedFood = d => d.food.map(([name, lat, lon, tags, price, desc]) => ({ name, lat, lon, tags: tags.split(" "), price, desc }));
+const curatedSlug = d => Object.keys(CURATED).find(k => CURATED[k] === d);
 
 /* Vista previa en vivo de lo que da tu dinero */
-let previewQueued = false;
+let previewQueued = false, previewData = null;
 function updatePreview() {
   const per = state.travelers * state.days ? state.money / state.travelers / state.days : 0;
   $("#money-per").textContent = `· ${money(per)} por persona y día`;
   if (previewQueued) return; previewQueued = true;
   requestAnimationFrame(() => {
     previewQueued = false;
-    const d = findCurated($("#dest").value.trim()), o = options();
+    const q = $("#dest").value.trim(), o = options();
+    let d = findCurated(q);
+    if (!d) {
+      const ix = findIndexed(q);
+      if (ix) {
+        const got = cityCache.get(ix.slug);
+        if (!got) { loadCity(ix.slug).then(() => updatePreview()).catch(() => {}); }
+        else { got.then(data => { previewData = data; }).catch(() => {}); if (previewData && previewData.name === ix.name) d = previewData; }
+      }
+    }
     if (!d) { $("#preview").innerHTML = $("#dest").value.trim() ? `Te diremos qué viaje te da este dinero al crear la ruta ✨` : `Escribe un destino y te decimos qué viaje te da este dinero ✨`; return; }
     const s = solveBudget(curatedStops(d), { ...o, foodList: curatedFood(d) }, d.cost, state.money);
     $("#preview").innerHTML = s.fits
@@ -1301,11 +1354,18 @@ async function run() {
   try { history.replaceState(null, "", "?" + params); } catch {}
   $("#go").disabled = true;
   try {
-    const dest = findCurated(q);
-    let title, subtitle, stops, foodList, hotels = [], idx, photoTitles, live = false;
+    const dest = findCurated(q), ix = dest ? null : findIndexed(q);
+    let title, subtitle, stops, foodList, hotels = [], idx, photoTitles, live = false, base = null, cityPhoto = null, slug = dest ? curatedSlug(dest) : ix?.slug;
     if (dest) {
       title = dest.name; subtitle = dest.country; idx = dest.cost; photoTitles = dest.photo;
       stops = curatedStops(dest); foodList = curatedFood(dest); hotels = curatedHotels(dest);
+      try { base = (await loadCity(slugOf(dest.name))).base; } catch {}
+    } else if (ix) {
+      setStatus(`<span class="loader">✈︎</span><br>Preparando tu viaje a ${esc(ix.name)}…`);
+      const data = await loadCity(ix.slug).catch(() => null);
+      if (!data) throw new Error(`No pudimos cargar los datos de ${ix.name}. Abre la página desde su enlace publicado o prueba un destino destacado.`);
+      title = data.name; subtitle = data.country; idx = data.cost; photoTitles = [data.name]; base = data.base; cityPhoto = data.photo || null;
+      stops = curatedStops(data); foodList = curatedFood(data); hotels = curatedHotels(data);
     } else {
       setStatus(`<span class="loader">✈︎</span><br>Buscando los mejores sitios y restaurantes de ${esc(q)}…`);
       try { $("#main").scrollIntoView({ behavior: "smooth", block: "center" }); } catch {}
@@ -1321,17 +1381,18 @@ async function run() {
     const b = solveBudget(stops, full, idx, state.money);
     const daysPlan = plan(stops, { ...full, save: b.save, foodPrice: Math.max(1, b.f) });
     const hotel = pickHotel(hotels, daysPlan, b.h);
-    render({ title, subtitle, daysPlan, o: full, live, idx, b, hotel });
-    photoFor(dest ? "city:" + Object.keys(CURATED).find(k => CURATED[k] === dest) : "", photoTitles).then(src => setPhoto($(".cover"), src));
+    render({ title, subtitle, daysPlan, o: full, live, idx, b, hotel, base });
+    (cityPhoto ? Promise.resolve(cityPhoto) : photoFor(slug ? "city:" + slug : "", photoTitles)).then(src => setPhoto($(".cover"), src));
     try { $("#main").scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
   } catch (err) {
     console.error(err);
-    const msg = err instanceof TypeError ? "No hay conexión con el servicio de mapas. Revisa tu internet o prueba un destino destacado." : err.message;
+    const sug = CITY_INDEX().filter(c => norm(q).split(" ").some(w => w.length > 2 && norm(c.country).includes(w))).slice(0, 8);
+    const msg = err instanceof TypeError ? `Todavía no tenemos «${q}» preparado. ${sug.length ? "Prueba con: " + sug.map(c => c.name).join(", ") + "." : "Busca en la lista de destinos de abajo."}` : err.message;
     setStatus(esc(msg || "Algo salió mal. Inténtalo de nuevo."), "error");
   } finally { $("#go").disabled = false; }
 }
 
-function render({ title, subtitle, daysPlan, o, live, idx, b, hotel }) {
+function render({ title, subtitle, daysPlan, o, live, idx, b, hotel, base }) {
   const visits = daysPlan.reduce((s, d) => s + d.items.filter(x => !x.meal).length, 0);
   const B = state.money, P = b.parts;
   const segs = [["Alojamiento", P.hotel, "#C65D3B"], ["Comida", P.food, "#C9973A"], ["Entradas", P.entries, "#6E7F5A"], ["Transporte", P.transport, "#3E7CA6"], ["Imprevistos", P.extra, "#A5577E"]];
@@ -1393,7 +1454,7 @@ function render({ title, subtitle, daysPlan, o, live, idx, b, hotel }) {
 
   $("#share").onclick = async () => { try { await navigator.clipboard.writeText(location.href); $("#share").textContent = "¡Copiado!"; } catch { $("#share").textContent = "Copia la URL"; } };
   $("#print").onclick = () => { try { print(); } catch {} };
-  drawMap(daysPlan, hotel);
+  drawMap(daysPlan, hotel, base);
   document.querySelectorAll(".story").forEach(t => t.onclick = () => selectDay(+t.dataset.day));
   document.querySelectorAll("[data-key]").forEach(li => li.onclick = e => {
     if (e.target.closest("a")) return;
@@ -1493,11 +1554,12 @@ function dayHTML(d, i, o, idx) {
     </article>`;
 }
 
-function drawMap(daysPlan, hotel) {
+function drawMap(daysPlan, hotel, base) {
   markers = {}; layers = [];
   if (!window.L) { $("#map").innerHTML = `<div class="status">No se pudo cargar el mapa. Abre la página en tu navegador con internet.</div>`; return; }
-  map = L.map("map", { scrollWheelZoom: false });
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 19, subdomains: "abcd", attribution: "© OpenStreetMap © CARTO" }).addTo(map);
+  map = L.map("map", { scrollWheelZoom: false, preferCanvas: true, zoomSnap: 0.5 });
+  if (base) drawBase(base);
+  else L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 19, subdomains: "abcd", attribution: "© OpenStreetMap © CARTO" }).addTo(map);
   const all = [];
   daysPlan.forEach((d, i) => {
     const color = DAY_COLORS[i % DAY_COLORS.length], group = L.featureGroup();
@@ -1519,8 +1581,35 @@ function drawMap(daysPlan, hotel) {
     const icon = L.divIcon({ className: "", html: `<div class="pin hotel">🛏️</div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
     markers.hotel = L.marker([hotel.lat, hotel.lon], { icon, title: hotel.name, zIndexOffset: 500 }).bindPopup(`<b>Tu alojamiento · ${esc(hotel.name)}</b><br>${esc(hotel.zone || "")}`).addTo(map);
   }
-  map.fitBounds(all, { padding: [30, 30] });
+  const inArea = map._baseBounds ? all.filter(p => map._baseBounds.pad(0.1).contains(p)) : all;
+  map.fitBounds(inArea.length >= 2 ? inArea : all, { padding: [30, 30] });
   setTimeout(() => map.invalidateSize(), 50);
+}
+/* Mapa real dibujado en la página: calles, parques y agua de OpenStreetMap (vía OpenFreeMap) */
+function decodeLines(list) {
+  return list.map(a => { const out = []; let x = 0, y = 0; for (let i = 0; i < a.length; i += 2) { x += a[i]; y += a[i + 1]; out.push([y / 1e5, x / 1e5]); } return out; });
+}
+function drawBase(base) {
+  const css = getComputedStyle(document.documentElement), v = k => css.getPropertyValue(k).trim();
+  const r = L.canvas({ padding: 0.6 });
+  $("#map").style.background = v("--map-land");
+  // el borde del mismo color tapa las juntas entre teselas
+  const poly = (list, color, w = 1) => list?.length && L.polygon(decodeLines(list).map(ring => [ring]), { renderer: r, stroke: true, color, weight: w, fillColor: color, fillOpacity: 1, interactive: false }).addTo(map);
+  const line = (list, color, weight) => list?.length && L.polyline(decodeLines(list), { renderer: r, color, weight, opacity: 1, lineCap: "round", lineJoin: "round", interactive: false }).addTo(map);
+  poly(base.park, v("--map-park")); poly(base.sand, v("--map-sand")); poly(base.water, v("--map-water"), 4);
+  line(base.waterway, v("--map-water"), 2);
+  const R = base.roads || {};
+  line(R.p, v("--map-path"), 1.2);
+  line(R.d, v("--map-road"), 2.2);
+  line(R.c, v("--map-road"), 3.4);
+  line(R.b, v("--map-major"), 4.5);
+  line(R.a, v("--map-motorway"), 5.5);
+  map.attributionControl.addAttribution("© OpenStreetMap · OpenFreeMap");
+  if (base.c) { // no dejar salir del área dibujada
+    const [la, lo, rk] = base.c, dLa = rk / 111, dLo = rk / (111 * Math.cos(la * Math.PI / 180));
+    const bb = L.latLngBounds([la - dLa, lo - dLo], [la + dLa, lo + dLo]);
+    map._baseBounds = bb;
+  }
 }
 function selectDay(day) {
   document.querySelectorAll(".story").forEach(t => t.setAttribute("aria-selected", +t.dataset.day === day));
@@ -1531,6 +1620,28 @@ function selectDay(day) {
 }
 
 /* Inspiración: tarjetas tipo post */
+function renderWorld() {
+  const list = CITY_INDEX().filter(c => !findCurated(c.name) || true);
+  if (!list.length) return;
+  const all = [...Object.values(CURATED).map(d => ({ name: d.name, country: d.country })), ...list.filter(c => !Object.values(CURATED).some(d => d.name === c.name))];
+  const byCountry = {};
+  for (const c of all) (byCountry[c.country] ||= []).push(c);
+  const countries = Object.keys(byCountry).sort((a, b) => a.localeCompare(b, "es"));
+  $("#n-dest").textContent = all.length; $("#n-countries").textContent = countries.length;
+  $("#mundo-count").textContent = `${all.length} destinos en ${countries.length} países. Toca uno para crear tu ruta.`;
+  $("#world").innerHTML = countries.map(k => `<div class="country" data-s="${esc(norm(k + " " + byCountry[k].map(c => c.name).join(" ")))}"><h4>${esc(k)}</h4><div class="chips">${byCountry[k].sort((a, b) => a.name.localeCompare(b.name, "es")).map(c => `<button type="button" class="chip" data-city="${esc(c.name)}" data-s="${esc(norm(c.name + " " + k))}">${esc(c.name)}</button>`).join("")}</div></div>`).join("");
+  for (const c of list) $("#dest-list").insertAdjacentHTML("beforeend", `<option value="${esc(c.name)}">`);
+  $("#world").onclick = e => { const b = e.target.closest("[data-city]"); if (!b) return; $("#dest").value = b.dataset.city; updatePreview(); run(); };
+  $("#mundo-filter").oninput = () => {
+    const f = norm($("#mundo-filter").value.trim());
+    document.querySelectorAll("#world .country").forEach(el => {
+      let any = false;
+      el.querySelectorAll("[data-city]").forEach(b => { const ok = !f || b.dataset.s.includes(f) || norm(el.querySelector("h4").textContent).includes(f); b.hidden = !ok; any ||= ok; });
+      el.hidden = !any;
+    });
+  };
+  $("#mundo").hidden = false;
+}
 function renderPosts() {
   const vibes = { madrid: "tapas y museos", barcelona: "Gaudí y mar", paris: "croissants y arte", roma: "dolce vita", londres: "pubs y museos gratis", lisboa: "miradores y nata", "nueva york": "la ciudad que nunca duerme", tokio: "neón y sushi", "ciudad de mexico": "tacos y murales", "antigua guatemala": "volcanes y colores" };
   Object.entries(CURATED).forEach(([key, d], i) => {
@@ -1543,6 +1654,7 @@ function renderPosts() {
     $("#posts").append(b);
     photoFor("city:" + key, d.photo, 500).then(src => setPhoto(b, src));
   });
+  renderWorld();
   document.querySelectorAll(".pola").forEach(p => photoFor("city:" + p.dataset.city, CURATED[p.dataset.city].photo, 500).then(src => setPhoto(p.querySelector(".img"), src)));
   const cr = window.PHOTO_CREDITS || [];
   if (cr.length) $("#credits").innerHTML = `<details><summary>Créditos de las fotos (Wikimedia Commons)</summary><p>${cr.map(([t]) => `<a href="https://commons.wikimedia.org/wiki/${encodeURI(t)}" target="_blank" rel="noopener">${esc(t.replace(/^File:/, "").replace(/_/g, " "))}</a>`).join(" · ")}<br>Cada foto pertenece a su autor y tiene su licencia libre, indicada en su página de Commons.</p></details>`;
