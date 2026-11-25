@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Cafetería Biblioteca Tec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: informe académico de un equipo de estudiantes, para profesores y compañeros
+   IDEA la ruta de un pedido en la barra de la cafetería, estación por estación, con sus fricciones marcadas
+   PICTURE recorrido de servicio de 5 estaciones (pedido → entrega) con etiquetas rojas de fricción
+   COLOUR blanco, tinta espresso, banda espresso en portada, rojo cereza de café para fricciones, caramelo de apoyo
+   TYPE Archivo + Inter
+   LAYOUT título y problema arriba, recorrido a todo el ancho debajo; en teléfono el recorrido se vuelve vertical */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#140c08);--ink:light-dark(#24150f,#f3e9df);--muted:light-dark(#6e5a4e,#b9a393);
+--rule:light-dark(#e6dad0,#3a2a20);--tint:light-dark(#f7f1ec,#1f140e);
+--esp:light-dark(#24150f,#0c0604);--onesp:#f6ece2;--crema:#e7cfb4;
+--red:light-dark(#b8322a,#ff7a66);--redsoft:light-dark(#fbe9e6,#3a1714);
+--car:light-dark(#9a5b26,#e0a669);--carsoft:light-dark(#f5e8da,#2c1d12)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Archivo,"Arial Narrow",system-ui,sans-serif;line-height:1.08;letter-spacing:-.02em;margin:0}
+h2{font-size:clamp(28px,3.6vw,40px);font-weight:800}
+h3{font-size:20px;font-weight:700}
+p{margin:0 0 12px}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding-block:clamp(32px,5vw,72px);padding-left:max(5vw,16px,env(safe-area-inset-left,0px));padding-right:max(5vw,16px,env(safe-area-inset-right,0px))}
+.band+.band{border-top:1px solid var(--rule)}
+.alt{background:var(--tint)}
+/* cabecera */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--esp);z-index:30}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--esp);color:var(--onesp);padding-left:max(5vw,16px,env(safe-area-inset-left,0px));padding-right:max(5vw,16px,env(safe-area-inset-right,0px));border-bottom:1px solid #3d2a1f}
+.bar{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:20px;min-height:56px;flex-wrap:wrap}
+.brand{font-family:Archivo,sans-serif;font-weight:800;font-size:17px;white-space:nowrap}
+.brand span{color:var(--crema);font-weight:500}
+nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;text-decoration:none;font-size:14px;font-weight:600;padding:8px 11px;border-radius:8px;white-space:nowrap;color:#e9dccf}
+nav a:hover{background:#3a271c;color:#fff}
+/* portada */
+.hero{background:var(--esp);color:var(--onesp)}
+.hero .top{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:end}
+.kicker{font-size:15px;color:var(--crema);margin-bottom:14px}
+.hero h1{font-size:clamp(34px,4.6vw,52px);font-weight:800}
+.hero .lead{font-size:17px;color:#e3d3c4;margin:0}
+.hero .lead b{color:#fff}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#4a3427;border:1px solid #4a3427;border-radius:12px;overflow:hidden;margin-top:28px}
+.facts div{background:#2e1d14;padding:14px 16px}
+.facts b{display:block;font-family:Archivo,sans-serif;font-size:30px;line-height:1.1;color:#fff}
+.facts span{font-size:13px;color:#cdb9a7}
+/* recorrido */
+.route{margin-top:clamp(28px,4vw,48px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;position:relative}
+.st{position:relative;padding:0 10px}
+.st .node{position:relative;display:flex;align-items:center;justify-content:center;height:84px}
+.st .node::before{content:"";position:absolute;left:0;right:0;top:50%;height:4px;background:var(--crema);transform:translateY(-50%)}
+.st:first-child .node::before{left:50%}
+.st:last-child .node::before{right:50%}
+.ico{position:relative;width:76px;height:76px;border-radius:50%;background:var(--onesp);border:4px solid var(--crema);display:grid;place-items:center}
+.ico svg{width:44px;height:44px}
+.st .num{position:absolute;top:-4px;right:calc(50% - 46px);width:26px;height:26px;border-radius:50%;background:#fff;color:#24150f;font:700 13px/26px Inter,sans-serif;text-align:center;box-shadow:0 0 0 3px #24150f}
+.st h3{font-size:17px;text-align:center;margin-top:12px;color:#fff}
+.st .sub{font-size:14px;text-align:center;color:#cdb9a7;margin:2px 0 12px}
+.fr{display:block;background:#4a1d18;border:1px solid #8a3a30;color:#ffd9d2;border-radius:8px;font-size:13.5px;line-height:1.35;padding:8px 10px;margin-top:8px}
+.fr::before{content:"Fricción · ";font-weight:700;color:#ff8f7e}
+.fr.ob::before{content:"Observado · "}
+.lane{grid-column:1/-1;margin:22px 10px 0;border:2px dashed #6b4a37;border-radius:12px;padding:12px 16px;font-size:14px;color:#e3d3c4;display:flex;gap:18px;flex-wrap:wrap}
+.lane b{color:#fff}
+.cap{font-size:13px;color:#b9a393;margin:14px 10px 0}
+/* contenido */
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(20px,4vw,56px);margin-bottom:28px;align-items:end}
+.tag{display:inline-block;font-size:14px;font-weight:700;color:var(--car);margin-bottom:8px}
+.sec-head p{color:var(--muted);margin:0}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font-weight:700;font-size:14px;color:var(--muted);border-bottom:2px solid var(--ink);padding:10px 12px}
+td{border-bottom:1px solid var(--rule);padding:12px;vertical-align:top}
+td:first-child{font-weight:600}
+.ref{color:var(--car);font-weight:600;font-size:13px;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{border:1px solid var(--rule);border-radius:12px;padding:20px;background:var(--bg)}
+.card h3{margin-bottom:8px}
+.hyp b{font-family:Archivo,sans-serif;font-size:28px;color:var(--car);display:block;line-height:1;margin-bottom:8px}
+.note{font-size:14px;color:var(--muted);border-left:3px solid var(--car);padding:4px 0 4px 14px;margin-top:20px}
+/* línea de tiempo de la entrevista */
+.tl{position:relative;height:64px;margin:6px 0 30px}
+.tl .axis{position:absolute;left:0;right:0;top:30px;height:6px;border-radius:3px;background:var(--carsoft)}
+.tl .tick{position:absolute;top:44px;font-size:13px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.tl a{position:absolute;top:18px;width:30px;height:30px;margin-left:-15px;border-radius:50%;background:var(--car);color:#fff;font:700 13px/30px Inter,sans-serif;text-align:center;text-decoration:none;box-shadow:0 0 0 3px var(--bg)}
+.tl a.hl{background:var(--red)}
+.tl a:hover{transform:scale(1.12)}
+.qs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px}
+.q{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 14px;padding:18px 0;border-top:1px solid var(--rule);scroll-margin-top:80px}
+.q .n{font-family:Archivo,sans-serif;font-weight:800;font-size:26px;line-height:1;color:var(--car)}
+.q h3{font-size:18px}
+.q h3 time{font:500 13px Inter,sans-serif;color:var(--muted);margin-left:6px;white-space:nowrap}
+.q p{margin:4px 0 0;font-size:15px}
+.q .imp{color:var(--muted)}
+.q .imp b{color:var(--ink)}
+/* red de valor */
+.net{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr);gap:10px 0;align-items:stretch}
+.net .h{font-size:14px;font-weight:700;color:var(--muted);padding:0 12px 6px}
+.net .a,.net .b{background:var(--tint);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;font-weight:600}
+.net .x{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-size:14px;padding:6px 10px;color:var(--car);font-weight:600;position:relative}
+.net .x::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid var(--carsoft);z-index:0}
+.net .x span{position:relative;background:var(--bg);padding:2px 8px;border-radius:6px}
+.figcap{font-size:13px;color:var(--muted);margin-top:14px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.flow span{background:var(--carsoft);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+.flow i{font-style:normal;color:var(--car);font-weight:700}
+.find{border-top:4px solid var(--car)}
+.find .n{font-family:Archivo,sans-serif;font-weight:800;font-size:40px;color:var(--car);line-height:1}
+.find dt{font-size:13px;font-weight:700;color:var(--muted);margin-top:14px}
+.find dd{margin:2px 0 0;font-size:15px}
+.problem{background:var(--redsoft);border-radius:14px;padding:clamp(20px,3vw,36px);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(20px,3vw,40px)}
+.problem h3{font-size:clamp(22px,2.6vw,30px);color:var(--red);margin-bottom:12px}
+.pend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pend span{border:1px solid var(--red);color:var(--red);border-radius:999px;padding:4px 12px;font-size:13.5px;font-weight:600}
+.who{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:20px}
+.who div{border-top:2px solid var(--car);padding-top:10px}
+.who b{display:block;font-family:Archivo,sans-serif;font-size:18px}
+.who span{font-size:14px;color:var(--muted)}
+.kpi td:first-child{white-space:nowrap}
+.formula{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:var(--tint);padding:2px 6px;border-radius:4px}
+.src{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+.src li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:10px;font-size:15px}
+.src b{color:var(--car);font-family:Archivo,sans-serif;font-size:18px}
+.src a{overflow-wrap:anywhere;color:var(--car)}
+footer{background:var(--esp);color:#cdb9a7;font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between}
+footer b{color:#fff}
+@media(max-width:900px){.hero .top,.sec-head,.problem{grid-template-columns:minmax(0,1fr)}.grid3{grid-template-columns:minmax(0,1fr)}.qs{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){
+.route{grid-template-columns:minmax(0,1fr)}
+.st{display:grid;grid-template-columns:76px minmax(0,1fr);gap:0 16px;padding:0 0 18px}
+.st .node{grid-row:1/span 3;height:auto;align-items:flex-start}
+.st .node::before{left:50%!important;right:auto!important;top:0;bottom:-18px;height:auto;width:4px;transform:translateX(-50%)}
+.st:first-child .node::before{top:38px}
+.st:last-child .node::before{bottom:auto;height:38px}
+.st .num{right:-6px;top:-4px}
+.st h3,.st .sub{text-align:left;margin-top:4px}
+.st .sub{margin-bottom:4px}
+.st .fr{grid-column:2}
+.lane,.cap{margin-left:0;margin-right:0}
+.grid2{grid-template-columns:minmax(0,1fr)}
+.net{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.net .x{grid-column:1/-1;order:0}
+.net .h.hx{display:none}
+}
+@media(max-width:600px){
+.facts b{font-size:24px}
+.who{grid-template-columns:minmax(0,1fr)}
+nav{margin-left:0;width:100%;padding-bottom:6px}
+table{font-size:14px}
+th,td{padding:8px 6px}
+.stack thead{display:none}
+.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--rule)}
+.stack td{display:block;border:0;padding:4px 0}
+.stack td::before{content:attr(data-l);display:block;font-size:13px;font-weight:700;color:var(--muted)}
+.tl .tick:nth-child(even){display:none}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.tl a:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">Cafetería Biblioteca Tec <span>· Grupo 503</span></div>
+    <nav aria-label="Secciones">
+      <a href="#perfil">Perfil</a>
+      <a href="#entrevista">Entrevista</a>
+      <a href="#diagnostico">Diagnóstico</a>
+      <a href="#hallazgos">Hallazgos</a>
+      <a href="#oportunidad">Oportunidad</a>
+      <a href="#fuentes">Fuentes</a>
+    </nav>
+  </div>
+</header>
+
+<section class="band hero">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="kicker">Expediente de investigación empresarial · Módulo 4, Taller 9 · 25 de noviembre de 2026</div>
+        <h1>En horas pico, la cobertura de personal puede no alcanzar a la demanda</h1>
+      </div>
+      <div>
+        <p class="lead">Analizamos la cafetería Starbucks de la <b>Biblioteca del campus Monterrey</b> a partir de una entrevista con una integrante del equipo y una observación. Proponemos <b>coordinar con anticipación</b> a baristas y supervisores antes de los periodos de alta demanda.</p>
+      </div>
+    </div>
+    <div class="facts">
+      <div><b>10</b><span>dimensiones de entrevista</span></div>
+      <div><b>2</b><span>vacantes en la sucursal</span></div>
+      <div><b>35 días</b><span>de capacitación inicial</span></div>
+    </div>
+
+    <div class="route" aria-label="Recorrido de un pedido y sus fricciones">
+      <div class="st">
+        <div class="node"><div class="ico"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="13" y="6" width="22" height="36" rx="4" fill="#24150f"/><rect x="16" y="11" width="16" height="24" rx="1.5" fill="#e7cfb4"/><path d="M20 20h8M20 24h8M20 28h5" stroke="#24150f" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="38.5" r="1.6" fill="#e7cfb4"/></svg></div><span class="num">1</span></div>
+        <h3>Pedido</h3><p class="sub">En caja o con Pickup desde la app</p>
+      </div>
+      <div class="st">
+        <div class="node"><div class="ico"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="13" width="36" height="24" rx="4" fill="#24150f"/><rect x="6" y="18" width="36" height="5" fill="#9a5b26"/><rect x="11" y="28" width="10" height="4" rx="1" fill="#e7cfb4"/></svg></div><span class="num">2</span></div>
+        <h3>Registro y pago</h3><p class="sub">Punto de venta</p>
+        <span class="fr">No se puede cobrar como extra un jarabe de temporada</span>
+        <span class="fr">El sistema es lento</span>
+      </div>
+      <div class="st">
+        <div class="node"><div class="ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h26l8 10-8 10H8z" fill="#24150f"/><circle cx="33" cy="24" r="2.5" fill="#e7cfb4"/><path d="M13 21h13M13 27h9" stroke="#e7cfb4" stroke-width="2.4" stroke-linecap="round"/></svg></div><span class="num">3</span></div>
+        <h3>Etiqueta</h3><p class="sub">Se imprime y pasa a la barra</p>
+      </div>
+      <div class="st">
+        <div class="node"><div class="ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 18h22l-2.5 22a3 3 0 0 1-3 2.6h-11a3 3 0 0 1-3-2.6z" fill="#24150f"/><rect x="10" y="14" width="26" height="5" rx="2" fill="#9a5b26"/><path d="M34 23h3a4 4 0 0 1 0 8h-4" stroke="#24150f" stroke-width="3" fill="none"/><path d="M19 10c-2-2 2-3 0-6M26 10c-2-2 2-3 0-6" stroke="#9a5b26" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="num">4</span></div>
+        <h3>Preparación</h3><p class="sub">Barra prepara bebidas; alimentos, la comida</p>
+        <span class="fr">Productos agotados</span>
+        <span class="fr ob">Una misma persona cubre caja y barra</span>
+      </div>
+      <div class="st">
+        <div class="node"><div class="ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 12h16l-2 26H18z" fill="#24150f"/><rect x="14" y="9" width="20" height="4" rx="1.5" fill="#9a5b26"/><path d="M17.3 22h13.4" stroke="#e7cfb4" stroke-width="5"/><path d="M6 40c6-1 10-4 16-4h10" stroke="#9a5b26" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><span class="num">5</span></div>
+        <h3>Entrega</h3><p class="sub">En tienda; oportunidad de fidelizar con Rewards</p>
+      </div>
+      <div class="lane"><span><b>En paralelo:</b> el apoyo repone insumos</span><span><b>Supervisión</b> coordina estaciones</span><span><b>Demanda</b> marcada por el calendario académico</span></div>
+    </div>
+    <p class="cap">Recorrido de la interacción principal según la entrevista [4]. Las fricciones fueron reportadas; su frecuencia y su efecto en los tiempos aún no se han medido.</p>
+  </div>
+</section>
+
+<section class="band" id="perfil">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">Producto 1 · Perfil empresarial</span><h2>Una sucursal dentro de la biblioteca, al servicio de estudiantes</h2></div>
+      <p>Unidad de análisis: la cafetería Starbucks de la Biblioteca del campus Monterrey. El análisis se limita a esta sucursal y distingue información pública de la marca, evidencia de la entrevista e hipótesis del equipo.</p>
+    </div>
+    <div class="scroll">
+      <table class="stack">
+        <thead><tr><th style="width:24%">Dimensión</th><th>Ficha de contexto</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Dimensión">Productos y servicios</td><td data-l="Ficha">Café, bebidas frías y calientes, alimentos y panadería; personalización, compra presencial y recogida de pedidos. <span class="ref">[1, 2, 4]</span></td></tr>
+          <tr><td data-l="Dimensión">Clientes</td><td data-l="Ficha">Principalmente estudiantes según el expediente; docentes, personal y otros usuarios de la biblioteca son segmentos potenciales no cuantificados. <span class="ref">[4]</span></td></tr>
+          <tr><td data-l="Dimensión">Propuesta de valor</td><td data-l="Ficha">Conveniencia dentro del campus, reconocimiento de marca, calidad percibida, trato personalizado y fidelización. <span class="ref">[2, 4]</span></td></tr>
+          <tr><td data-l="Dimensión">Venta y entrega</td><td data-l="Ficha">Selección, registro y pago del pedido, preparación y entrega en tienda. Pickup permite ordenar anticipadamente desde la app. <span class="ref">[1, 3, 4]</span></td></tr>
+          <tr><td data-l="Dimensión">Tecnología digital</td><td data-l="Ficha">Aplicación Starbucks México, Rewards, pagos digitales y Pickup a nivel marca; punto de venta y etiquetas confirmados por la entrevistada. <span class="ref">[1–4]</span></td></tr>
+          <tr><td data-l="Dimensión">Red de valor</td><td data-l="Ficha">Clientes, baristas, supervisores, gerente y responsable de distrito. La biblioteca y el calendario académico conforman el contexto de demanda. <span class="ref">[4]</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 style="margin:36px 0 16px">Dos hipótesis preliminares de oportunidad</h3>
+    <div class="grid2">
+      <div class="card hyp"><b>H1</b>Anticipar la demanda universitaria y la disponibilidad del personal podría mejorar la continuidad del servicio en periodos pico.</div>
+      <div class="card hyp"><b>H2</b>Mejorar el registro de personalizaciones podría reducir fricciones al solicitar ingredientes de temporada y facilitar el cobro correcto.</div>
+    </div>
+    <p class="note">Son posibilidades de mejora, no resultados validados. No se dispone del registro original de hipótesis anterior a la entrevista; esta ficha se reconstruyó después.</p>
+  </div>
+</section>
+
+<section class="band alt" id="entrevista">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">Producto 2 · Registro de entrevista</span><h2>Veinte minutos de audio, diez dimensiones</h2></div>
+      <p>Fuente primaria [4]: entrevista a una integrante del equipo de la sucursal. Los tiempos corresponden al expediente original; las respuestas son síntesis, no citas textuales. En rojo, las preguntas que sostienen el problema prioritario.</p>
+    </div>
+    <div class="tl" id="tl" aria-label="Línea de tiempo del audio"><div class="axis"></div></div>
+    <div class="qs" id="qs"></div>
+
+    <div class="grid3" style="margin-top:36px">
+      <div class="card"><h3>Evidencia observacional</h3><p>Un integrante del equipo observó a una misma persona tomar pedidos y preparar bebidas. La entrevistada explicó que esto puede ocurrir cuando falta personal y que existe capacitación para cubrir distintas posiciones (11:36–13:04). [4]</p></div>
+      <div class="card"><h3>Preparación y alcance</h3><p>La matriz conserva las diez dimensiones oficiales. No se dispone del guion previo ni de la asignación nominal de roles, ni consta la autorización de grabación. No se atribuyen respuestas adicionales a la entrevistada.</p></div>
+      <div class="card"><h3>Límites de la evidencia</h3><p>Una entrevista y una observación permiten identificar mecanismos y oportunidades, pero no estimar su frecuencia, demostrar causalidad ni generalizar a todas las sucursales. Los tiempos del expediente no equivalen a una verificación independiente del audio.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="diagnostico">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">Producto 3 · Diagnóstico empresarial</span><h2>Un pedido y su pago a cambio de producto y servicio</h2></div>
+      <p>Actor A: Starbucks (equipo operativo). Actor B: clientes de la comunidad universitaria. Debajo de ese intercambio, la entrega depende de cómo se coordinan las estaciones y quién autoriza los cambios.</p>
+    </div>
+    <h3 style="margin-bottom:14px">A. Red de valor actual</h3>
+    <div class="net">
+      <div class="h">Actor A</div><div class="h hx" style="text-align:center">Intercambio</div><div class="h">Actor B</div>
+      <div class="a">Caja, barra, alimentos y apoyo</div><div class="x"><span>→ Productos y atención<br>← Pedido, pago y preferencias</span></div><div class="b">Estudiantes y comunidad universitaria</div>
+      <div class="a">Gerencia y supervisores</div><div class="x"><span>↕ Asignación de tareas y coordinación</span></div><div class="b">Equipo operativo</div>
+      <div class="a">Responsable de distrito</div><div class="x"><span>↓ Reglas y autorización de cambios</span></div><div class="b">Gerencia de sucursal</div>
+      <div class="a">Rewards / Pickup</div><div class="x"><span>↔ Pedido digital y beneficios</span></div><div class="b">Clientes y sucursal</div>
+    </div>
+    <p class="figcap">Figura 1. Relaciones de la red de valor actual. Elaboración a partir del expediente [4]; las flechas indican el sentido del intercambio.</p>
+
+    <div class="scroll" style="margin-top:28px">
+      <table class="stack">
+        <thead><tr><th style="width:30%">Actor complementario</th><th>Recurso / beneficio</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Actor">Caja, barra, alimentos y apoyo</td><td data-l="Recurso">Intercambian información del pedido, preparación e insumos; contribuyen a la continuidad del servicio.</td></tr>
+          <tr><td data-l="Actor">Gerente y dos supervisores</td><td data-l="Recurso">Coordinan tareas y reciben información de necesidades operativas.</td></tr>
+          <tr><td data-l="Actor">Responsable de distrito</td><td data-l="Recurso">Autoriza cambios dentro de sus facultades y eleva decisiones cuando corresponde.</td></tr>
+          <tr><td data-l="Actor">Rewards / Pickup (canal)</td><td data-l="Recurso">Facilita pedidos, pagos y beneficios; conecta al cliente con la operación.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid2" style="margin-top:40px">
+      <div>
+        <h3>B. Interacción principal</h3>
+        <div class="flow"><span>Caja o Pickup</span><i>→</i><span>Registro y pago</span><i>→</i><span>Etiqueta</span><i>→</i><span>Bebida / alimento</span><i>→</i><span>Entrega</span></div>
+        <p>En paralelo, el apoyo repone insumos y la supervisión coordina estaciones. El cliente obtiene el producto; Starbucks recibe el pago y la oportunidad de fidelizarlo.</p>
+      </div>
+      <div>
+        <h3>Fricciones reportadas</h3>
+        <p style="margin-top:14px">Personalización limitada por el punto de venta, lentitud del sistema, agotamientos y ajustes de disponibilidad. La cobertura simultánea de caja y barra está respaldada por una observación; su impacto en los tiempos aún debe medirse.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt" id="hallazgos">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">Producto 3 · Hallazgos y problema prioritario</span><h2>Tres hallazgos, un problema que los conecta</h2></div>
+      <p>Cada hallazgo se apoya en un tramo concreto de la entrevista [4] y se vincula con un concepto de análisis del Módulo 4.</p>
+    </div>
+    <div class="grid3">
+      <div class="card find"><div class="n">1</div><h3 style="margin-top:8px">Demanda variable y disponibilidad limitada</h3>
+        <dl><dt>Evidencia · 04:58–07:13</dt><dd>Semanas pico, agotamientos, dos vacantes y ajustes por el calendario académico.</dd>
+        <dt>Por qué importa</dt><dd>La capacidad puede no coincidir con las necesidades del servicio.</dd>
+        <dt>Concepto</dt><dd>Fricción operativa; coordinación de oferta y demanda.</dd></dl></div>
+      <div class="card find"><div class="n">2</div><h3 style="margin-top:8px">Personalización limitada</h3>
+        <dl><dt>Evidencia · 02:20–04:11</dt><dd>Americano o matcha con jarabe de temporada sin opción de cobrarlo como extra.</dd>
+        <dt>Por qué importa</dt><dd>Puede afectar la experiencia personalizada y el registro correcto de la venta.</dd>
+        <dt>Concepto</dt><dd>Interacción principal; propuesta de valor y facilitación.</dd></dl></div>
+      <div class="card find"><div class="n">3</div><h3 style="margin-top:8px">Polivalencia del personal</h3>
+        <dl><dt>Evidencia · 11:36–14:48</dt><dd>Entrevista y observación: una persona cubre caja y barra; hay capacitación cruzada.</dd>
+        <dt>Por qué importa</dt><dd>Permite redistribuir recursos, aunque podría generar interrupciones si falta cobertura.</dd>
+        <dt>Concepto</dt><dd>Red de valor; complementariedad y colaboración.</dd></dl></div>
+    </div>
+
+    <div class="problem" style="margin-top:32px">
+      <div>
+        <span class="tag" style="color:var(--red)">D. Problema prioritario</span>
+        <h3>Desajuste potencial entre la demanda y la cobertura de personal durante horas pico</h3>
+        <p>Puede provocar interrupciones, mayor espera, sobrecarga y ventas no realizadas. Estas consecuencias son hipótesis, no resultados comprobados.</p>
+        <p>Se apoya en los hallazgos 1 y 3 y conecta varias etapas del proceso. Aunque la entrevistada priorizó los conflictos con clientes, el equipo eligió la cobertura por su alcance operativo y porque se puede medir. No se afirma que sea la causa de esos conflictos.</p>
+      </div>
+      <div>
+        <h3 style="font-size:18px;color:var(--ink)">Información pendiente</h3>
+        <p style="font-size:15px;color:var(--muted)">Sin estos datos no es posible cuantificar la magnitud del problema:</p>
+        <div class="pend"><span>Pedidos por franja y canal</span><span>Dotación real por estación</span><span>Tiempos de entrega</span><span>Frecuencia de interrupciones</span><span>Disponibilidad de insumos</span><span>Causas de los incidentes</span></div>
+        <p style="font-size:15px;margin-top:18px"><b>Afecta a:</b> baristas, supervisores, gerencia y clientes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="oportunidad">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">Producto 3 · Oportunidad</span><h2>Coordinar la cobertura antes del pico, no durante</h2></div>
+      <p>Compartir disponibilidad y competencias antes de los periodos de alta demanda, identificar necesidades de cobertura y acordar responsabilidades por estación. Se define en términos de interacción y capacidad, sin elegir todavía una solución tecnológica.</p>
+    </div>
+    <div class="who">
+      <div><b>Baristas</b><span>Mayor previsibilidad de sus turnos y tareas.</span></div>
+      <div><b>Supervisión</b><span>Detecta faltantes antes de que empiece el turno.</span></div>
+      <div><b>Clientes</b><span>Un servicio más consistente en horas pico.</span></div>
+    </div>
+    <p class="note">La propuesta debe respetar los procedimientos internos y la autorización del responsable de distrito cuando corresponda.</p>
+
+    <div class="grid2" style="margin-top:40px;align-items:start">
+      <div>
+        <h3>Validación propuesta para el taller</h3>
+        <p style="margin-top:12px">Comparar turnos similares antes y durante una prueba de coordinación. Registrar solo información operativa agregada y autorizada, y controlar volumen de pedidos, canal, dotación y disponibilidad de productos.</p>
+        <p style="color:var(--muted);font-size:15px">Las métricas son una propuesta; no son resultados ya obtenidos.</p>
+      </div>
+      <div class="scroll">
+        <table class="kpi stack">
+          <thead><tr><th>Indicador</th><th>Definición</th></tr></thead>
+          <tbody>
+            <tr><td data-l="Indicador">Tiempo de entrega</td><td data-l="Definición">Minutos entre registro y entrega; comparar la mediana por turno y canal.</td></tr>
+            <tr><td data-l="Indicador">Interrupciones en barra</td><td data-l="Definición">Salidas de la barra para otras tareas, por hora observada.</td></tr>
+            <tr><td data-l="Indicador">Cobertura</td><td data-l="Definición"><span class="formula">estaciones-hora cubiertas ÷ requeridas × 100</span></td></tr>
+            <tr><td data-l="Indicador">Productividad</td><td data-l="Definición"><span class="formula">pedidos entregados ÷ horas-persona</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt" id="fuentes">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">Fuentes y trazabilidad</span><h2>De dónde sale cada dato</h2></div>
+      <p>Fuentes públicas consultadas el 25 de noviembre de 2026; no acreditan una consulta previa a la entrevista ni todas las capacidades de la sucursal.</p>
+    </div>
+    <ul class="src">
+      <li><b>[1]</b><span>Starbucks México. Términos y condiciones Starbucks Rewards. <a href="https://rewards.starbucks.mx/tos/rewards">rewards.starbucks.mx/tos/rewards</a></span></li>
+      <li><b>[2]</b><span>Starbucks México. Preguntas frecuentes Rewards. <a href="https://rewards.starbucks.mx/faq/rewards">rewards.starbucks.mx/faq/rewards</a></span></li>
+      <li><b>[3]</b><span>Starbucks Coffee Company. Starbucks México, ficha oficial de la aplicación. <a href="https://play.google.com/store/apps/details?id=com.starbucks.mx">play.google.com/store/apps/details?id=com.starbucks.mx</a></span></li>
+      <li><b>[4]</b><span>Equipo, Grupo 503. Expediente de investigación empresarial, Starbucks de la Biblioteca del Tec de Monterrey. Registro resumido de entrevista y observación; archivo de audio citado: Tecnológico de Monterrey (1).m4a.</span></li>
+    </ul>
+  </div>
+</section>
+
+<footer class="band">
+  <div class="wrap">
+    <div><b>Grupo 503</b> · Expediente de investigación empresarial · Módulo 4, Taller 9</div>
+    <div>Trabajo académico de estudiantes. No es un sitio oficial de Starbucks ni del Tecnológico de Monterrey.</div>
+  </div>
+</footer>
+
+<script>
+{
+  const Q = [
+    {t:'00:49', s:49,  h:'Propuesta de valor', r:'Marca, calidad, trato cercano y personalización.', i:'La experiencia y la adaptación del producto complementan el valor funcional.'},
+    {t:'01:42', s:102, h:'Interacción principal', r:'Algunos ingredientes de temporada no pueden registrarse como extra aunque estén disponibles.', i:'Fricción entre la oferta física y las opciones del sistema de venta.'},
+    {t:'04:31', s:271, h:'Capacidad operativa', r:'Demanda variable, agotamiento de productos, dos vacantes y ajustes de horario por entregas académicas.', i:'Riesgo de desajuste entre demanda y capacidad; magnitud sin medir.', hl:1},
+    {t:'07:13', s:433, h:'Tecnología y datos', r:'Punto de venta, etiquetas y Pickup. Según su conocimiento, no operaban con Uber Eats ni DiDi.', i:'Existe infraestructura digital; no se obtuvo información sobre acceso a datos históricos.'},
+    {t:'08:30', s:510, h:'Fidelización', r:'Estrellas canjeables, promociones por correo y acceso preferente a artículos.', i:'Incentivos para la recurrencia; efecto local no cuantificado.'},
+    {t:'10:47', s:647, h:'Red de valor', r:'Caja recibe pedidos; barra prepara bebidas; alimentos prepara comida; apoyo repone insumos.', i:'La entrega depende de la coordinación de recursos y estaciones.'},
+    {t:'13:04', s:784, h:'Colaboración', r:'Apoyo entre estaciones; 35 días de capacitación inicial con entrenador y cursos digitales.', i:'La polivalencia habilita reasignaciones operativas.', hl:1},
+    {t:'16:24', s:984, h:'Inteligencia artificial', r:'Sugirió revisar el punto de venta por su lentitud y mencionó un cambio previsto.', i:'No se obtuvo información sobre una aplicación específica de IA.'},
+    {t:'17:06', s:1026,h:'Gobernanza', r:'Procedimientos generales; el responsable de distrito autoriza o eleva cambios.', i:'La innovación necesita respetar facultades y reglas corporativas.'},
+    {t:'20:19', s:1219,h:'Validación', r:'Priorizó los conflictos con clientes y escuchar al cliente y al barista.', i:'Su prioridad difiere de la selección del equipo. No se obtuvo una métrica concreta.'}
+  ];
+  const MAX = 1260;
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const tl = document.getElementById('tl');
+  let ticks = '';
+  for (let m = 0; m <= 20; m += 5) ticks += `<span class="tick" style="left:${(m*60/MAX*100).toFixed(2)}%">${m} min</span>`;
+  tl.insertAdjacentHTML('beforeend', ticks + Q.map((q,k) =>
+    `<a href="#q${k+1}" class="${q.hl?'hl':''}" style="left:${(q.s/MAX*100).toFixed(2)}%" title="${esc(q.h)} · ${q.t}">${k+1}</a>`).join(''));
+  document.getElementById('qs').innerHTML = Q.map((q,k) => `
+    <article class="q" id="q${k+1}">
+      <div class="n" style="${q.hl?'color:var(--red)':''}">${k+1}</div>
+      <div><h3>${esc(q.h)}<time>${q.t}</time></h3>
+      <p>${esc(q.r)}</p>
+      <p class="imp"><b>Implicación:</b> ${esc(q.i)}</p></div>
+    </article>`).join('');
+}
+</script>
+</body>
+</html>
